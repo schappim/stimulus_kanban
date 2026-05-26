@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>38 — Dispatcher board | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    /* Sidebar + grid layout */
+    .disp { display: grid; grid-template-columns: 240px 1fr; gap: 12px; height: 600px; margin-top: 16px; }
+    .disp .pool {
+      border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;
+      display: flex; flex-direction: column; min-height: 0;
+    }
+    .disp .pool > h2 {
+      margin: 0; padding: 10px 12px; border-bottom: 1px solid #e5e7eb;
+      font-size: 12px; text-transform: uppercase; color: #6b7280; letter-spacing: 0.05em; font-weight: 700;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .disp .pool > h2 .badge {
+      background: #fef3c7; color: #92400e; padding: 1px 8px; border-radius: 999px;
+      font-size: 11px; font-weight: 700;
+    }
+    .disp .grid {
+      border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;
+      min-width: 0;
+    }
+    /* Each "grid" is itself a board, with a row per tradie and columns per day. */
+    .disp .grid .sk-columns { padding: 8px; gap: 6px; }
+    .disp .grid .sk-column { background: #f9fafb; min-width: 130px; }
+    .disp .grid .sk-column-header {
+      font-size: 11px; padding: 6px 8px; text-transform: uppercase;
+      letter-spacing: 0.04em; color: #374151; background: #fff;
+    }
+    /* tradie row marker */
+    .tradie-row { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-top: 1px dashed #e5e7eb; }
+    .tradie-row .avatar {
+      width: 22px; height: 22px; border-radius: 50%; background: #2563eb; color: #fff;
+      display: inline-grid; place-items: center; font-size: 11px; font-weight: 700;
+    }
+    .tradie-row .avatar.dave { background: #2563eb; }
+    .tradie-row .avatar.sam  { background: #059669; }
+    .tradie-row .avatar.mia  { background: #b45309; }
+    .tradie-row .name { font-size: 12px; font-weight: 600; }
+
+    /* Card face */
+    .disp .sk-card { padding: 6px 8px; font-size: 12px; }
+    .disp .sk-card .meta { display: flex; gap: 4px; align-items: baseline; font-size: 11px; color: #6b7280; }
+    .disp .sk-card .ttl { font-weight: 600; color: #111827; margin: 1px 0; line-height: 1.25; }
+    .disp .sk-card .addr { font-size: 10px; color: #6b7280; line-height: 1.2; }
+    .disp .sk-card .pill {
+      display: inline-block; font-size: 9px; font-weight: 700; text-transform: uppercase;
+      padding: 0 4px; border-radius: 3px; color: #fff; letter-spacing: 0.04em;
+    }
+    .disp .sk-card .pill.callout  { background: #dc2626; }
+    .disp .sk-card .pill.install  { background: #2563eb; }
+    .disp .sk-card .pill.quote    { background: #a855f7; }
+
+    .pool .sk-cards { flex: 1; min-height: 100px; padding: 4px; gap: 4px; }
+    .pool .sk-column-header { display: none; }
+    .pool .sk-column { background: transparent; border: 0; min-width: 100%; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>38 — Dispatcher board (ServiceM8 "Diary" pattern)</h1>
+  <p class="lede">Unscheduled jobs sit in the left rail. Each tradie has a row of day-slots on the right. Drag a job from the rail to a slot to dispatch it — drop it back on the rail to <em>un</em>schedule. The pool is a one-column board; each tradie row is a multi-column board sharing data via <code>boardApi.applyTransaction</code>.</p>
+
+  <template id="disp-card">
+    <article class="sk-card">
+      <div class="meta">
+        <span class="jobno" data-bind="job_no"></span>
+        <span data-bind="type_label" data-bind-attr="class:type_pill_class"></span>
+      </div>
+      <div class="ttl" data-bind="title"></div>
+      <div class="addr" data-bind="suburb"></div>
+    </article>
+  </template>
+
+  <div class="disp">
+    <!-- Unscheduled pool: a one-column board -->
+    <div class="pool" id="pool"
+         data-controller="board"
+         data-board-card-renderer-value="disp-card"
+         data-board-card-selection-value="none">
+      <h2>Unscheduled <span class="badge" id="pool-count">0</span></h2>
+      <ol class="sk-columns">
+        <li data-controller="board-column"
+            data-board-column-id-value="unscheduled"
+            data-board-column-title-value="Unscheduled"><ol class="sk-cards"></ol></li>
+      </ol>
+    </div>
+
+    <!-- The grid: three tradies, each is its own board (so per-row drag is local) -->
+    <div class="grid">
+      <div class="tradie-row">
+        <span class="avatar dave">D</span><span class="name">Dave (gas plumber)</span>
+      </div>
+      <div id="board-dave"
+           data-controller="board"
+           data-board-card-renderer-value="disp-card"
+           data-board-card-selection-value="none">
+        <ol class="sk-columns">
+          <li data-controller="board-column" data-board-column-id-value="dave-mon" data-board-column-title-value="Mon"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-tue" data-board-column-title-value="Tue"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-wed" data-board-column-title-value="Wed"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-thu" data-board-column-title-value="Thu"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-fri" data-board-column-title-value="Fri"><ol class="sk-cards"></ol></li>
+        </ol>
+      </div>
+
+      <div class="tradie-row">
+        <span class="avatar sam">S</span><span class="name">Sam (apprentice)</span>
+      </div>
+      <div id="board-sam"
+           data-controller="board"
+           data-board-card-renderer-value="disp-card"
+           data-board-card-selection-value="none">
+        <ol class="sk-columns">
+          <li data-controller="board-column" data-board-column-id-value="sam-mon" data-board-column-title-value="Mon"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-tue" data-board-column-title-value="Tue"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-wed" data-board-column-title-value="Wed"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-thu" data-board-column-title-value="Thu"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-fri" data-board-column-title-value="Fri"><ol class="sk-cards"></ol></li>
+        </ol>
+      </div>
+
+      <div class="tradie-row">
+        <span class="avatar mia">M</span><span class="name">Mia (commercial)</span>
+      </div>
+      <div id="board-mia"
+           data-controller="board"
+           data-board-card-renderer-value="disp-card"
+           data-board-card-selection-value="none">
+        <ol class="sk-columns">
+          <li data-controller="board-column" data-board-column-id-value="mia-mon" data-board-column-title-value="Mon"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-tue" data-board-column-title-value="Tue"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-wed" data-board-column-title-value="Wed"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-thu" data-board-column-title-value="Thu"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-fri" data-board-column-title-value="Fri"><ol class="sk-cards"></ol></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <pre class="log" id="log">// drag a card from "Unscheduled" onto a tradie's day-slot. Drop on the pool to unschedule.</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+
+    const typeLabel = { callout: 'CALLOUT', install: 'INSTALL', quote: 'QUOTE' };
+    const enrich = (j) => ({
+      ...j,
+      type_label: typeLabel[j.type] || j.type.toUpperCase(),
+      type_pill_class: `pill ${j.type}`,
+    });
+
+    // A single source-of-truth dataset; we route cards into the right board
+    // based on their `column_id`. Boards bind by the unscheduled / tradie-day
+    // namespace in the column_id (e.g. "dave-mon", "unscheduled").
+    const all = [
+      enrich({ id: 1,  column_id: 'unscheduled', job_no: 'JOB-1001', type: 'callout', title: 'Leaking kitchen tap',         suburb: 'Surry Hills' }),
+      enrich({ id: 2,  column_id: 'unscheduled', job_no: 'JOB-1002', type: 'install', title: 'HWS replace 250L gas',         suburb: 'Bondi' }),
+      enrich({ id: 3,  column_id: 'unscheduled', job_no: 'JOB-1003', type: 'quote',   title: 'Quote — bathroom rough-in',     suburb: 'Mosman' }),
+      enrich({ id: 4,  column_id: 'unscheduled', job_no: 'JOB-1004', type: 'callout', title: 'Toilet running constantly',     suburb: 'Manly' }),
+      enrich({ id: 5,  column_id: 'unscheduled', job_no: 'JOB-1005', type: 'install', title: 'Gas cooktop install (Smeg)',    suburb: 'Paddington' }),
+
+      enrich({ id: 10, column_id: 'dave-mon',    job_no: 'JOB-0998', type: 'install', title: 'Methven tapware (kitchen)',    suburb: 'Paddington' }),
+      enrich({ id: 11, column_id: 'dave-wed',    job_no: 'JOB-0997', type: 'callout', title: 'No hot water at unit 4',       suburb: 'Parramatta' }),
+      enrich({ id: 12, column_id: 'sam-tue',     job_no: 'JOB-0996', type: 'callout', title: 'Mixer tap drips slow',         suburb: 'Newtown' }),
+      enrich({ id: 13, column_id: 'mia-fri',     job_no: 'JOB-0995', type: 'install', title: 'Café espresso plumbing',       suburb: 'CBD' }),
+    ];
+
+    const pool  = document.getElementById('pool');
+    const bDave = document.getElementById('board-dave');
+    const bSam  = document.getElementById('board-sam');
+    const bMia  = document.getElementById('board-mia');
+    const allBoards = [pool, bDave, bSam, bMia];
+
+    function filterFor(board) {
+      const ids = board.boardApi.getColumnData().map((c) => c.id);
+      return all.filter((c) => ids.includes(c.column_id));
+    }
+
+    function refresh() {
+      for (const b of allBoards) b.boardApi.setCardData(filterFor(b));
+      document.getElementById('pool-count').textContent = all.filter((c) => c.column_id === 'unscheduled').length;
+    }
+
+    // The library doesn't ship cross-board drag — but it does ship a public
+    // beforeMove cancel + the host can reseat the card on its own boards by
+    // listening for drop events. Easiest: use HTML5 DnD between boards.
+    // Each card already has `draggable=true` from the controller; we hook
+    // dragstart to stash the cardId and dragover/drop on each column to accept.
+    let dragId = null;
+    document.addEventListener('dragstart', (ev) => {
+      const cardEl = ev.target.closest?.('[data-card-id]');
+      if (!cardEl) return;
+      dragId = cardEl.getAttribute('data-card-id');
+      ev.dataTransfer.setData('text/plain', dragId);
+      ev.dataTransfer.effectAllowed = 'move';
+    });
+
+    // Allow drop into any column across any board.
+    function bindDrop(boardEl) {
+      boardEl.addEventListener('dragover', (ev) => {
+        const col = ev.target.closest?.('[data-board-column-id-value]');
+        if (!col) return;
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = 'move';
+      });
+      boardEl.addEventListener('drop', (ev) => {
+        const col = ev.target.closest?.('[data-board-column-id-value]');
+        if (!col || !dragId) return;
+        ev.preventDefault();
+        const toCol = col.getAttribute('data-board-column-id-value');
+        const card  = all.find((c) => String(c.id) === String(dragId));
+        if (!card) return;
+        if (card.column_id === toCol) return;     // intra-column reorder is handled by the board itself
+        card.column_id = toCol;
+        refresh();
+        log(`${card.job_no} → ${toCol}`);
+        dragId = null;
+      });
+    }
+    allBoards.forEach(bindDrop);
+
+    function log(msg) {
+      const el = document.getElementById('log');
+      el.textContent = `${msg}\n${el.textContent}`.split('\n').slice(0, 10).join('\n');
+    }
+
+    // Boot every board with its share of the data.
+    let booted = 0;
+    allBoards.forEach((b) => b.addEventListener('board:ready', () => {
+      if (++booted === allBoards.length) refresh();
+    }));
+  </script>
+</body>
+</html>
