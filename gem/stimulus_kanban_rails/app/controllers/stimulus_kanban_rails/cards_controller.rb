@@ -25,9 +25,10 @@ module StimulusKanbanRails
       card = scoped_card(params[:id])
       field = params.require(:field)
       value = params.permit(:value)[:value]
+      card._skr_optimistic_id = optimistic_id if card.respond_to?(:_skr_optimistic_id=)
       success, errors, payload = board_instance.apply_update!(card, field, value, user: current_user_if_defined)
       if success
-        render json: { card: board_instance.card_to_h(card), update: payload }
+        render json: { card: board_instance.card_to_h(card), update: payload, optimistic_id: optimistic_id }
       else
         render json: { errors: errors }, status: :unprocessable_entity
       end
@@ -37,8 +38,9 @@ module StimulusKanbanRails
       card = scoped_card(params[:id])
       to_column_id = params.require(:to_column_id)
       to_index     = params.fetch(:to_index, 0).to_i
+      card._skr_optimistic_id = optimistic_id if card.respond_to?(:_skr_optimistic_id=)
       _, mutations = board_instance.apply_move!(card, to_column_id: to_column_id, to_index: to_index, user: current_user_if_defined)
-      render json: { card: board_instance.card_to_h(card), mutations: mutations }
+      render json: { card: board_instance.card_to_h(card), mutations: mutations, optimistic_id: optimistic_id }
     end
 
     def destroy
@@ -52,6 +54,14 @@ module StimulusKanbanRails
     def card_params
       raw = params.require(:card).permit!.to_h
       raw.symbolize_keys
+    end
+
+    # Pulled from the body, query string, or X-Optimistic-Id header — the
+    # board-sync controller sends it as the header. Carried through into
+    # the model's _skr_optimistic_id attr so the after_commit broadcast
+    # includes it and the originating client can suppress its own echo.
+    def optimistic_id
+      params[:optimistic_id] || request.headers["X-Optimistic-Id"]
     end
 
     def render_veto(err)

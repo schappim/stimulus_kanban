@@ -10,6 +10,15 @@ module StimulusKanbanRails
   module Broadcastable
     extend ActiveSupport::Concern
 
+    included do
+      # Set by the cards controller before a board-driven save so the broadcast
+      # carries the originating client's optimistic id. The originator's
+      # board-sync controller then suppresses its own echo (it already applied
+      # the move locally). nil for changes made outside the board (console,
+      # background jobs) — those broadcast to everyone with no suppression.
+      attr_accessor :_skr_optimistic_id
+    end
+
     class_methods do
       def broadcasts_board(board_class, stream: nil)
         @stimulus_kanban_board_class = board_class
@@ -33,6 +42,7 @@ module StimulusKanbanRails
       payload = {
         kind: kind,
         card: kind == :remove ? { id: id } : board.card_to_h(self),
+        optimistic_id: _skr_optimistic_id,
       }
       streamables = StimulusKanbanRails.streamables_for(klass.resource_name, stream)
       Turbo::StreamsChannel.broadcast_render_to(

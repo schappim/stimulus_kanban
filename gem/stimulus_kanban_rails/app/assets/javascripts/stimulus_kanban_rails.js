@@ -5,11 +5,16 @@
  * Optimistic moves done on the client get reconciled (or reverted) by the
  * matching server echo.
  *
- * For the v0.1 cut this file exposes a single `start(app?)` that registers
- * a `board-sync` controller. Host apps tag the board with
- * `data-controller="board board-sync"` and the sync controller listens for
- * `board:cardMoved` / `board:cardValueChanged` and POSTs through the cards
- * controller; Turbo Stream echoes apply via applyTransaction.
+ * Optimistic-id reconciliation (mirrors stimulus_grid_rails):
+ *   - every PATCH/POST sends a fresh X-Optimistic-Id header
+ *   - the server stashes it on the model (_skr_optimistic_id) and the
+ *     after_commit broadcast carries it back to ALL connected tabs
+ *   - the originating client sees its own id in the incoming event and
+ *     suppresses it (the move was already applied locally); other tabs
+ *     apply via applyTransaction as normal
+ *
+ * Host apps tag the board with `data-controller="board board-sync"` and
+ * this controller does the rest.
  */
 import { Application, Controller } from "@hotwired/stimulus";
 
@@ -20,6 +25,11 @@ class BoardSyncController extends Controller {
   };
 
   connect() {
+    // In-flight optimistic ids the originator should ignore when they echo
+    // back from the server's broadcast. Each id is added when we PATCH and
+    // dropped after a short TTL so a stuck request can't leak memory.
+    this._myOptimisticIds = new Set();
+
     this._onMoved   = (ev) => this._postMove(ev.detail);
     this._onUpdated = (ev) => this._postUpdate(ev.detail);
     this._onIncoming = (ev) => this._applyIncoming(ev.detail);
@@ -31,6 +41,14 @@ class BoardSyncController extends Controller {
     this.element.removeEventListener("board:cardMoved",        this._onMoved);
     this.element.removeEventListener("board:cardValueChanged", this._onUpdated);
     document.removeEventListener("stimulus-kanban-rails:event", this._onIncoming);
+  }
+
+  _newOptimisticId() {
+    const id = (crypto?.randomUUID?.() || `oid-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    this._myOptimisticIds.add(id);
+    // Stale guard — drop the id after 30s so a hung request never grows the set.
+    setTimeout(() => this._myOptimisticIds.delete(id), 30_000);
+    return id;
   }
 
   _postMove({ cardId, toColumnId, toIndex }) {
@@ -52,6 +70,12 @@ class BoardSyncController extends Controller {
   }
   _applyIncoming({ resource, event }) {
     if (resource !== this.resourceValue) return;
+    // Suppress our own echo — the originator already applied this change
+    // locally; re-applying would be redundant and can flicker.
+    if (event.optimistic_id && this._myOptimisticIds.has(event.optimistic_id)) {
+      this._myOptimisticIds.delete(event.optimistic_id);
+      return;
+    }
     const api = this.element.boardApi;
     if (!api) return;
     if (event.kind === "remove") api.applyTransaction({ remove: [event.card.id] });
@@ -72,6 +96,7 @@ class BoardSyncController extends Controller {
       "Content-Type":   "application/json",
       "Accept":         "application/json",
       "X-Requested-With": "XMLHttpRequest",
+      "X-Optimistic-Id":  this._newOptimisticId(),
       ...(csrf ? { "X-CSRF-Token": csrf } : {}),
     };
   }
