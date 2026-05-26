@@ -41,6 +41,10 @@ export default defineConfig({
         assetFileNames: (info) => info.name.endsWith('.css') ? 'stimulus_kanban.css' : info.name,
         globals: {},
         extend: true,
+        // Suppress "named+default" warning — the IIFE deliberately exposes
+        // both so window.StimulusKanban behaves like a namespace AND its
+        // controllers can be named-imported in a bundler context.
+        exports: 'named',
       },
     },
     sourcemap: true,
