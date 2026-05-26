@@ -112,6 +112,9 @@ After `connect`, `element.boardApi.setCardData([...])` and
 - `data-board-column-collapsed-value="true"` / `hidden-value="true"`
 - `data-board-column-width-value="320"`
 - `data-board-column-color-value="#3b82f6"` / `icon-value="🔥"`
+- `data-board-column-stuck-after-days-value="7"` — declarative aging:
+  cards sitting in this column ≥ N days get a `Nd ⚠` badge + the
+  `board:cardStuck` event fires once per crossing (see Aging section)
 
 ## Card attributes
 
@@ -160,10 +163,23 @@ Highlights:
   `clearPersistedState`
 - **Detail panel:** `openCardDetail(id)`, `closeCardDetail`,
   `isCardDetailOpen`
+- **Aging / time-in-column:** `getCardEnteredAt(id)`,
+  `getCardAgeInColumn(id, now?)`, `getStuckCardIds(now?)`,
+  `setAgingClock(fn|null)` (replace the "now" provider for
+  deterministic demos / tests)
+- **Optimistic in-flight pulse:** `setCardPending(id, on=true)` adds
+  a blue pulse ring; `setCardError(id, on=true, msg?)` swaps it to
+  red + sets `data-card-error-msg` for tooltips; `isCardPending(id)`
+  to query. Use during a save round-trip; clear on success or
+  dismissal.
 
 ## Events (bubble off the board element)
 
 - `board:ready` — `{ api }`
+- `board:rendered` — fires after **every** DOM re-render. Use this to
+  re-paint per-card decorations that don't fit `data-bind` (tag pills,
+  hover actions, photo strips, custom avatar rows) — the card wrappers
+  are recreated on each render, so paint inside this hook.
 - `board:beforeMove` — **cancellable** via `ev.preventDefault()`
 - `board:cardMoved`, `board:cardsMoved`
 - `board:cardAdded`, `board:cardRemoved`
@@ -171,11 +187,56 @@ Highlights:
 - `board:cardClicked` / `board:cardDblClicked`
 - `board:cardEditStarted` / `board:cardValueChanged` / `board:cardEditCancelled`
 - `board:wipExceeded` — fires once per crossing, not per card
+- `board:cardStuck` — `{ cardId, columnId, ageDays }`; fires once per
+  crossing when a card sits in its column ≥ the column's
+  `stuck_after_days` threshold
 - `board:swimlaneChanged`, `board:filterChanged`
 - `board:columnMoved/VisibleChanged/CollapsedChanged/Resized/SortChanged`
 - `board:cardDetailOpened` / `board:cardDetailClosed`
 - `board:fileAttached` — cancellable
 - `board:columnFetchMore` (server-side mode)
+
+## Helpers shipped on the package
+
+```js
+import { attachBulkActionToolbar } from "@ninjaai/stimulus_kanban"
+
+attachBulkActionToolbar(boardEl, {
+  minSelection: 1,
+  position: "bottom",                        // or "top"
+  actions: [
+    { id: "move",   label: "Move to Quoting", primary: true,
+      onClick: (ids, api) => api.bulkMove({ fromIds: ids, toColumnId: "quoting", toIndex: 0 }) },
+    { id: "tag",    label: "Tag urgent",
+      onClick: (ids, api) => api.applyTransaction({ update: ids.map(id => ({ id, urgent: true })) }) },
+    { id: "delete", label: "Archive", danger: true,
+      onClick: (ids, api) => api.bulkMove({ fromIds: ids, toColumnId: "archived", toIndex: 0 }) },
+  ],
+})
+```
+
+Returns `{ destroy(), update(), el }` so hot-reloading hosts can clean
+up. The toolbar appears at the bottom of the viewport when N ≥
+`minSelection` cards are selected and hides on `clearSelection`. Each
+action receives `(selectedIds, boardApi, boardEl)` and can be marked
+`primary: true` / `danger: true` / `disabled: (ids) => …`.
+
+## Aging / time-in-column
+
+```html
+<li data-controller="board-column"
+    data-board-column-id-value="quoting"
+    data-board-column-stuck-after-days-value="3">…</li>
+```
+
+The board tracks `enteredColumnAt` per card on every set/transaction/
+move. Cards in a column with a `stuck_after_days` threshold get
+`data-card-stuck="true"` + `data-card-age-days="N"` on the wrapper +
+the bundled CSS draws a red ring + `Nd ⚠` badge. The board emits
+`board:cardStuck` once per crossing — wire it to SMS / email / Slack.
+
+For tests / demos, swap the clock: `api.setAgingClock(() => "2026-05-26T10:00:00Z")`
+so the badge math is deterministic regardless of wall clock.
 
 ## Custom card renderers
 
@@ -223,7 +284,8 @@ composition.
 - **Optimistic + server reconcile:** apply the move locally
   (`moveCard`), POST to the server, then reconcile via
   `applyTransaction({ update: [...] })` with the server's authoritative
-  `column_id` / `order`. The Rails companion automates this.
+  `column_id` / `order`. The Rails companion automates this — see the
+  `stimulus-kanban-rails` skill.
 - **Server-side columns:** set `data-board-server-side-value="true"`,
   send one page per column via `setCardData`, send totals via
   `setColumnCounts({ colId: n })`. Watch `board:columnFetchMore` for
@@ -231,3 +293,15 @@ composition.
 - **Test programmatic drag:** in vitest, mount the board in jsdom, call
   `api.beginDrag([id], fromCol)` + `api.endDrag({ toColumnId, toIndex })`
   — no synthetic pointer events needed.
+- **Painting decorations:** put paint code in a `board:rendered`
+  handler. The hook fires after every render (initial, after a move,
+  after `setCardData`, after a filter change), so your tag pills /
+  avatars / photo thumbnails survive every state change.
+- **Optimistic save UI:** `api.setCardPending(id, true)` before a fetch,
+  `api.setCardPending(id, false)` on success or
+  `api.setCardError(id, true, "HTTP 422: …")` on failure. The bundled
+  CSS draws the pulse animations — no extra styles needed.
+- **Reference demos:** the repo's `demo/` directory ships 50+ HTML
+  files demonstrating every feature in isolation. Each has a Playwright
+  verification script under `scripts/verify-*.mjs` proving the feature
+  works. Browse them at <https://kanban.schappi.cloud/demo/>.
