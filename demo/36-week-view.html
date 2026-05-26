@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>36 — Week view | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .wv-card { padding: 8px 10px; }
+    .wv-card .time {
+      font: 600 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #1d4ed8;
+      letter-spacing: 0.02em;
+    }
+    .wv-card .duration {
+      color: #6b7280;
+      font-size: 11px;
+      margin-left: 6px;
+    }
+    .wv-card h4 { margin: 4px 0 2px 0; font-size: 13px; }
+    .wv-card .customer { color: #374151; font-size: 12px; font-weight: 500; }
+    .wv-card .addr { color: #6b7280; font-size: 11px; margin-top: 2px; }
+    .wv-card .type-pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 1px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+      margin-left: 4px;
+      color: #fff;
+    }
+    .wv-card .type-callout    { background: #dc2626; }
+    .wv-card .type-install    { background: #2563eb; }
+    .wv-card .type-quote      { background: #a855f7; }
+    .wv-card .type-paperwork  { background: #6b7280; }
+    .wv-card .type-emergency  { background: #b91c1c; }
+    /* Compress columns to fit the week on one row */
+    .week-board .sk-column { min-width: 200px; }
+    /* Quiet weekend columns */
+    .week-board [data-board-column-id-value="sat"] .sk-column-header,
+    .week-board [data-board-column-id-value="sun"] .sk-column-header {
+      background: #fef3c7;
+    }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>36 — Week view (per-column time sort)</h1>
+  <p class="lede">A single tradie's working week. Each day column is sorted <code>asc:start_time</code>, so jobs always appear in chronological order — drop a card anywhere in a day and it auto-reseats by time. Per-column sort also <strong>disables intra-column drag</strong>; cards can still move between days.</p>
+
+  <template id="wv-card">
+    <article class="sk-card wv-card">
+      <div>
+        <span class="time" data-bind="start_time"></span>
+        <span class="duration" data-bind="duration"></span>
+        <span data-bind="type_pill_text" data-bind-attr="class:type_pill_class"></span>
+      </div>
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="customer" data-bind="customer"></div>
+      <div class="addr" data-bind="address"></div>
+    </article>
+  </template>
+
+  <div class="panel week-board" data-controller="board"
+       data-board-card-renderer-value="wv-card"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="mon" data-board-column-title-value="Mon 1 Jun" data-board-column-sort-value="asc:start_time"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="tue" data-board-column-title-value="Tue 2 Jun" data-board-column-sort-value="asc:start_time"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="wed" data-board-column-title-value="Wed 3 Jun" data-board-column-sort-value="asc:start_time"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="thu" data-board-column-title-value="Thu 4 Jun" data-board-column-sort-value="asc:start_time"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="fri" data-board-column-title-value="Fri 5 Jun" data-board-column-sort-value="asc:start_time"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="sat" data-board-column-title-value="Sat 6 Jun" data-board-column-sort-value="asc:start_time"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="sun" data-board-column-title-value="Sun 7 Jun" data-board-column-sort-value="asc:start_time"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <p class="tip">Try: drag the <em>11:00 Friday callout</em> to <em>Wednesday</em> — it'll auto-sort into the right time slot.</p>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    // Cards are intentionally listed out of order to show off the per-column
+    // sort: the board re-orders them by start_time on first render.
+    const cards = [
+      // Friday (listed first to prove the sort)
+      { id: 1,  column_id: 'fri', start_time: '14:30', duration: '1 hr',    type: 'paperwork', title: 'Issue invoices + chase overdue', customer: 'Office (no travel)', address: '—' },
+      { id: 2,  column_id: 'fri', start_time: '08:30', duration: '45 min',  type: 'quote',     title: 'Quote visit — bathroom reno',     customer: 'Ms Avery',           address: '14 Bayview St, Coogee' },
+      { id: 3,  column_id: 'fri', start_time: '11:00', duration: '1.5 hr', type: 'callout',   title: 'No hot water at unit 4',          customer: 'Highview Strata',    address: '88 Park Rd, Parramatta' },
+      // Monday
+      { id: 4,  column_id: 'mon', start_time: '08:00', duration: '1 hr',   type: 'callout',   title: 'Leaking kitchen tap',             customer: 'Mrs Patel',          address: '12 Smith St, Surry Hills' },
+      { id: 5,  column_id: 'mon', start_time: '10:30', duration: '2 hr',   type: 'install',   title: 'HWS replace — 50L to 250L gas',   customer: 'Mr Chen',            address: '6 Wairoa Ave, Bondi' },
+      { id: 6,  column_id: 'mon', start_time: '14:00', duration: '30 min', type: 'quote',     title: 'Quote — laundry rough-in',        customer: 'Smith family',       address: '21 Trafalgar St, Newtown' },
+      // Tuesday
+      { id: 7,  column_id: 'tue', start_time: '07:30', duration: '5 hr',   type: 'install',   title: 'Bathroom rough-in (renovation)',  customer: 'Williams residence', address: '3 Beauty Point Rd, Mosman' },
+      { id: 8,  column_id: 'tue', start_time: '14:00', duration: '1 hr',   type: 'callout',   title: 'Toilet running constantly',       customer: 'Lee household',      address: '8 The Corso, Manly' },
+      // Wednesday
+      { id: 9,  column_id: 'wed', start_time: '09:00', duration: '2 hr',   type: 'paperwork', title: 'Tradie tax — BAS for the quarter', customer: 'Office',             address: '—' },
+      { id: 10, column_id: 'wed', start_time: '13:00', duration: '2 hr',   type: 'install',   title: 'Methven tapware (kitchen)',       customer: 'Khoury family',      address: '102 Oxford St, Paddington' },
+      // Thursday
+      { id: 11, column_id: 'thu', start_time: '08:00', duration: '4 hr',   type: 'install',   title: 'Sewer line excavate + cap',       customer: 'Bondi Beach Pavilion', address: '1 Queen Elizabeth Dr, Bondi' },
+      { id: 12, column_id: 'thu', start_time: '13:30', duration: '2 hr',   type: 'install',   title: 'Gas cooktop install (Smeg 90cm)',  customer: 'Khoury family',      address: '102 Oxford St, Paddington' },
+      // Saturday (overtime / emergency only)
+      { id: 13, column_id: 'sat', start_time: '09:00', duration: '2 hr',   type: 'emergency', title: 'Weekend emergency — burst pipe',  customer: 'Newtown IGA',        address: '102 King St, Newtown' },
+    ];
+    cards.forEach((c) => {
+      const map = { callout: 'CALLOUT', install: 'INSTALL', quote: 'QUOTE', paperwork: 'ADMIN', emergency: 'EMERGENCY' };
+      c.type_pill_text  = map[c.type] || c.type.toUpperCase();
+      c.type_pill_class = `type-pill type-${c.type}`;
+    });
+    document.getElementById('board').addEventListener('board:ready', (ev) => ev.detail.api.setCardData(cards));
+  </script>
+</body>
+</html>
