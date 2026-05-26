@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>37 — Rich job-detail panel | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    /* Card face — compact, ServiceM8-ish */
+    .jd-card { padding: 8px 10px; }
+    .jd-card .top { display: flex; gap: 6px; align-items: baseline; }
+    .jd-card .jobno {
+      font: 600 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #6b7280; letter-spacing: 0.05em;
+    }
+    .jd-card .pill {
+      font: 700 10px system-ui; text-transform: uppercase; padding: 1px 6px;
+      border-radius: 999px; color: #fff; letter-spacing: 0.04em; margin-left: auto;
+    }
+    .jd-card .pill.callout   { background: #dc2626; }
+    .jd-card .pill.install   { background: #2563eb; }
+    .jd-card .pill.quote     { background: #a855f7; }
+    .jd-card .pill.warranty  { background: #f59e0b; }
+    .jd-card h4 { margin: 4px 0 2px 0; font-size: 13px; }
+    .jd-card .cust { color: #374151; font-size: 12px; }
+    .jd-card .addr { color: #6b7280; font-size: 11px; }
+
+    /* Rail layout */
+    .panel { display: grid; grid-template-columns: 1fr 380px; gap: 0; }
+    .panel .sk-board-stage { min-width: 0; }
+    /* The rail itself is appended into the board — give it some breathing room */
+
+    /* ---- Detail panel ---- */
+    .jd-detail {
+      display: flex; flex-direction: column;
+      background: #fff;
+      border-left: 1px solid #e5e7eb;
+      height: 100%; overflow: hidden;
+    }
+    .jd-detail > header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px; border-bottom: 1px solid #e5e7eb; background: #f9fafb;
+    }
+    .jd-detail .head-text { flex: 1; min-width: 0; }
+    .jd-detail .head-text .jobno {
+      font: 600 11px ui-monospace, Menlo, monospace;
+      color: #6b7280; letter-spacing: 0.05em;
+    }
+    .jd-detail h2 { margin: 2px 0 0 0; font-size: 15px; line-height: 1.3; }
+    .jd-detail .close {
+      background: transparent; border: 0; cursor: pointer; font-size: 22px;
+      color: #6b7280; padding: 0 4px;
+    }
+    .jd-detail .close:hover { color: #111827; }
+
+    .jd-body {
+      overflow-y: auto; padding: 14px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .jd-section h3 {
+      margin: 0 0 6px 0; font-size: 11px; text-transform: uppercase;
+      color: #6b7280; letter-spacing: 0.05em; font-weight: 700;
+    }
+    .jd-contact { display: grid; grid-template-columns: 1fr; gap: 4px; }
+    .jd-contact .name { font-weight: 600; }
+    .jd-contact .row { display: flex; gap: 6px; align-items: center; font-size: 13px; color: #374151; }
+    .jd-contact a {
+      color: #2563eb; text-decoration: none; padding: 2px 6px; border-radius: 4px;
+      background: #eff6ff; font-size: 12px;
+    }
+    .jd-contact a:hover { background: #dbeafe; }
+
+    .jd-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .jd-actions button {
+      font: inherit; font-size: 12px; padding: 6px 10px;
+      border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer;
+    }
+    .jd-actions button.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .jd-actions button.primary:hover { background: #1d4ed8; }
+    .jd-actions button.danger { color: #b91c1c; border-color: #fecaca; }
+    .jd-actions button:hover { background: #f3f4f6; }
+    .jd-actions button.primary:hover { background: #1d4ed8; }
+
+    /* Photo carousel */
+    .jd-photos {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+    }
+    .jd-photos .photo {
+      aspect-ratio: 1; border-radius: 4px; background-size: cover;
+      background-position: center; background-color: #e5e7eb;
+      position: relative; overflow: hidden; cursor: pointer;
+    }
+    .jd-photos .photo.add {
+      display: flex; align-items: center; justify-content: center;
+      color: #9ca3af; font-size: 20px; border: 1px dashed #d1d5db; background: #f9fafb;
+    }
+
+    /* Materials list */
+    table.jd-mats { width: 100%; border-collapse: collapse; font-size: 12px; }
+    table.jd-mats th, table.jd-mats td { text-align: left; padding: 4px 6px; }
+    table.jd-mats th { color: #6b7280; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
+    table.jd-mats td { border-bottom: 1px solid #f3f4f6; }
+    table.jd-mats td.r, table.jd-mats th.r { text-align: right; }
+    table.jd-mats tfoot td { font-weight: 700; border-top: 1px solid #e5e7eb; padding-top: 8px; }
+
+    /* Activity timeline */
+    .jd-timeline { list-style: none; margin: 0; padding: 0; }
+    .jd-timeline li {
+      position: relative; padding: 0 0 12px 22px; font-size: 12px; color: #374151;
+      border-left: 2px solid #e5e7eb; margin-left: 6px;
+    }
+    .jd-timeline li::before {
+      content: ""; position: absolute; left: -7px; top: 2px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #fff; border: 2px solid #9ca3af;
+    }
+    .jd-timeline li.created::before { border-color: #2563eb; }
+    .jd-timeline li.moved::before   { border-color: #a855f7; }
+    .jd-timeline li.photo::before   { border-color: #10b981; }
+    .jd-timeline li.completed::before { border-color: #059669; background: #059669; }
+    .jd-timeline .when { color: #9ca3af; font-size: 11px; margin-left: 6px; }
+    .jd-timeline .who  { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>37 — Rich job-detail panel (ServiceM8-style)</h1>
+  <p class="lede">A real tradie's job-card detail: tap-to-call / SMS / Navigate, photo gallery, materials list with a running total, activity timeline, and action buttons. Click any card.</p>
+
+  <!-- The card face (compact) -->
+  <template id="jd-card">
+    <article class="sk-card jd-card">
+      <div class="top">
+        <span class="jobno" data-bind="job_no"></span>
+        <span data-bind="type_label" data-bind-attr="class:type_pill_class"></span>
+      </div>
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="cust" data-bind="customer_name"></div>
+      <div class="addr" data-bind="address"></div>
+    </article>
+  </template>
+
+  <!-- The rich detail panel -->
+  <template id="jd-detail">
+    <aside class="jd-detail">
+      <header>
+        <div class="head-text">
+          <div class="jobno" data-bind="job_no"></div>
+          <h2 data-bind="title"></h2>
+        </div>
+        <button data-detail-close class="close" aria-label="Close">×</button>
+      </header>
+      <div class="jd-body">
+        <section class="jd-section">
+          <h3>Customer</h3>
+          <div class="jd-contact">
+            <div class="name" data-bind="customer_name"></div>
+            <div class="row">
+              <span data-bind="phone"></span>
+              <a data-bind-attr="href:phone_tel">Call</a>
+              <a data-bind-attr="href:phone_sms">SMS</a>
+            </div>
+            <div class="row">
+              <span data-bind="address"></span>
+              <a data-bind-attr="href:map_url" target="_blank" rel="noopener">Navigate</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="jd-section">
+          <h3>Quick actions</h3>
+          <div class="jd-actions" data-jd-actions>
+            <button class="primary" data-jd-action="start-timer">▶ Start timer</button>
+            <button data-jd-action="add-photo">📷 Add photo</button>
+            <button data-jd-action="add-note">＋ Note</button>
+            <button data-jd-action="mark-complete">✓ Mark complete</button>
+            <button data-jd-action="convert-invoice">💷 Convert to invoice</button>
+          </div>
+        </section>
+
+        <section class="jd-section">
+          <h3>Photos</h3>
+          <div class="jd-photos" data-jd-photos></div>
+        </section>
+
+        <section class="jd-section">
+          <h3>Materials</h3>
+          <table class="jd-mats" data-jd-materials>
+            <thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Each</th><th class="r">Total</th></tr></thead>
+            <tbody></tbody>
+            <tfoot><tr><td colspan="3" class="r">Job total</td><td class="r" data-jd-mat-total></td></tr></tfoot>
+          </table>
+        </section>
+
+        <section class="jd-section">
+          <h3>Activity</h3>
+          <ul class="jd-timeline" data-jd-timeline></ul>
+        </section>
+      </div>
+    </aside>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="jd-card"
+       data-board-card-detail-template-value="jd-detail"
+       data-board-detail-layout-value="rail"
+       data-board-detail-width-value="380">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="scheduled"  data-board-column-title-value="Scheduled"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="in_progress" data-board-column-title-value="In progress"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="completed"  data-board-column-title-value="Completed"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="invoiced"   data-board-column-title-value="Invoiced"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <p class="tip">Tap a card → the rail opens with a full job sheet. The action buttons append fresh timeline entries; <strong>Convert to invoice</strong> moves the card to <em>Invoiced</em>.</p>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+
+    // Derive contact-link hrefs + carousel/materials/timeline payloads here so
+    // the data-bind contract stays "field → text" and the renderer template
+    // doesn't have to reach for JS expressions.
+    const typeLabel = { callout: 'CALLOUT', install: 'INSTALL', quote: 'QUOTE', warranty: 'WARRANTY' };
+    function enrich(j) {
+      const digits = (j.phone || '').replace(/[^\d+]/g, '');
+      return {
+        ...j,
+        type_label: typeLabel[j.type] || j.type.toUpperCase(),
+        type_pill_class: `pill ${j.type}`,
+        phone_tel: digits ? `tel:${digits}` : null,
+        phone_sms: digits ? `sms:${digits}` : null,
+        map_url: j.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(j.address)}` : null,
+      };
+    }
+
+    const jobs = [
+      enrich({
+        id: 1, column_id: 'scheduled', job_no: 'JOB-1042', type: 'callout',
+        title: 'Leaking kitchen tap',
+        customer_name: 'Mrs Patel', phone: '0412 555 901',
+        address: '12 Smith St, Surry Hills NSW 2010',
+        photos: [
+          'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=200&q=80&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=200&q=80&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1620626011761-996317b8d101?w=200&q=80&auto=format&fit=crop',
+        ],
+        materials: [
+          { item: 'Tap cartridge (Caroma)', qty: 1, each: 38.50 },
+          { item: 'PTFE tape', qty: 1, each: 2.20 },
+        ],
+        timeline: [
+          { type: 'created', when: '2026-05-25 09:12', who: 'Office', text: 'job created from phone enquiry' },
+          { type: 'moved',   when: '2026-05-25 09:15', who: 'Office', text: 'scheduled for Tuesday morning' },
+        ],
+      }),
+      enrich({
+        id: 2, column_id: 'scheduled', job_no: 'JOB-1043', type: 'install',
+        title: 'HWS replace — 50L → 250L gas',
+        customer_name: 'Mr Chen', phone: '0421 444 102',
+        address: '6 Wairoa Ave, Bondi NSW 2026',
+        photos: [
+          'https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=200&q=80&auto=format&fit=crop',
+        ],
+        materials: [
+          { item: 'Rheem 250L stellar gas', qty: 1, each: 1480.00 },
+          { item: 'Tempering valve', qty: 1, each: 78.00 },
+          { item: 'Copper 20mm (m)', qty: 4, each: 18.50 },
+        ],
+        timeline: [
+          { type: 'created', when: '2026-05-23 14:02', who: 'Office', text: 'quote accepted, converted to job' },
+        ],
+      }),
+      enrich({
+        id: 3, column_id: 'in_progress', job_no: 'JOB-1038', type: 'install',
+        title: 'Bathroom rough-in (3-bed reno)',
+        customer_name: 'Williams residence', phone: '0490 121 555',
+        address: '3 Beauty Point Rd, Mosman NSW 2088',
+        photos: [
+          'https://images.unsplash.com/photo-1564540586988-aa4e53c3d799?w=200&q=80&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1620626011761-996317b8d101?w=200&q=80&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=200&q=80&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=200&q=80&auto=format&fit=crop',
+        ],
+        materials: [
+          { item: 'PEX 16mm (m)',    qty: 22, each: 4.20 },
+          { item: 'Brass fitting set', qty: 1, each: 88.00 },
+          { item: 'Floor waste 80mm',  qty: 2, each: 18.50 },
+        ],
+        timeline: [
+          { type: 'created',   when: '2026-05-19 08:00', who: 'Office', text: 'job created from won quote Q-2241' },
+          { type: 'moved',     when: '2026-05-26 07:42', who: 'Dave',   text: 'started — moved to In progress' },
+          { type: 'photo',     when: '2026-05-26 09:30', who: 'Dave',   text: 'added 4 site photos' },
+        ],
+      }),
+      enrich({
+        id: 4, column_id: 'completed', job_no: 'JOB-1029', type: 'callout',
+        title: 'Toilet running constantly',
+        customer_name: 'Lee household', phone: '0455 010 020',
+        address: '8 The Corso, Manly NSW 2095',
+        photos: [],
+        materials: [
+          { item: 'Inlet valve (cistern)', qty: 1, each: 28.00 },
+        ],
+        timeline: [
+          { type: 'created',   when: '2026-05-20 11:00', who: 'Office', text: 'job created' },
+          { type: 'moved',     when: '2026-05-22 09:00', who: 'Dave',   text: 'on site' },
+          { type: 'completed', when: '2026-05-22 09:38', who: 'Dave',   text: 'job complete — 38 min' },
+        ],
+      }),
+    ];
+
+    const board = document.getElementById('board');
+
+    board.addEventListener('board:ready', (ev) => ev.detail.api.setCardData(jobs));
+
+    // Open the rail on a single click (ServiceM8/Tradify UX). The dblclick
+    // route still works — this just hoists detail-on-click to first class.
+    board.addEventListener('board:cardClicked', (ev) => {
+      // Ignore clicks that originated from inside the detail panel itself.
+      if (ev.detail.originalEvent?.target?.closest('.jd-detail')) return;
+      board.boardApi.openCardDetail(ev.detail.cardId);
+    });
+
+    // Populate the dynamic sections (photos, materials, timeline) after the
+    // template clone has had its data-bind fields filled by the library.
+    board.addEventListener('board:cardDetailOpened', (ev) => {
+      const { cardId, panelEl } = ev.detail;
+      const card = board.boardApi.getCardData().find((c) => String(c.id) === String(cardId));
+      if (!card) return;
+
+      // Photos
+      const photos = panelEl.querySelector('[data-jd-photos]');
+      photos.innerHTML = '';
+      (card.photos || []).slice(0, 4).forEach((url) => {
+        const d = document.createElement('div');
+        d.className = 'photo';
+        d.style.backgroundImage = `url(${url})`;
+        photos.appendChild(d);
+      });
+      // Fill empties up to 4
+      for (let i = (card.photos || []).length; i < 4; i++) {
+        const d = document.createElement('div');
+        d.className = 'photo add';
+        d.textContent = '+';
+        photos.appendChild(d);
+      }
+
+      // Materials
+      const fmt = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
+      const tbody = panelEl.querySelector('[data-jd-materials] tbody');
+      tbody.innerHTML = '';
+      let total = 0;
+      (card.materials || []).forEach((m) => {
+        const line = m.qty * m.each;
+        total += line;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${m.item}</td><td class="r">${m.qty}</td><td class="r">${fmt.format(m.each)}</td><td class="r">${fmt.format(line)}</td>`;
+        tbody.appendChild(tr);
+      });
+      panelEl.querySelector('[data-jd-mat-total]').textContent = fmt.format(total);
+
+      // Timeline
+      const tl = panelEl.querySelector('[data-jd-timeline]');
+      tl.innerHTML = '';
+      (card.timeline || []).forEach((t) => {
+        const li = document.createElement('li');
+        li.className = t.type;
+        li.innerHTML = `<span class="who">${t.who}</span> ${t.text} <span class="when">${t.when}</span>`;
+        tl.appendChild(li);
+      });
+
+      // Action buttons
+      panelEl.querySelectorAll('[data-jd-action]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const stamp = new Date().toISOString().replace('T', ' ').slice(0, 16);
+          const action = btn.getAttribute('data-jd-action');
+          const me = 'Dave';
+          let entry;
+          switch (action) {
+            case 'start-timer':     entry = { type: 'moved',     when: stamp, who: me, text: 'started timer' }; break;
+            case 'add-photo':       entry = { type: 'photo',     when: stamp, who: me, text: 'added a photo' }; break;
+            case 'add-note':        entry = { type: 'moved',     when: stamp, who: me, text: 'added a note' }; break;
+            case 'mark-complete':   entry = { type: 'completed', when: stamp, who: me, text: 'marked complete' }; break;
+            case 'convert-invoice': entry = { type: 'moved',     when: stamp, who: me, text: 'converted to invoice' }; break;
+          }
+          if (!entry) return;
+
+          // Mutate the underlying card record then re-bind the timeline section.
+          card.timeline = (card.timeline || []).concat([entry]);
+          const li = document.createElement('li');
+          li.className = entry.type;
+          li.innerHTML = `<span class="who">${entry.who}</span> ${entry.text} <span class="when">${entry.when}</span>`;
+          tl.appendChild(li);
+
+          if (action === 'mark-complete') {
+            board.boardApi.moveCard(card.id, { toColumnId: 'completed', toIndex: 0 });
+          } else if (action === 'convert-invoice') {
+            board.boardApi.moveCard(card.id, { toColumnId: 'invoiced', toIndex: 0 });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
