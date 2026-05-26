@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>30 — Multi-trade site handover | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .phase-card { padding: 10px 12px; }
+    .phase-card .lot { font-family: ui-monospace, monospace; font-size: 11px; background: #fef3c7; padding: 1px 6px; border-radius: 4px; font-weight: 700; }
+    .phase-card h4 { margin: 6px 0 4px 0; font-size: 13px; }
+    .phase-card .meta { color: #6b7280; font-size: 12px; display: flex; justify-content: space-between; }
+    .phase-card .signoffs { display: flex; gap: 8px; font-size: 11px; margin-top: 4px; }
+    .phase-card .signoff { padding: 1px 6px; border-radius: 4px; }
+    .phase-card .signoff.ok { background: #d1fae5; color: #047857; }
+    .phase-card .signoff.no { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>30 — Multi-trade site handover (workflow guard)</h1>
+  <p class="lede">Every block on this development has its own prerequisite chain. <code>board:beforeMove</code> calls <code>preventDefault()</code> if the previous trade hasn't signed off — try dragging a block from <em>Plumbing rough-in</em> past <em>Electrical rough-in</em> without the plumbing sign-off.</p>
+
+  <template id="phase-card">
+    <article class="sk-card phase-card">
+      <div style="display:flex; justify-content: space-between; align-items: center;">
+        <span class="lot" data-bind="lot"></span>
+        <span class="meta" data-bind="builder"></span>
+      </div>
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="signoffs">
+        <span class="signoff" data-bind="plumb_label" data-bind-attr="class:plumb_class"></span>
+        <span class="signoff" data-bind="elec_label" data-bind-attr="class:elec_class"></span>
+      </div>
+    </article>
+  </template>
+
+  <div class="panel" data-controller="board" data-board-card-renderer-value="phase-card" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="prep"        data-board-column-title-value="Site prep"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="plumbing"    data-board-column-title-value="Plumbing rough-in"
+          data-board-column-accept-cards-from-value='["prep"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="electrical"  data-board-column-title-value="Electrical rough-in"
+          data-board-column-accept-cards-from-value='["plumbing"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="frames"      data-board-column-title-value="Framing &amp; lock-up"
+          data-board-column-accept-cards-from-value='["electrical"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="drywall"     data-board-column-title-value="Drywall + paint"
+          data-board-column-accept-cards-from-value='["frames"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="handover"    data-board-column-title-value="Handover"
+          data-board-column-accept-cards-from-value='["drywall"]'><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// refused moves</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    const log = document.getElementById('log');
+    const decorate = (c) => {
+      c.plumb_label = c.plumbing_signed_off ? 'P ✓' : 'P ✗';
+      c.plumb_class = c.plumbing_signed_off ? 'signoff ok' : 'signoff no';
+      c.elec_label  = c.electrical_signed_off ? 'E ✓' : 'E ✗';
+      c.elec_class  = c.electrical_signed_off ? 'signoff ok' : 'signoff no';
+      return c;
+    };
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'prep',       lot: 'Lot 12', builder: 'Greybridge Homes',  title: 'Bench cuts + foundations',          plumbing_signed_off: false, electrical_signed_off: false },
+        { id: 2, column_id: 'plumbing',   lot: 'Lot 8',  builder: 'Greybridge Homes',  title: 'Sewer + cold water mains',          plumbing_signed_off: false, electrical_signed_off: false },
+        { id: 3, column_id: 'plumbing',   lot: 'Lot 4',  builder: 'Coastal Builders',  title: 'Wet area rough-in (2 bath, 1 ens)',  plumbing_signed_off: true,  electrical_signed_off: false },
+        { id: 4, column_id: 'electrical', lot: 'Lot 1',  builder: 'Coastal Builders',  title: 'Cable runs + switchboard',           plumbing_signed_off: true,  electrical_signed_off: false },
+        { id: 5, column_id: 'frames',     lot: 'Lot 18', builder: 'Greybridge Homes',  title: 'Roof trusses + truss tie-down',      plumbing_signed_off: true,  electrical_signed_off: true },
+        { id: 6, column_id: 'drywall',    lot: 'Lot 22', builder: 'Coastal Builders',  title: 'Internal walls + ceilings + paint',  plumbing_signed_off: true,  electrical_signed_off: true },
+      ].map(decorate));
+    });
+    board.addEventListener('board:beforeMove', (ev) => {
+      for (const id of ev.detail.cardIds) {
+        const card = board.boardApi.getCardData().find((c) => c.id === id);
+        if (!card) continue;
+        if (ev.detail.toColumnId === 'electrical' && !card.plumbing_signed_off) {
+          ev.preventDefault();
+          log.textContent = `🚫 ${card.lot} cannot enter Electrical — plumbing rough-in not signed off.\n` + log.textContent;
+          return;
+        }
+        if ((ev.detail.toColumnId === 'frames' || ev.detail.toColumnId === 'drywall' || ev.detail.toColumnId === 'handover') && !card.electrical_signed_off) {
+          ev.preventDefault();
+          log.textContent = `🚫 ${card.lot} cannot advance — electrical rough-in not signed off.\n` + log.textContent;
+          return;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
