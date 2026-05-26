@@ -52,6 +52,18 @@ describe('boardApi — data + columns', () => {
     expect(cards.every((c) => c.column_id === 'todo')).toBe(true);
   });
 
+  it('renders visible card text + column header title (no <span text=…> attribute leak)', async () => {
+    // Regression: el() in dom.js used to drop the `text:` pseudo-attr onto
+    // the element as a literal attribute, so cards + headers rendered blank.
+    await new Promise((r) => requestAnimationFrame(r));
+    const cardOne = root.querySelector('[data-card-id="1"]');
+    expect(cardOne.textContent).toContain('A');
+    expect(cardOne.querySelector('[text]')).toBeNull();
+    const todoHeader = root.querySelector('[data-board-column-id-value="todo"] .sk-column-title');
+    expect(todoHeader.textContent).toBe('To do');
+    expect(todoHeader.getAttribute('text')).toBeNull();
+  });
+
   it('moveCard re-renders into the target column', async () => {
     api.moveCard('1', { toColumnId: 'done', toIndex: 0 });
     await new Promise((r) => requestAnimationFrame(r));

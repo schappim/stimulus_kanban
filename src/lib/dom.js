@@ -9,6 +9,12 @@ export function el(tag, attrs = {}, children = []) {
   for (const [k, v] of Object.entries(attrs)) {
     if (v === false || v == null) continue;
     if (k === 'class') node.className = v;
+    // `text:` is a pseudo-attribute that sets textContent — saves callers
+    // from having to wrap a single string child in an array. Without this
+    // branch the loop falls through and the literal `text=` attribute lands
+    // on the element instead, which silently drops the visible text.
+    else if (k === 'text') node.textContent = String(v);
+    else if (k === 'html') node.innerHTML = String(v);
     else if (k === 'style' && typeof v === 'object') Object.assign(node.style, v);
     else if (k.startsWith('on') && typeof v === 'function') {
       node.addEventListener(k.slice(2).toLowerCase(), v);

@@ -353,7 +353,7 @@ function qt(r) {
 function p(r, t = {}, e = []) {
   const n = document.createElement(r);
   for (const [s, i] of Object.entries(t))
-    i === !1 || i == null || (s === "class" ? n.className = i : s === "style" && typeof i == "object" ? Object.assign(n.style, i) : s.startsWith("on") && typeof i == "function" ? n.addEventListener(s.slice(2).toLowerCase(), i) : i === !0 ? n.setAttribute(s, "") : n.setAttribute(s, String(i)));
+    i === !1 || i == null || (s === "class" ? n.className = i : s === "text" ? n.textContent = String(i) : s === "html" ? n.innerHTML = String(i) : s === "style" && typeof i == "object" ? Object.assign(n.style, i) : s.startsWith("on") && typeof i == "function" ? n.addEventListener(s.slice(2).toLowerCase(), i) : i === !0 ? n.setAttribute(s, "") : n.setAttribute(s, String(i)));
   for (const s of [].concat(e))
     s == null || s === !1 || n.appendChild(typeof s == "string" ? document.createTextNode(s) : s);
   return n;
