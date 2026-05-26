@@ -81,6 +81,14 @@ module StimulusKanbanRails
     def columns; (self.class.columns_registry || {}).values; end
     def card_fields; (self.class.card_fields_registry || {}).values; end
 
+    # The base relation visible to the cards controller. Override for per-user
+    # authorization scoping (e.g. `model_class.where(account: user.account)`).
+    # ActsAsTenant's default_scope is honoured automatically because we go
+    # through `model_class.all` instead of an unscoped find.
+    def scope(_user = user)
+      self.class.model_class.all
+    end
+
     # Returns the column id (Symbol) the given AR record currently lives in.
     # Boards customise by overriding — the default looks for `column_id`.
     def column_id_for(card)

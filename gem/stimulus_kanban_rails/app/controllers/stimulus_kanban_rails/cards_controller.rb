@@ -1,10 +1,16 @@
 module StimulusKanbanRails
+  # GET    /boards/:resource/cards/:id      → show (used by sync revert)
   # POST   /boards/:resource/cards          → create
   # PATCH  /boards/:resource/cards/:id      → field update
   # PATCH  /boards/:resource/cards/:id/move → move (column / index)
   # DELETE /boards/:resource/cards/:id      → destroy
   class CardsController < BaseController
     rescue_from StimulusKanbanRails::Veto, with: :render_veto
+
+    def show
+      card = scoped_card(params[:id])
+      render json: { card: board_instance.card_to_h(card) }
+    end
 
     def create
       card = board_class.model_class.new(card_params)
@@ -16,7 +22,7 @@ module StimulusKanbanRails
     end
 
     def update
-      card = board_class.model_class.find(params[:id])
+      card = scoped_card(params[:id])
       field = params.require(:field)
       value = params.permit(:value)[:value]
       success, errors, payload = board_instance.apply_update!(card, field, value, user: current_user_if_defined)
@@ -28,7 +34,7 @@ module StimulusKanbanRails
     end
 
     def move
-      card = board_class.model_class.find(params[:id])
+      card = scoped_card(params[:id])
       to_column_id = params.require(:to_column_id)
       to_index     = params.fetch(:to_index, 0).to_i
       _, mutations = board_instance.apply_move!(card, to_column_id: to_column_id, to_index: to_index, user: current_user_if_defined)
@@ -36,7 +42,7 @@ module StimulusKanbanRails
     end
 
     def destroy
-      card = board_class.model_class.find(params[:id])
+      card = scoped_card(params[:id])
       card.destroy
       head :no_content
     end
