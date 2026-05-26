@@ -640,3 +640,26 @@
   padding: 3px 8px; font-size: 16px; line-height: 1; color: rgba(255,255,255,0.75);
 }
 .sk-bulk-toolbar .sk-bulk-clear:hover { color: #fff; }
+
+/* Time-in-column "stuck" warning — set by the board controller when a card
+ * has been in its current column for >= the column's stuck_after_days.
+ * Attribute lives on the .sk-card-wrapper that carries data-card-id. */
+.sk-card-wrapper[data-card-stuck="true"] {
+  position: relative;
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px var(--sk-stuck-outline, #ef4444) inset;
+}
+.sk-card-wrapper[data-card-stuck="true"]::after {
+  content: attr(data-card-age-days) "d ⚠";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font: 700 10px ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--sk-stuck-bg, #fef2f2);
+  color: var(--sk-stuck-fg, #b91c1c);
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  z-index: 1;
+}

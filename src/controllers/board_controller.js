@@ -71,6 +71,8 @@ export default class BoardController extends Controller {
       editing: null,            // { cardId, editorEl, originalSnapshot }
       openDetailCardId: null,
       wipExceeded: new Set(),   // colIds currently over-WIP (for "fire once" semantics)
+      stuckCards: new Set(),    // cardIds currently stuck per column.stuck_after_days
+      enteredColumnAt: new Map(),// cardId → ISO timestamp of when card entered current column
       virtualColumns: new Map(),// columnId → virtual instance
       ready: false,
     };
@@ -149,6 +151,7 @@ export default class BoardController extends Controller {
         accept_from: this._jsonOrNull(el.getAttribute('data-board-column-accept-cards-from-value')),
         disallow_drag: el.getAttribute('data-board-column-disallow-drag-value') === 'true',
         sort: el.getAttribute('data-board-column-sort-value') || 'manual',
+        stuck_after_days: this._numOrNull(el.getAttribute('data-board-column-stuck-after-days-value')),
         card_renderer: el.getAttribute('data-board-column-card-renderer-value') || null,
         card_editor:   el.getAttribute('data-board-column-card-editor-value') || null,
         add_card_label: el.getAttribute('data-board-column-add-card-label-value') || null,
@@ -217,6 +220,7 @@ export default class BoardController extends Controller {
 
   setCardData(cards) {
     this.state.cards = normaliseCards(cards, this._modelOpts());
+    this._reseedEnteredColumnAt();
     this._scheduleRender();
     emit(this.element, 'board:cardDataChanged', { cards: this.getCardData() });
   }
@@ -237,7 +241,10 @@ export default class BoardController extends Controller {
   }
 
   applyTransaction(tx) {
+    // Snapshot pre-state to detect column transitions for aging tracker.
+    const beforeCol = new Map(this.state.cards.map((c) => [String(c[this.getCardIdValue]), String(c[this.getColumnIdValue])]));
     this.state.cards = applyTransactionModel(this.state.cards, tx, this._modelOpts());
+    this._trackEnteredColumnDelta(beforeCol);
     this._scheduleRender();
     if (Array.isArray(tx?.add))    tx.add.forEach((a) => emit(this.element, 'board:cardAdded', { cardId: a[this.getCardIdValue], columnId: a[this.getColumnIdValue], card: a }));
     if (Array.isArray(tx?.remove)) tx.remove.forEach((r) => emit(this.element, 'board:cardRemoved', { cardId: typeof r === 'object' ? r[this.getCardIdValue] : r }));
@@ -309,10 +316,13 @@ export default class BoardController extends Controller {
     if (!this._beforeMoveOk([cardId], before?.[this.getColumnIdValue], target.toColumnId, target.toIndex)) return false;
     const fromIndex = this._currentVisibleIndex(cardId);
     this.state.cards = moveCardModel(this.state.cards, cardId, target, this._modelOpts());
+    const fromCol = before?.[this.getColumnIdValue];
+    const toCol   = target.toColumnId ?? fromCol;
+    if (String(fromCol) !== String(toCol)) this._markEnteredColumn(cardId);
     this._scheduleRender();
     emit(this.element, 'board:cardMoved', {
       cardId,
-      fromColumnId: before?.[this.getColumnIdValue],
+      fromColumnId: fromCol,
       toColumnId: target.toColumnId,
       fromIndex,
       toIndex: target.toIndex,
@@ -325,11 +335,15 @@ export default class BoardController extends Controller {
     if (!cardIds?.length) return false;
     const sample = this._snapshotCard(cardIds[0]);
     if (!this._beforeMoveOk(cardIds, sample?.[this.getColumnIdValue], target.toColumnId, target.toIndex)) return false;
+    const fromCol = sample?.[this.getColumnIdValue];
     this.state.cards = moveCardsModel(this.state.cards, cardIds, target, this._modelOpts());
+    if (String(fromCol) !== String(target.toColumnId)) {
+      for (const id of cardIds) this._markEnteredColumn(id);
+    }
     this._scheduleRender();
     emit(this.element, 'board:cardsMoved', {
       cardIds,
-      fromColumnId: sample?.[this.getColumnIdValue],
+      fromColumnId: fromCol,
       toColumnId: target.toColumnId,
       toIndex: target.toIndex,
     });
@@ -558,6 +572,115 @@ export default class BoardController extends Controller {
       }
     }
     this.state.wipExceeded = next;
+  }
+
+  /* Aging / time-in-column tracking
+   * ---------------------------------
+   * The board keeps a Map<cardId, ISO timestamp> recording when each card
+   * entered its current column. Hosts can read this via getCardEnteredAt /
+   * getCardAgeInColumn / getStuckCardIds, and any column with
+   * `data-board-column-stuck-after-days-value="N"` will mark its old cards
+   * as data-card-stuck="true" each render. The set of stuck cards is
+   * compared between renders so a `board:cardStuck` event fires once per
+   * crossing. */
+
+  _markEnteredColumn(cardId, isoStamp) {
+    const id = String(cardId);
+    const ts = isoStamp || this._aging_now();
+    this.state.enteredColumnAt.set(id, ts);
+  }
+  _reseedEnteredColumnAt() {
+    // After setCardData, anything we don't have a record for inherits a
+    // synthetic timestamp from `entered_at` / `created_at` if the host
+    // provided one, else now (we don't know how long it's been sitting).
+    const next = new Map();
+    const now  = this._aging_now();
+    for (const c of this.state.cards) {
+      const id = String(c[this.getCardIdValue]);
+      const prev = this.state.enteredColumnAt.get(id);
+      // Host can supply per-card `entered_column_at` / `entered_at` ISO.
+      const fromHost = c.entered_column_at || c.entered_at;
+      next.set(id, prev || fromHost || now);
+    }
+    this.state.enteredColumnAt = next;
+  }
+  _trackEnteredColumnDelta(beforeCol) {
+    // Compare per-card column membership between `beforeCol` and the current
+    // cards list. New rows get `now`; cross-column rows get `now`.
+    const now = this._aging_now();
+    for (const c of this.state.cards) {
+      const id     = String(c[this.getCardIdValue]);
+      const newCol = String(c[this.getColumnIdValue]);
+      const oldCol = beforeCol.get(id);
+      if (oldCol == null)              this.state.enteredColumnAt.set(id, c.entered_column_at || c.entered_at || now);
+      else if (oldCol !== newCol)      this.state.enteredColumnAt.set(id, now);
+    }
+    // Drop entries for removed cards.
+    const presentIds = new Set(this.state.cards.map((c) => String(c[this.getCardIdValue])));
+    for (const k of this.state.enteredColumnAt.keys()) {
+      if (!presentIds.has(k)) this.state.enteredColumnAt.delete(k);
+    }
+  }
+  _aging_now() {
+    // Hookable for tests — the demo can stub `boardController._aging_now`
+    // to fix "now" without having to rewire Date.
+    return new Date().toISOString();
+  }
+
+  getCardEnteredAt(cardId) {
+    return this.state.enteredColumnAt.get(String(cardId)) || null;
+  }
+  /* Whole-day delta. `2026-05-26T10:00:00Z` → `2026-05-28T11:00:00Z` is 2 days. */
+  getCardAgeInColumn(cardId, now = this._aging_now()) {
+    const enteredIso = this.getCardEnteredAt(cardId);
+    if (!enteredIso) return null;
+    const ms = new Date(now) - new Date(enteredIso);
+    if (Number.isNaN(ms)) return null;
+    return Math.max(0, Math.floor(ms / 86400000));
+  }
+  getStuckCardIds(now = this._aging_now()) {
+    const out = [];
+    for (const col of this._orderedColumns()) {
+      if (!col.stuck_after_days) continue;
+      for (const c of cardsInColumn(this.state.cards, col.id, this._modelOpts())) {
+        const id = String(c[this.getCardIdValue]);
+        const age = this.getCardAgeInColumn(id, now);
+        if (age != null && age >= col.stuck_after_days) out.push(id);
+      }
+    }
+    return out;
+  }
+  _decorateStuckCards() {
+    // Run after each render. Builds the next stuck-set, diffs against the
+    // last one so board:cardStuck fires once per crossing (mirrors WIP).
+    const cols = this._orderedColumns();
+    if (!cols.some((c) => c.stuck_after_days)) return;
+    const nowIso = this._aging_now();
+    const next = new Set(this.getStuckCardIds(nowIso));
+    // Apply DOM markers
+    for (const cardEl of this.element.querySelectorAll('[data-card-id]')) {
+      const id = cardEl.getAttribute('data-card-id');
+      const stuck = next.has(String(id));
+      cardEl.setAttribute('data-card-stuck', stuck ? 'true' : 'false');
+      if (stuck) {
+        const age = this.getCardAgeInColumn(id, nowIso);
+        if (age != null) cardEl.setAttribute('data-card-age-days', String(age));
+      } else {
+        cardEl.removeAttribute('data-card-age-days');
+      }
+    }
+    // Fire once per crossing
+    for (const id of next) {
+      if (!this.state.stuckCards.has(id)) {
+        const card = this.state.cards.find((c) => String(c[this.getCardIdValue]) === id);
+        emit(this.element, 'board:cardStuck', {
+          cardId: id,
+          columnId: card?.[this.getColumnIdValue],
+          ageDays: this.getCardAgeInColumn(id, nowIso),
+        });
+      }
+    }
+    this.state.stuckCards = next;
   }
 
   /* persistence */
@@ -808,6 +931,7 @@ export default class BoardController extends Controller {
     }
 
     this._refreshSelectionDecorations();
+    this._decorateStuckCards();
     if (wasReady) this._schedulePersist();
   }
 

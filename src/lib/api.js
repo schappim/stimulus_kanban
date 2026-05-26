@@ -72,6 +72,19 @@ export function createBoardApi(board) {
     // ---- WIP ----
     getWipState()                      { return board.getWipState(); },
 
+    // ---- Aging / time-in-column ----
+    getCardEnteredAt(cardId)           { return board.getCardEnteredAt(cardId); },
+    getCardAgeInColumn(cardId, now)    { return board.getCardAgeInColumn(cardId, now); },
+    getStuckCardIds(now)               { return board.getStuckCardIds(now); },
+    setAgingClock(fn) {
+      // Replace the controller's "now" provider — useful for tests / demos
+      // where you want deterministic ages. Pass `null` to restore the
+      // wall-clock default.
+      if (typeof fn === 'function') board._aging_now = fn;
+      else board._aging_now = () => new Date().toISOString();
+      board._decorateStuckCards();
+    },
+
     // ---- Persistence ----
     getBoardState()                    { return board.getBoardState(); },
     applyBoardState(state)             { return board.applyBoardState(state); },
