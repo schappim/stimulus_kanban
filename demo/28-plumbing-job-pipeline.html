@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>28 — Plumbing job pipeline | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .plumb-card { padding: 10px 12px; }
+    .plumb-card .row { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+    .plumb-card .job-num { font-family: ui-monospace, monospace; font-size: 11px; color: #6b7280; background: #f3f4f6; padding: 1px 6px; border-radius: 4px; }
+    .plumb-card .value { font-weight: 700; color: #047857; font-variant-numeric: tabular-nums; }
+    .plumb-card h4 { margin: 6px 0 4px 0; font-size: 13px; }
+    .plumb-card .meta { color: #6b7280; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>28 — Plumbing job pipeline</h1>
+  <p class="lede">A residential plumber's pipeline. <strong>On site</strong> has a WIP of 2 (one truck only fits two jobs in a day). <code>accept_from</code> stops a job skipping the workflow — you can't invoice before going on site, and can't mark paid before invoicing.</p>
+
+  <template id="job-card">
+    <article class="sk-card plumb-card">
+      <div class="row">
+        <span class="job-num" data-bind="job_number"></span>
+        <span class="value" data-bind="value_display"></span>
+      </div>
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="row">
+        <span class="meta" data-bind="customer_name"></span>
+        <span class="meta" data-bind="suburb"></span>
+      </div>
+    </article>
+  </template>
+
+  <div class="panel" data-controller="board" data-board-card-renderer-value="job-card" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="enquiry"  data-board-column-title-value="Quote requested"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="quoted"   data-board-column-title-value="Quoted"
+          data-board-column-wip-value="8"
+          data-board-column-accept-cards-from-value='["enquiry"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="booked"   data-board-column-title-value="Booked"
+          data-board-column-accept-cards-from-value='["quoted","enquiry"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="onsite"   data-board-column-title-value="On site"
+          data-board-column-wip-value="2"
+          data-board-column-accept-cards-from-value='["booked"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="invoiced" data-board-column-title-value="Invoiced"
+          data-board-column-accept-cards-from-value='["onsite"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="paid"     data-board-column-title-value="Paid"
+          data-board-column-accept-cards-from-value='["invoiced"]'><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <p class="tip">Try: drag the "Burst pipe" card from <em>Quote requested</em> straight to <em>Invoiced</em> — the drop is refused.</p>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const fmt = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+    const cards = [
+      { id: 1, column_id: 'enquiry',  job_number: 'JOB-2026-104', title: 'Leaking kitchen tap',                             customer_name: 'Mrs Patel',             suburb: 'Surry Hills',     value: 185 },
+      { id: 2, column_id: 'enquiry',  job_number: 'JOB-2026-103', title: 'Burst pipe in laundry',                           customer_name: 'Smith family',          suburb: 'Newtown',         value: 395 },
+      { id: 3, column_id: 'quoted',   job_number: 'JOB-2026-101', title: 'Replace 50L electric HWS with 200L gas',           customer_name: 'Mr Chen',               suburb: 'Bondi',           value: 4200 },
+      { id: 4, column_id: 'quoted',   job_number: 'JOB-2026-100', title: 'Bathroom rough-in (renovation)',                   customer_name: 'Williams residence',    suburb: 'Mosman',          value: 2800 },
+      { id: 5, column_id: 'booked',   job_number: 'JOB-2026-098', title: 'Replace kitchen tapware (Methven)',                customer_name: 'Lee household',         suburb: 'Manly',           value: 720 },
+      { id: 6, column_id: 'onsite',   job_number: 'JOB-2026-097', title: 'Unblock main sewer line',                          customer_name: 'Bondi Beach Pavilion',  suburb: 'Bondi',           value: 1450 },
+      { id: 7, column_id: 'onsite',   job_number: 'JOB-2026-096', title: 'Gas cooktop install (Smeg 90cm)',                  customer_name: 'Khoury family',         suburb: 'Paddington',      value: 980 },
+      { id: 8, column_id: 'invoiced', job_number: 'JOB-2026-094', title: 'Toilet replacement ×2',                            customer_name: 'Highview Strata',       suburb: 'Parramatta',      value: 1320 },
+      { id: 9, column_id: 'paid',     job_number: 'JOB-2026-090', title: 'Annual backflow test + cert',                      customer_name: 'Newtown IGA',           suburb: 'Newtown',         value: 280 },
+    ];
+    cards.forEach((c) => c.value_display = fmt.format(c.value));
+    document.getElementById('board').addEventListener('board:ready', (ev) => ev.detail.api.setCardData(cards));
+  </script>
+</body>
+</html>
