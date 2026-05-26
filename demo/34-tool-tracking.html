@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>34 — Tool & equipment tracking | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .tool-card { padding: 10px 12px; }
+    .tool-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .tool-card .brand { font-weight: 700; color: #b91c1c; }
+    .tool-card .sn    { font-family: ui-monospace, monospace; font-size: 10px; color: #6b7280; background: #f3f4f6; padding: 1px 6px; border-radius: 4px; }
+    .tool-card h4     { margin: 4px 0; font-size: 13px; }
+    .tool-card .where { color: #6b7280; font-size: 12px; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>34 — Tool &amp; equipment tracking</h1>
+  <p class="lede">Your high-value tools, by where they are right now. Retired tools are <code>__locked</code> — they can't be dragged or edited so old kit can't accidentally re-enter the rotation.</p>
+
+  <template id="tool-card">
+    <article class="sk-card tool-card">
+      <div class="row">
+        <span><span class="brand" data-bind="brand"></span> <span data-bind="title"></span></span>
+        <span class="sn" data-bind="serial"></span>
+      </div>
+      <div class="where" data-bind="current_site"></div>
+    </article>
+  </template>
+
+  <div class="panel" data-controller="board" data-board-card-renderer-value="tool-card" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="shed"      data-board-column-title-value="In shed"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="onsite"    data-board-column-title-value="Out on site"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="returning" data-board-column-title-value="Booked back"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="service"   data-board-column-title-value="In service / repair"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="retired"   data-board-column-title-value="Retired"
+          data-board-column-color-value="#9ca3af"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    document.getElementById('board').addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'shed',      brand: 'Hilti',     title: 'TE 6-A36 hammer drill',     serial: 'HD-4119', current_site: 'In shed' },
+        { id: 2, column_id: 'shed',      brand: 'Makita',    title: 'DLM382 cordless mower',     serial: 'MA-2271', current_site: 'In shed' },
+        { id: 3, column_id: 'onsite',    brand: 'DeWalt',    title: '54V mitre saw',             serial: 'DW-7842', current_site: 'Job 2026-104 — Bondi reno' },
+        { id: 4, column_id: 'onsite',    brand: 'Bosch',     title: 'GRL 800-20 HV laser',       serial: 'BO-3110', current_site: 'Job 2026-101 — HWS swap, Mosman' },
+        { id: 5, column_id: 'onsite',    brand: 'Hilti',     title: 'PR 30-HVS rotating laser',  serial: 'HI-8829', current_site: 'Job 2026-098 — Newtown extension' },
+        { id: 6, column_id: 'returning', brand: 'Stihl',     title: 'MS 271 chainsaw',           serial: 'ST-4451', current_site: 'Returning from Manly tomorrow' },
+        { id: 7, column_id: 'service',   brand: 'Milwaukee', title: 'M18 FUEL SDS rotary hammer', serial: 'MI-5562', current_site: 'At Northshore Powertools — chuck repair' },
+        { id: 8, column_id: 'retired',   brand: 'Makita',    title: '14.4V drill (2014)',         serial: 'MA-0091', current_site: 'Retired Aug 2025', __locked: true },
+        { id: 9, column_id: 'retired',   brand: 'Paslode',   title: 'Impulse 16-gauge nailer (2013)', serial: 'PA-0042', current_site: 'Retired Jan 2026', __locked: true },
+      ]);
+    });
+  </script>
+</body>
+</html>
