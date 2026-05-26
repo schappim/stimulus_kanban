@@ -11,12 +11,12 @@ function H(r, t = {}) {
   }
   const c = [];
   for (const [d, m] of l)
-    m.slice().sort((S, k) => {
-      const f = S[s], A = k[s];
-      return f == null && A == null ? 0 : f == null ? 1 : A == null ? -1 : Number(f) - Number(A);
-    }).forEach((S, k) => {
-      const f = { ...S };
-      f[e] = String(S[e] ?? ""), f[n] = d, f[s] = S[s] == null ? k : Number(S[s]), c.push(f);
+    m.slice().sort((b, k) => {
+      const f = b[s], I = k[s];
+      return f == null && I == null ? 0 : f == null ? 1 : I == null ? -1 : Number(f) - Number(I);
+    }).forEach((b, k) => {
+      const f = { ...b };
+      f[e] = String(b[e] ?? ""), f[n] = d, f[s] = b[s] == null ? k : Number(b[s]), c.push(f);
     });
   return c;
 }
@@ -111,23 +111,23 @@ function Mt(r, t, e = {}) {
 function z(r, t, e, n = {}) {
   const s = n.getCardId || B, i = n.getColumnId || T, l = n.orderField || q, c = String(t), d = r.map((C) => ({ ...C })), m = d.find((C) => String(C[s]) === c);
   if (!m) return r;
-  const g = String(m[i]), S = String(e.toColumnId ?? g), k = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex);
-  m[i] = S;
-  const f = d.filter((C) => String(C[i]) === g && String(C[s]) !== c).sort((C, I) => Number(C[l] ?? 0) - Number(I[l] ?? 0)), A = d.filter((C) => String(C[i]) === S && String(C[s]) !== c).sort((C, I) => Number(C[l] ?? 0) - Number(I[l] ?? 0)), w = Math.max(0, Math.min(k, A.length));
-  return A.splice(w, 0, m), f.forEach((C, I) => {
-    C[l] = I;
-  }), A.forEach((C, I) => {
-    C[l] = I;
+  const g = String(m[i]), b = String(e.toColumnId ?? g), k = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex);
+  m[i] = b;
+  const f = d.filter((C) => String(C[i]) === g && String(C[s]) !== c).sort((C, A) => Number(C[l] ?? 0) - Number(A[l] ?? 0)), I = d.filter((C) => String(C[i]) === b && String(C[s]) !== c).sort((C, A) => Number(C[l] ?? 0) - Number(A[l] ?? 0)), w = Math.max(0, Math.min(k, I.length));
+  return I.splice(w, 0, m), f.forEach((C, A) => {
+    C[l] = A;
+  }), I.forEach((C, A) => {
+    C[l] = A;
   }), d;
 }
 function Bt(r, t, e, n = {}) {
   const s = n.getCardId || B, i = n.getColumnId || T, l = n.orderField || q;
   if (!Array.isArray(t) || t.length === 0) return r;
-  const c = new Set(t.map(String)), d = String(e.toColumnId), m = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex), g = r.map((w) => ({ ...w })), S = g.filter((w) => c.has(String(w[s]))).sort((w, C) => {
-    const I = g.indexOf(w), O = g.indexOf(C);
-    return I - O;
+  const c = new Set(t.map(String)), d = String(e.toColumnId), m = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex), g = r.map((w) => ({ ...w })), b = g.filter((w) => c.has(String(w[s]))).sort((w, C) => {
+    const A = g.indexOf(w), O = g.indexOf(C);
+    return A - O;
   });
-  if (S.length === 0) return r;
+  if (b.length === 0) return r;
   const k = /* @__PURE__ */ new Map();
   for (const w of g) {
     if (c.has(String(w[s]))) continue;
@@ -135,13 +135,13 @@ function Bt(r, t, e, n = {}) {
     k.has(C) || k.set(C, []), k.get(C).push(w);
   }
   for (const w of k.values())
-    w.sort((C, I) => Number(C[l] ?? 0) - Number(I[l] ?? 0));
-  for (const w of S) w[i] = d;
-  const f = k.get(d) || [], A = Math.max(0, Math.min(m, f.length));
-  f.splice(A, 0, ...S), k.set(d, f);
+    w.sort((C, A) => Number(C[l] ?? 0) - Number(A[l] ?? 0));
+  for (const w of b) w[i] = d;
+  const f = k.get(d) || [], I = Math.max(0, Math.min(m, f.length));
+  f.splice(I, 0, ...b), k.set(d, f);
   for (const w of k.values())
-    w.forEach((C, I) => {
-      C[l] = I;
+    w.forEach((C, A) => {
+      C[l] = A;
     });
   return g;
 }
@@ -455,7 +455,7 @@ function jt({ root: r, hooks: t }) {
       o.preventDefault();
       return;
     }
-    const b = u.getAttribute("data-card-id"), E = t.expandSelection?.(b, _) ?? [b];
+    const S = u.getAttribute("data-card-id"), E = t.expandSelection?.(S, _) ?? [S];
     e.dragging = !0, e.cardIds = E, e.fromColumnId = _, o.dataTransfer.effectAllowed = "move";
     try {
       o.dataTransfer.setData("text/plain", JSON.stringify({ ids: E }));
@@ -477,7 +477,7 @@ function jt({ root: r, hooks: t }) {
     e.dragging && (o.preventDefault(), C({ cancelled: !1 }));
   }
   function l(o) {
-    e.dragging && e.targetColumnId == null && C({ cancelled: !0 }), I();
+    e.dragging && e.targetColumnId == null && C({ cancelled: !0 }), A();
   }
   let c = null;
   function d(o) {
@@ -493,8 +493,8 @@ function jt({ root: r, hooks: t }) {
   }
   function m(o) {
     if (c && !e.pointerActive) {
-      const b = o.clientX - c.x, E = o.clientY - c.y;
-      if (Math.hypot(b, E) < 6) return;
+      const S = o.clientX - c.x, E = o.clientY - c.y;
+      if (Math.hypot(S, E) < 6) return;
       k(c, o);
     }
     if (!e.pointerActive) return;
@@ -511,33 +511,33 @@ function jt({ root: r, hooks: t }) {
       c = null;
       return;
     }
-    c = null, C({ cancelled: e.targetColumnId == null }), I();
+    c = null, C({ cancelled: e.targetColumnId == null }), A();
   }
-  function S(o) {
-    c = null, e.pointerActive && (C({ cancelled: !0 }), I());
+  function b(o) {
+    c = null, e.pointerActive && (C({ cancelled: !0 }), A());
   }
   function k(o, u) {
     const h = L(o.cardEl, "[data-board-column-id-value]");
     if (!h) return;
     const _ = h.getAttribute("data-board-column-id-value");
     if (t.isColumnDisallowDrag?.(_)) return;
-    const b = t.expandSelection?.(o.id, _) ?? [o.id];
-    e.dragging = !0, e.pointerActive = !0, e.cardIds = b, e.fromColumnId = _, o.cardEl.classList.add("sk-card-dragging"), e.ghostEl = wt(o.cardEl, b.length), rt(u.clientX, u.clientY);
+    const S = t.expandSelection?.(o.id, _) ?? [o.id];
+    e.dragging = !0, e.pointerActive = !0, e.cardIds = S, e.fromColumnId = _, o.cardEl.classList.add("sk-card-dragging"), e.ghostEl = wt(o.cardEl, S.length), rt(u.clientX, u.clientY);
     try {
       o.cardEl.setPointerCapture?.(o.pointerId);
     } catch {
     }
-    t.onDragStart?.({ ids: b, fromColumnId: _ });
+    t.onDragStart?.({ ids: S, fromColumnId: _ });
   }
   function f(o) {
     e.dragging && o.key === "Escape" && (e.targetColumnId = null, e.targetIndex = null, W());
   }
-  function A(o, u) {
+  function I(o, u) {
     e.dragging = !0, e.cardIds = Array.isArray(o) ? o.slice() : [o], e.fromColumnId = u, t.onDragStart?.({ ids: e.cardIds, fromColumnId: u });
   }
   function w(o = {}) {
     const u = !!o.cancelled;
-    u || (e.targetColumnId = o.toColumnId ?? null, e.targetIndex = o.toIndex == null ? null : Number(o.toIndex)), C({ cancelled: u }), I();
+    u || (e.targetColumnId = o.toColumnId ?? null, e.targetIndex = o.toIndex == null ? null : Number(o.toIndex)), C({ cancelled: u }), A();
   }
   function C({ cancelled: o }) {
     if (!e.dragging) return;
@@ -550,7 +550,7 @@ function jt({ root: r, hooks: t }) {
     };
     t.onDrop?.(u);
   }
-  function I() {
+  function A() {
     e.dragging = !1, e.pointerActive = !1, e.cardIds = [], e.fromColumnId = null, e.targetColumnId = null, e.targetIndex = null, e.ghostEl && (e.ghostEl.remove(), e.ghostEl = null), W(), bt();
     for (const o of r.querySelectorAll(".sk-card-dragging"))
       o.classList.remove("sk-card-dragging");
@@ -561,11 +561,11 @@ function jt({ root: r, hooks: t }) {
   function P(o, u) {
     const h = o.querySelector(".sk-cards");
     if (!h) return 0;
-    const _ = Array.from(h.querySelectorAll(":scope > [data-card-id]")).filter((b) => !b.classList.contains("sk-card-dragging"));
+    const _ = Array.from(h.querySelectorAll(":scope > [data-card-id]")).filter((S) => !S.classList.contains("sk-card-dragging"));
     if (_.length === 0) return 0;
-    for (let b = 0; b < _.length; b++) {
-      const E = _[b].getBoundingClientRect();
-      if (u < E.top + E.height / 2) return b;
+    for (let S = 0; S < _.length; S++) {
+      const E = _[S].getBoundingClientRect();
+      if (u < E.top + E.height / 2) return S;
     }
     return _.length;
   }
@@ -573,8 +573,8 @@ function jt({ root: r, hooks: t }) {
     const h = o.querySelector(".sk-cards");
     if (!h) return;
     e.indicatorEl || (e.indicatorEl = document.createElement("li"), e.indicatorEl.className = "sk-drop-indicator", e.indicatorEl.setAttribute("aria-hidden", "true"));
-    const _ = e.indicatorEl, b = Array.from(h.querySelectorAll(":scope > [data-card-id]")).filter((E) => !E.classList.contains("sk-card-dragging"));
-    u >= b.length ? h.appendChild(_) : h.insertBefore(_, b[u]);
+    const _ = e.indicatorEl, S = Array.from(h.querySelectorAll(":scope > [data-card-id]")).filter((E) => !E.classList.contains("sk-card-dragging"));
+    u >= S.length ? h.appendChild(_) : h.insertBefore(_, S[u]);
   }
   function W() {
     e.indicatorEl?.parentNode && e.indicatorEl.parentNode.removeChild(e.indicatorEl);
@@ -608,12 +608,12 @@ function jt({ root: r, hooks: t }) {
     if (!h) return;
     const _ = h.querySelector(".sk-cards");
     if (!_) return;
-    const b = _.getBoundingClientRect();
-    if (u < b.top + V) {
-      const E = j(b.top + V - u);
+    const S = _.getBoundingClientRect();
+    if (u < S.top + V) {
+      const E = j(S.top + V - u);
       _.scrollTop -= E;
-    } else if (u > b.bottom - V) {
-      const E = j(u - (b.bottom - V));
+    } else if (u > S.bottom - V) {
+      const E = j(u - (S.bottom - V));
       _.scrollTop += E;
     }
   }
@@ -624,8 +624,8 @@ function jt({ root: r, hooks: t }) {
   function nt(o, u) {
     const h = r.querySelectorAll("[data-board-column-id-value]");
     for (const _ of h) {
-      const b = _.getBoundingClientRect();
-      if (o >= b.left && o <= b.right && u >= b.top && u <= b.bottom) return _;
+      const S = _.getBoundingClientRect();
+      if (o >= S.left && o <= S.right && u >= S.top && u <= S.bottom) return _;
     }
     return null;
   }
@@ -646,11 +646,11 @@ function jt({ root: r, hooks: t }) {
     } catch {
     }
   }
-  return r.addEventListener("dragstart", n), r.addEventListener("dragover", s), r.addEventListener("drop", i), r.addEventListener("dragend", l), r.addEventListener("pointerdown", d), window.addEventListener("pointermove", m), window.addEventListener("pointerup", g), window.addEventListener("pointercancel", S), document.addEventListener("keydown", f), {
-    beginDrag: A,
+  return r.addEventListener("dragstart", n), r.addEventListener("dragover", s), r.addEventListener("drop", i), r.addEventListener("dragend", l), r.addEventListener("pointerdown", d), window.addEventListener("pointermove", m), window.addEventListener("pointerup", g), window.addEventListener("pointercancel", b), document.addEventListener("keydown", f), {
+    beginDrag: I,
     endDrag: w,
     destroy() {
-      r.removeEventListener("dragstart", n), r.removeEventListener("dragover", s), r.removeEventListener("drop", i), r.removeEventListener("dragend", l), r.removeEventListener("pointerdown", d), window.removeEventListener("pointermove", m), window.removeEventListener("pointerup", g), window.removeEventListener("pointercancel", S), document.removeEventListener("keydown", f), I();
+      r.removeEventListener("dragstart", n), r.removeEventListener("dragover", s), r.removeEventListener("drop", i), r.removeEventListener("dragend", l), r.removeEventListener("pointerdown", d), window.removeEventListener("pointermove", m), window.removeEventListener("pointerup", g), window.removeEventListener("pointercancel", b), document.removeEventListener("keydown", f), A();
     },
     isDragging() {
       return e.dragging;
@@ -674,8 +674,8 @@ function Ht({
   const c = t + e, d = document.createElement("li"), m = document.createElement("li");
   d.className = "sk-virtual-spacer", m.className = "sk-virtual-spacer", d.setAttribute("aria-hidden", "true"), m.setAttribute("aria-hidden", "true");
   let g = /* @__PURE__ */ new Map();
-  function S() {
-    const f = r.length, A = s.clientHeight, w = s.scrollTop, C = Math.max(0, Math.floor(w / c) - n), I = Math.ceil(A / c) + n * 2, O = Math.min(f - 1, C + I);
+  function b() {
+    const f = r.length, I = s.clientHeight, w = s.scrollTop, C = Math.max(0, Math.floor(w / c) - n), A = Math.ceil(I / c) + n * 2, O = Math.min(f - 1, C + A);
     l.replaceChildren(), d.style.height = `${C * c}px`, m.style.height = `${Math.max(0, (f - O - 1) * c)}px`, l.appendChild(d);
     const P = /* @__PURE__ */ new Map();
     for (let N = C; N <= O; N++) {
@@ -687,12 +687,12 @@ function Ht({
     g = P, l.appendChild(m);
   }
   function k() {
-    S();
+    b();
   }
-  return s.addEventListener("scroll", k, { passive: !0 }), S(), {
-    render: S,
+  return s.addEventListener("scroll", k, { passive: !0 }), b(), {
+    render: b,
     update(f) {
-      r = f, g.clear(), S();
+      r = f, g.clear(), b();
     },
     destroy() {
       s.removeEventListener("scroll", k), g.clear(), l.replaceChildren();
@@ -1105,8 +1105,8 @@ class Q extends $ {
       k && (m.__color = k);
       const f = n.getAttribute("data-card-renderer");
       f && (m.__renderer = f);
-      const A = n.getAttribute("data-card-editor");
-      A && (m.__editor = A), t.push(m);
+      const I = n.getAttribute("data-card-editor");
+      I && (m.__editor = I), t.push(m);
     }
     return t;
   }
@@ -1505,24 +1505,27 @@ class Q extends $ {
         const g = p("li", {
           class: "sk-swimlane",
           "data-swimlane-value": d || ""
-        }), S = p("div", {
+        }), b = this.state.collapsedSwimlanes.has(d), k = p("div", {
           class: "sk-swimlane-header",
           "data-controller": "swimlane-header",
-          "data-swimlane-header-value-value": d || ""
+          "data-swimlane-header-value-value": d || "",
+          // The whole header is the click target — chevron, label, and count.
+          // Keyboard parity (Enter / Space) is wired in the controller's
+          // keydown handler so the header is a real WAI-ARIA button.
+          "data-action": "click->swimlane-header#toggle keydown->swimlane-header#keydown",
+          role: "button",
+          tabindex: "0",
+          "aria-expanded": b ? "false" : "true"
         }, [
-          p(
-            "button",
-            { type: "button", class: "sk-swimlane-toggle", "data-action": "swimlane-header#toggle" },
-            this.state.collapsedSwimlanes.has(d) ? "▶" : "▼"
-          ),
+          p("span", { class: "sk-swimlane-toggle", "aria-hidden": "true", text: b ? "▶" : "▼" }),
           p("span", { class: "sk-swimlane-label", text: d || "Unassigned" }),
           p("span", { class: "sk-swimlane-count", text: `${m.length}` })
-        ]), k = p("div", { class: "sk-swimlane-cols", style: `gap:${this.gapValue}px` });
-        for (const f of l) {
-          const A = R(m, f.id, this._modelOpts());
-          k.appendChild(this._renderColumn(f, A, s));
+        ]), f = p("div", { class: "sk-swimlane-cols", style: `gap:${this.gapValue}px` });
+        for (const I of l) {
+          const w = R(m, I.id, this._modelOpts());
+          f.appendChild(this._renderColumn(I, w, s));
         }
-        g.append(S, k), this.state.collapsedSwimlanes.has(d) && g.classList.add("sk-swimlane-collapsed"), i.appendChild(g);
+        g.append(k, f), this.state.collapsedSwimlanes.has(d) && g.classList.add("sk-swimlane-collapsed"), i.appendChild(g);
       }
     else
       for (const d of l) {
@@ -1584,21 +1587,21 @@ class Q extends $ {
       g.appendChild(f);
     }
     d.append(m, g);
-    const S = Number(this.cardHeightValue);
+    const b = Number(this.cardHeightValue);
     if (Yt({
       cardCount: s.length,
       threshold: this.virtualThresholdValue,
-      cardHeight: S,
+      cardHeight: b,
       virtual: this.virtualValue
     })) {
       this.state.virtualColumns.get(t.id)?.destroy?.(), g.replaceChildren();
       const f = Ht({
         cards: s,
-        cardHeight: S,
+        cardHeight: b,
         gap: this.gapValue,
         scrollEl: g,
         cardsListEl: g,
-        renderCard: (A) => this._renderCard(A, t)
+        renderCard: (I) => this._renderCard(I, t)
       });
       this.state.virtualColumns.set(t.id, f);
     } else
@@ -1963,6 +1966,9 @@ class tt extends $ {
     if (!e) return;
     const n = this.valueValue || "", s = e.state.collapsedSwimlanes;
     s.has(n) ? s.delete(n) : s.add(n), e._scheduleRender?.();
+  }
+  keydown(t) {
+    (t.key === "Enter" || t.key === " " || t.key === "Spacebar") && (t.preventDefault(), this.toggle(t));
   }
 }
 x(tt, "values", {

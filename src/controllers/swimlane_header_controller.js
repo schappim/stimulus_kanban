@@ -3,10 +3,10 @@ import { findParentController } from '../lib/dom.js';
 
 /* swimlane-header controller — toggle a swimlane's collapse state.
  *
- * The board controller renders a header row per swimlane bucket with a
- * collapse caret. This controller is the action target — `data-action`
- * wired in the rendered markup calls swimlane-header#toggle, which flips
- * the board's `collapsedSwimlanes` set and triggers a re-render. */
+ * The header element itself is the click target (role="button",
+ * tabindex="0", aria-expanded). `toggle` runs on click; `keydown`
+ * forwards Enter / Space so keyboard users get the same affordance as
+ * mouse users. */
 export default class SwimlaneHeaderController extends Controller {
   static values = {
     value: { type: String, default: '' },
@@ -19,5 +19,12 @@ export default class SwimlaneHeaderController extends Controller {
     const set = board.state.collapsedSwimlanes;
     if (set.has(v)) set.delete(v); else set.add(v);
     board._scheduleRender?.();
+  }
+
+  keydown(ev) {
+    if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
+      ev.preventDefault();
+      this.toggle(ev);
+    }
   }
 }

@@ -774,13 +774,20 @@ export default class BoardController extends Controller {
           class: 'sk-swimlane',
           'data-swimlane-value': value || '',
         });
+        const isCollapsed = this.state.collapsedSwimlanes.has(value);
         const header = el('div', {
           class: 'sk-swimlane-header',
           'data-controller': 'swimlane-header',
           'data-swimlane-header-value-value': value || '',
+          // The whole header is the click target — chevron, label, and count.
+          // Keyboard parity (Enter / Space) is wired in the controller's
+          // keydown handler so the header is a real WAI-ARIA button.
+          'data-action': 'click->swimlane-header#toggle keydown->swimlane-header#keydown',
+          role: 'button',
+          tabindex: '0',
+          'aria-expanded': isCollapsed ? 'false' : 'true',
         }, [
-          el('button', { type: 'button', class: 'sk-swimlane-toggle', 'data-action': 'swimlane-header#toggle' },
-            this.state.collapsedSwimlanes.has(value) ? '▶' : '▼'),
+          el('span', { class: 'sk-swimlane-toggle', 'aria-hidden': 'true', text: isCollapsed ? '▶' : '▼' }),
           el('span', { class: 'sk-swimlane-label', text: value || 'Unassigned' }),
           el('span', { class: 'sk-swimlane-count', text: `${bucket.length}` }),
         ]);

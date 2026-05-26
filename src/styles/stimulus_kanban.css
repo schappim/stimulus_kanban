@@ -77,6 +77,13 @@
   border-radius: var(--sk-radius-sm);
   cursor: pointer;
   user-select: none;
+  outline: none;
+  transition: background 0.12s ease;
+}
+.sk-board .sk-swimlane-header:hover { background: var(--sk-card-bg-hover); }
+.sk-board .sk-swimlane-header:focus-visible {
+  outline: 2px solid var(--sk-accent);
+  outline-offset: 2px;
 }
 .sk-board .sk-swimlane-label {
   flex: 1;
@@ -87,14 +94,11 @@
   font-variant-numeric: tabular-nums;
 }
 .sk-board .sk-swimlane-toggle {
-  background: transparent;
-  border: 0;
-  cursor: pointer;
   color: var(--sk-fg-muted);
   font-size: 12px;
-  padding: 0;
   width: 16px;
   text-align: center;
+  display: inline-block;
 }
 .sk-board .sk-swimlane-cols {
   display: flex;
