@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>45 — Customer-view swimlanes | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    body { max-width: 1400px; }
+    .cv-card { padding: 8px 10px; }
+    .cv-card h4 { margin: 0 0 2px 0; font-size: 13px; }
+    .cv-card .meta { color: #6b7280; font-size: 12px; }
+    .cv-card .row { display: flex; gap: 6px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+    .cv-card .pill {
+      display: inline-block; font: 600 10px system-ui; padding: 2px 8px;
+      border-radius: 4px; color: #fff; letter-spacing: 0.04em;
+      text-transform: uppercase; line-height: 1.5;
+    }
+    .cv-card .pill.callout  { background: #dc2626; }
+    .cv-card .pill.install  { background: #2563eb; }
+    .cv-card .pill.quote    { background: #a855f7; }
+    .cv-card .pill.warranty { background: #f59e0b; }
+    .cv-card .val {
+      font: 600 11px ui-monospace, Menlo, monospace; color: #047857;
+    }
+    /* Toolbar */
+    .toolbar select { font: inherit; padding: 4px 10px; border-radius: 4px; border: 1px solid #d1d5db; background: #fff; }
+    .toolbar .key { color: #6b7280; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>45 — Customer-view swimlanes ("everything for the Patel residence")</h1>
+  <p class="lede">Same job list, but bucketed by <em>customer</em> instead of stage. One lane per customer shows their entire pipeline horizontally — quote → booked → on site → completed — so you can see at a glance who's a one-off and who's a repeat customer. Toggle the <strong>Group by</strong> dropdown to swap between customer / suburb / assignee.</p>
+
+  <div class="toolbar">
+    <span class="key">Group by:</span>
+    <select id="swim">
+      <option value="customer" selected>customer</option>
+      <option value="suburb">suburb</option>
+      <option value="assignee">assignee</option>
+      <option value="">none (flat)</option>
+    </select>
+  </div>
+
+  <template id="cv-card">
+    <article class="sk-card cv-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta"><span data-bind="suburb"></span></div>
+      <div class="row">
+        <span data-bind="type_label" data-bind-attr="class:type_pill_class"></span>
+        <span class="val" data-bind="value_label"></span>
+      </div>
+    </article>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="cv-card"
+       data-board-swimlane-field-value="customer">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="quoting"   data-board-column-title-value="Quoting"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="booked"    data-board-column-title-value="Booked"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="on_site"   data-board-column-title-value="On site"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="completed" data-board-column-title-value="Completed"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="invoiced"  data-board-column-title-value="Invoiced"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    const fmt = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+    const tpc = { callout: 'CALLOUT', install: 'INSTALL', quote: 'QUOTE', warranty: 'WARRANTY' };
+    function enrich(c) {
+      return { ...c,
+        type_label: tpc[c.type] || c.type.toUpperCase(),
+        type_pill_class: `pill ${c.type}`,
+        value_label: c.value ? fmt.format(c.value) : '',
+      };
+    }
+    const jobs = [
+      // Patel residence — 3 historical + 1 current
+      enrich({ id: 1, column_id: 'invoiced',  customer: 'Patel residence',  suburb: 'Surry Hills', type: 'install', title: 'New dishwasher + waste',       value: 450,  assignee: 'Dave' }),
+      enrich({ id: 2, column_id: 'completed', customer: 'Patel residence',  suburb: 'Surry Hills', type: 'callout', title: 'Mixer tap drips slow',          value: 180,  assignee: 'Sam' }),
+      enrich({ id: 3, column_id: 'on_site',   customer: 'Patel residence',  suburb: 'Surry Hills', type: 'callout', title: 'Leaking kitchen tap',           value: 220,  assignee: 'Dave' }),
+      enrich({ id: 4, column_id: 'quoting',   customer: 'Patel residence',  suburb: 'Surry Hills', type: 'quote',   title: 'Quote — laundry rough-in',      value: 1800, assignee: 'Dave' }),
+
+      // Williams — bigger renovation
+      enrich({ id: 5, column_id: 'on_site',   customer: 'Williams residence', suburb: 'Mosman', type: 'install', title: 'Bathroom rough-in (3-bed)',        value: 5400, assignee: 'Dave' }),
+      enrich({ id: 6, column_id: 'booked',    customer: 'Williams residence', suburb: 'Mosman', type: 'install', title: 'Bathroom fit-off + commissioning', value: 3200, assignee: 'Dave' }),
+
+      // Cottesloe Strata — recurring maintenance
+      enrich({ id: 7, column_id: 'completed', customer: 'Cottesloe Strata', suburb: 'Vaucluse', type: 'warranty', title: 'Annual gas safety (12 units)',    value: 1450, assignee: 'Mia' }),
+      enrich({ id: 8, column_id: 'invoiced',  customer: 'Cottesloe Strata', suburb: 'Vaucluse', type: 'warranty', title: 'Annual gas safety 2025',          value: 1380, assignee: 'Mia' }),
+      enrich({ id: 9, column_id: 'booked',    customer: 'Cottesloe Strata', suburb: 'Vaucluse', type: 'callout',  title: 'Unit 4 — slow drain in en-suite', value: 240,  assignee: 'Mia' }),
+
+      // Bondi Pavilion — one big project + ongoing
+      enrich({ id: 10, column_id: 'on_site',  customer: 'Bondi Pavilion',  suburb: 'Bondi',    type: 'install', title: 'Sewer line excavate + cap',         value: 8200, assignee: 'Dave' }),
+      enrich({ id: 11, column_id: 'completed',customer: 'Bondi Pavilion',  suburb: 'Bondi',    type: 'warranty',title: 'Weekly dosing check',                value: 90,   assignee: 'Sam' }),
+
+      // Newtown IGA — one-off
+      enrich({ id: 12, column_id: 'invoiced', customer: 'Newtown IGA',     suburb: 'Newtown',  type: 'callout', title: 'Weekend emergency — burst pipe',    value: 880,  assignee: 'Dave' }),
+    ];
+
+    board.addEventListener('board:ready', (ev) => ev.detail.api.setCardData(jobs));
+
+    document.getElementById('swim').addEventListener('change', (ev) => {
+      board.boardApi.setSwimlaneField(ev.target.value || '');
+    });
+  </script>
+</body>
+</html>
