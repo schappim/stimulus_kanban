@@ -1866,7 +1866,7 @@ class kt extends $ {
       const n = this._board();
       if (!n) return;
       const s = this._cardId(), i = this._card(), l = i?.[n.getColumnIdValue] ?? null;
-      if (y(this.element, "board:cardClicked", { cardId: s, card: i, columnId: l, originalEvent: e }), n.suppressCardClickSelectionValue || n.cardSelectionValue === "") return;
+      if (y(this.element, "board:cardClicked", { cardId: s, card: i, columnId: l, originalEvent: e }), n._setActive?.(s), n.suppressCardClickSelectionValue || n.cardSelectionValue === "") return;
       const c = e.metaKey || e.ctrlKey, d = e.shiftKey;
       n.cardSelectionValue === "multiple" && (c || d || n.cardMultiSelectWithClickValue) ? n.toggleSelection(s) : (n.clearSelection?.(), n.selectCard(s));
     });
@@ -1874,7 +1874,7 @@ class kt extends $ {
       const n = this._board();
       if (!n) return;
       const s = this._cardId(), i = this._card(), l = i?.[n.getColumnIdValue] ?? null;
-      y(this.element, "board:cardDblClicked", { cardId: s, card: i, columnId: l }), n.startEditingCard?.(s);
+      y(this.element, "board:cardDblClicked", { cardId: s, card: i, columnId: l }), n.cardDetailTemplateValue ? n.openCardDetail?.(s) : n.startEditingCard?.(s);
     });
   }
   connect() {

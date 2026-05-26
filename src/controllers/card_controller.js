@@ -38,6 +38,11 @@ export default class CardController extends Controller {
     const colId = card?.[board.getColumnIdValue] ?? null;
     emit(this.element, 'board:cardClicked', { cardId: id, card, columnId: colId, originalEvent: ev });
 
+    // Always activate the clicked card. The keyboard handler (Enter to open
+    // detail / editor, arrows to move) needs an active card; without this,
+    // a fresh click→Enter sequence does nothing because activeCardId is null.
+    board._setActive?.(id);
+
     if (board.suppressCardClickSelectionValue) return;
     if (board.cardSelectionValue === '') return;
     const meta = ev.metaKey || ev.ctrlKey;
@@ -56,8 +61,15 @@ export default class CardController extends Controller {
     const card = this._card();
     const colId = card?.[board.getColumnIdValue] ?? null;
     emit(this.element, 'board:cardDblClicked', { cardId: id, card, columnId: colId });
-    // dblclick → start inline edit, mirroring the grid's dblclick-to-edit UX.
-    board.startEditingCard?.(id);
+    // Prefer the detail panel when a template is wired up — mirrors the
+    // keyboard Enter handler so dblclick + Enter behave the same way.
+    // Without this, demos with only a detail template (no editor) never
+    // surface their panel from a plain dblclick.
+    if (board.cardDetailTemplateValue) {
+      board.openCardDetail?.(id);
+    } else {
+      board.startEditingCard?.(id);
+    }
   };
 
   /* Imperative helpers — exposed for host glue */
