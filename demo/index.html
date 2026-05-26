@@ -14,6 +14,20 @@
     code { background: #f3f4f6; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
     section { margin-top: 32px; }
     h2 { font-size: 16px; color: #374151; }
+    .demo-desc { color: #6b7280; font-size: 13px; }
+    .tradie-badge {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      vertical-align: 1px;
+    }
   </style>
 </head>
 <body>
@@ -62,6 +76,29 @@
       <li><a href="25-drag-to-attach-files.html">25 — Drag-to-attach files</a></li>
       <li><a href="26-email-thread.html">26 — Email triage board</a></li>
       <li><a href="27-order-fulfilment.html">27 — Order fulfilment board</a></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Tradie scenarios <span class="tradie-badge">new</span></h2>
+    <p class="lede">Real-world boards for the people who actually run a trade business — plumbers, sparkies, chippies, painters, builders.</p>
+    <ol start="28">
+      <li><a href="28-plumbing-job-pipeline.html">28 — Plumbing job pipeline</a>
+        <span class="demo-desc">— quote → booked → on site → invoiced → paid, with WIP and <code>accept_from</code></span></li>
+      <li><a href="29-weekly-roster.html">29 — Weekly roster (swimlanes by tradie)</a>
+        <span class="demo-desc">— Mon–Fri columns, one lane per worker; drag to reschedule</span></li>
+      <li><a href="30-building-handover-veto.html">30 — Multi-trade site handover</a>
+        <span class="demo-desc">— <code>board:beforeMove</code> vetos drops that skip a trade sign-off</span></li>
+      <li><a href="31-snag-list-photos.html">31 — Snag list (drag photos onto a card)</a>
+        <span class="demo-desc">— builder's punch list with drag-to-attach defect photos</span></li>
+      <li><a href="32-sparky-quote-pipeline.html">32 — Sparky quote pipeline (live AUD totals)</a>
+        <span class="demo-desc">— electrical contractor's quote book, with <code>+ New enquiry</code> add-card</span></li>
+      <li><a href="33-fleet-maintenance.html">33 — Fleet &amp; vehicle maintenance</a>
+        <span class="demo-desc">— every ute and van by service stage, WIP-capped 'at workshop'</span></li>
+      <li><a href="34-tool-tracking.html">34 — Tool &amp; equipment tracking</a>
+        <span class="demo-desc">— high-value tools by location; retired tools are locked</span></li>
+      <li><a href="35-apprentice-training.html">35 — Apprentice training tracker</a>
+        <span class="demo-desc">— competency units swimlaned by apprentice (Tom / Pia / Jess)</span></li>
     </ol>
   </section>
 </body>
