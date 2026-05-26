@@ -6,8 +6,13 @@
   <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
   <link rel="stylesheet" href="_shared.css" />
   <style>
+    /* Give the dispatcher more horizontal room than the default 1100px;
+     * even so, the 10 day-columns × 3 tradie rows will overflow on most
+     * laptop screens — that's the whole point of the demo. */
+    body { max-width: 1400px; }
+
     /* Sidebar + grid layout */
-    .disp { display: grid; grid-template-columns: 240px 1fr; gap: 12px; height: 600px; margin-top: 16px; }
+    .disp { display: grid; grid-template-columns: 240px 1fr; gap: 12px; height: 620px; margin-top: 16px; }
     .disp .pool {
       border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;
       display: flex; flex-direction: column; min-height: 0;
@@ -27,7 +32,7 @@
     }
     /* Each "grid" is itself a board, with a row per tradie and columns per day. */
     .disp .grid .sk-columns { padding: 8px; gap: 6px; }
-    .disp .grid .sk-column { background: #f9fafb; min-width: 130px; }
+    .disp .grid .sk-column { background: #f9fafb; min-width: 180px; }
     .disp .grid .sk-column-header {
       font-size: 11px; padding: 6px 8px; text-transform: uppercase;
       letter-spacing: 0.04em; color: #374151; background: #fff;
@@ -101,11 +106,16 @@
            data-board-card-renderer-value="disp-card"
            data-board-card-selection-value="none">
         <ol class="sk-columns">
-          <li data-controller="board-column" data-board-column-id-value="dave-mon" data-board-column-title-value="Mon"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="dave-tue" data-board-column-title-value="Tue"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="dave-wed" data-board-column-title-value="Wed"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="dave-thu" data-board-column-title-value="Thu"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="dave-fri" data-board-column-title-value="Fri"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-mon1" data-board-column-title-value="Mon 1 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-tue1" data-board-column-title-value="Tue 2 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-wed1" data-board-column-title-value="Wed 3 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-thu1" data-board-column-title-value="Thu 4 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-fri1" data-board-column-title-value="Fri 5 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-mon2" data-board-column-title-value="Mon 8 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-tue2" data-board-column-title-value="Tue 9 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-wed2" data-board-column-title-value="Wed 10 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-thu2" data-board-column-title-value="Thu 11 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="dave-fri2" data-board-column-title-value="Fri 12 Jun"><ol class="sk-cards"></ol></li>
         </ol>
       </div>
 
@@ -117,11 +127,16 @@
            data-board-card-renderer-value="disp-card"
            data-board-card-selection-value="none">
         <ol class="sk-columns">
-          <li data-controller="board-column" data-board-column-id-value="sam-mon" data-board-column-title-value="Mon"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="sam-tue" data-board-column-title-value="Tue"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="sam-wed" data-board-column-title-value="Wed"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="sam-thu" data-board-column-title-value="Thu"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="sam-fri" data-board-column-title-value="Fri"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-mon1" data-board-column-title-value="Mon 1 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-tue1" data-board-column-title-value="Tue 2 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-wed1" data-board-column-title-value="Wed 3 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-thu1" data-board-column-title-value="Thu 4 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-fri1" data-board-column-title-value="Fri 5 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-mon2" data-board-column-title-value="Mon 8 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-tue2" data-board-column-title-value="Tue 9 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-wed2" data-board-column-title-value="Wed 10 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-thu2" data-board-column-title-value="Thu 11 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sam-fri2" data-board-column-title-value="Fri 12 Jun"><ol class="sk-cards"></ol></li>
         </ol>
       </div>
 
@@ -133,11 +148,16 @@
            data-board-card-renderer-value="disp-card"
            data-board-card-selection-value="none">
         <ol class="sk-columns">
-          <li data-controller="board-column" data-board-column-id-value="mia-mon" data-board-column-title-value="Mon"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="mia-tue" data-board-column-title-value="Tue"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="mia-wed" data-board-column-title-value="Wed"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="mia-thu" data-board-column-title-value="Thu"><ol class="sk-cards"></ol></li>
-          <li data-controller="board-column" data-board-column-id-value="mia-fri" data-board-column-title-value="Fri"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-mon1" data-board-column-title-value="Mon 1 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-tue1" data-board-column-title-value="Tue 2 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-wed1" data-board-column-title-value="Wed 3 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-thu1" data-board-column-title-value="Thu 4 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-fri1" data-board-column-title-value="Fri 5 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-mon2" data-board-column-title-value="Mon 8 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-tue2" data-board-column-title-value="Tue 9 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-wed2" data-board-column-title-value="Wed 10 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-thu2" data-board-column-title-value="Thu 11 Jun"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="mia-fri2" data-board-column-title-value="Fri 12 Jun"><ol class="sk-cards"></ol></li>
         </ol>
       </div>
     </div>
@@ -166,10 +186,15 @@
       enrich({ id: 4,  column_id: 'unscheduled', job_no: 'JOB-1004', type: 'callout', title: 'Toilet running constantly',     suburb: 'Manly' }),
       enrich({ id: 5,  column_id: 'unscheduled', job_no: 'JOB-1005', type: 'install', title: 'Gas cooktop install (Smeg)',    suburb: 'Paddington' }),
 
-      enrich({ id: 10, column_id: 'dave-mon',    job_no: 'JOB-0998', type: 'install', title: 'Methven tapware (kitchen)',    suburb: 'Paddington' }),
-      enrich({ id: 11, column_id: 'dave-wed',    job_no: 'JOB-0997', type: 'callout', title: 'No hot water at unit 4',       suburb: 'Parramatta' }),
-      enrich({ id: 12, column_id: 'sam-tue',     job_no: 'JOB-0996', type: 'callout', title: 'Mixer tap drips slow',         suburb: 'Newtown' }),
-      enrich({ id: 13, column_id: 'mia-fri',     job_no: 'JOB-0995', type: 'install', title: 'Café espresso plumbing',       suburb: 'CBD' }),
+      enrich({ id: 10, column_id: 'dave-mon1',   job_no: 'JOB-0998', type: 'install', title: 'Methven tapware (kitchen)',    suburb: 'Paddington' }),
+      enrich({ id: 11, column_id: 'dave-wed1',   job_no: 'JOB-0997', type: 'callout', title: 'No hot water at unit 4',       suburb: 'Parramatta' }),
+      enrich({ id: 12, column_id: 'sam-tue1',    job_no: 'JOB-0996', type: 'callout', title: 'Mixer tap drips slow',         suburb: 'Newtown' }),
+      enrich({ id: 13, column_id: 'mia-fri1',    job_no: 'JOB-0995', type: 'install', title: 'Café espresso plumbing',       suburb: 'CBD' }),
+      // Week-2 bookings — useful to see scroll sync land on real cards
+      enrich({ id: 14, column_id: 'dave-tue2',   job_no: 'JOB-0993', type: 'install', title: 'Sewer line excavate + cap',    suburb: 'Bondi' }),
+      enrich({ id: 15, column_id: 'mia-wed2',    job_no: 'JOB-0992', type: 'install', title: 'Switchboard upgrade ×4',       suburb: 'Surry Hills' }),
+      enrich({ id: 16, column_id: 'sam-thu2',    job_no: 'JOB-0991', type: 'callout', title: 'Drain blocked (kitchen sink)', suburb: 'Coogee' }),
+      enrich({ id: 17, column_id: 'dave-fri2',   job_no: 'JOB-0990', type: 'install', title: 'Gas cooktop install (Smeg 90)', suburb: 'Paddington' }),
     ];
 
     const pool  = document.getElementById('pool');
