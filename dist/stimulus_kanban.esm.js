@@ -1,10 +1,10 @@
 var At = Object.defineProperty;
 var Et = (r, t, e) => t in r ? At(r, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : r[t] = e;
 var x = (r, t, e) => Et(r, typeof t != "symbol" ? t + "" : t, e);
-import { Controller as R, Application as Dt } from "@hotwired/stimulus";
-const $ = "id", N = "column_id", W = "order";
+import { Controller as $, Application as Dt } from "@hotwired/stimulus";
+const B = "id", T = "column_id", q = "order";
 function H(r, t = {}) {
-  const e = t.getCardId || $, n = t.getColumnId || N, s = t.orderField || W, i = Array.isArray(r) ? r.filter((d) => d != null) : [], l = /* @__PURE__ */ new Map();
+  const e = t.getCardId || B, n = t.getColumnId || T, s = t.orderField || q, i = Array.isArray(r) ? r.filter((d) => d != null) : [], l = /* @__PURE__ */ new Map();
   for (const d of i) {
     const m = String(d[n] ?? "");
     l.has(m) || l.set(m, []), l.get(m).push(d);
@@ -34,8 +34,8 @@ function st(r) {
     min_count: t.min_count == null ? null : Number(t.min_count)
   })) : [];
 }
-function B(r, t, e = {}) {
-  const n = e.getColumnId || N;
+function R(r, t, e = {}) {
+  const n = e.getColumnId || T;
   return r.filter((s) => String(s[n]) === String(t));
 }
 const xt = (r, t) => String(r ?? "").localeCompare(String(t ?? ""), void 0, { numeric: !0, sensitivity: "base" });
@@ -43,7 +43,7 @@ function Ft(r, t, e) {
   const n = r?.[e], s = t?.[e];
   return n == null && s == null ? 0 : n == null ? -1 : s == null ? 1 : typeof n == "number" && typeof s == "number" ? n - s : xt(n, s);
 }
-function K(r, t, e = W) {
+function K(r, t, e = q) {
   if (!t || t === "manual")
     return r.slice().sort((l, c) => {
       const d = l[e], m = c[e];
@@ -55,19 +55,25 @@ function K(r, t, e = W) {
   return r.slice().sort((l, c) => i * Ft(l, c, s));
 }
 function Vt(r, t) {
-  if (!t) return r;
-  const e = String(t).toLowerCase();
-  return r.filter((n) => Lt(n, e));
+  return t ? r.filter((e) => Tt(e, t)) : r;
 }
-function Lt(r, t) {
+const Lt = /* @__PURE__ */ new Set([
+  B,
+  T,
+  q,
+  "id",
+  "column_id",
+  "order"
+]);
+function Tt(r, t) {
   if (!t) return !0;
   const e = String(t).toLowerCase();
-  for (const n of Object.values(r))
-    if (n != null && (typeof n == "string" || typeof n == "number") && String(n).toLowerCase().includes(e))
+  for (const [n, s] of Object.entries(r))
+    if (s != null && !n.startsWith("__") && !Lt.has(n) && (typeof s == "string" || typeof s == "number") && String(s).toLowerCase().includes(e))
       return !0;
   return !1;
 }
-function Tt(r, t) {
+function Nt(r, t) {
   return typeof t != "function" ? r : r.filter((e) => {
     try {
       return !!t(e);
@@ -76,7 +82,7 @@ function Tt(r, t) {
     }
   });
 }
-function Nt(r, t) {
+function Ot(r, t) {
   const e = /* @__PURE__ */ new Map();
   if (!t)
     return e.set("", r.slice()), e;
@@ -86,8 +92,8 @@ function Nt(r, t) {
   }
   return e;
 }
-function Ot(r, t, e = {}) {
-  const n = e.getColumnId || N, s = /* @__PURE__ */ new Map();
+function Mt(r, t, e = {}) {
+  const n = e.getColumnId || T, s = /* @__PURE__ */ new Map();
   for (const i of t) {
     const l = String(i[n] ?? "");
     s.set(l, (s.get(l) || 0) + 1);
@@ -103,48 +109,48 @@ function Ot(r, t, e = {}) {
   });
 }
 function z(r, t, e, n = {}) {
-  const s = n.getCardId || $, i = n.getColumnId || N, l = n.orderField || W, c = String(t), d = r.map((g) => ({ ...g })), m = d.find((g) => String(g[s]) === c);
+  const s = n.getCardId || B, i = n.getColumnId || T, l = n.orderField || q, c = String(t), d = r.map((C) => ({ ...C })), m = d.find((C) => String(C[s]) === c);
   if (!m) return r;
-  const y = String(m[i]), S = String(e.toColumnId ?? y), k = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex);
+  const g = String(m[i]), S = String(e.toColumnId ?? g), k = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex);
   m[i] = S;
-  const f = d.filter((g) => String(g[i]) === y && String(g[s]) !== c).sort((g, I) => Number(g[l] ?? 0) - Number(I[l] ?? 0)), A = d.filter((g) => String(g[i]) === S && String(g[s]) !== c).sort((g, I) => Number(g[l] ?? 0) - Number(I[l] ?? 0)), w = Math.max(0, Math.min(k, A.length));
-  return A.splice(w, 0, m), f.forEach((g, I) => {
-    g[l] = I;
-  }), A.forEach((g, I) => {
-    g[l] = I;
+  const f = d.filter((C) => String(C[i]) === g && String(C[s]) !== c).sort((C, I) => Number(C[l] ?? 0) - Number(I[l] ?? 0)), A = d.filter((C) => String(C[i]) === S && String(C[s]) !== c).sort((C, I) => Number(C[l] ?? 0) - Number(I[l] ?? 0)), w = Math.max(0, Math.min(k, A.length));
+  return A.splice(w, 0, m), f.forEach((C, I) => {
+    C[l] = I;
+  }), A.forEach((C, I) => {
+    C[l] = I;
   }), d;
 }
-function Mt(r, t, e, n = {}) {
-  const s = n.getCardId || $, i = n.getColumnId || N, l = n.orderField || W;
+function Bt(r, t, e, n = {}) {
+  const s = n.getCardId || B, i = n.getColumnId || T, l = n.orderField || q;
   if (!Array.isArray(t) || t.length === 0) return r;
-  const c = new Set(t.map(String)), d = String(e.toColumnId), m = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex), y = r.map((w) => ({ ...w })), S = y.filter((w) => c.has(String(w[s]))).sort((w, g) => {
-    const I = y.indexOf(w), O = y.indexOf(g);
+  const c = new Set(t.map(String)), d = String(e.toColumnId), m = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex), g = r.map((w) => ({ ...w })), S = g.filter((w) => c.has(String(w[s]))).sort((w, C) => {
+    const I = g.indexOf(w), O = g.indexOf(C);
     return I - O;
   });
   if (S.length === 0) return r;
   const k = /* @__PURE__ */ new Map();
-  for (const w of y) {
+  for (const w of g) {
     if (c.has(String(w[s]))) continue;
-    const g = String(w[i]);
-    k.has(g) || k.set(g, []), k.get(g).push(w);
+    const C = String(w[i]);
+    k.has(C) || k.set(C, []), k.get(C).push(w);
   }
   for (const w of k.values())
-    w.sort((g, I) => Number(g[l] ?? 0) - Number(I[l] ?? 0));
+    w.sort((C, I) => Number(C[l] ?? 0) - Number(I[l] ?? 0));
   for (const w of S) w[i] = d;
   const f = k.get(d) || [], A = Math.max(0, Math.min(m, f.length));
   f.splice(A, 0, ...S), k.set(d, f);
   for (const w of k.values())
-    w.forEach((g, I) => {
-      g[l] = I;
+    w.forEach((C, I) => {
+      C[l] = I;
     });
-  return y;
+  return g;
 }
-function Bt(r, t, e, n = {}) {
-  const s = n.getCardId || $, i = n.getColumnId || N, l = String(t), c = r.find((d) => String(d[s]) === l);
+function Rt(r, t, e, n = {}) {
+  const s = n.getCardId || B, i = n.getColumnId || T, l = String(t), c = r.find((d) => String(d[s]) === l);
   return c ? z(r, l, { toColumnId: c[i], toIndex: e }, n) : r;
 }
-function Rt(r, t, e = {}) {
-  const n = e.getCardId || $, s = e.getColumnId || N;
+function $t(r, t, e = {}) {
+  const n = e.getCardId || B, s = e.getColumnId || T;
   let i = r.slice();
   const l = t || {};
   if (Array.isArray(l.remove)) {
@@ -154,7 +160,12 @@ function Rt(r, t, e = {}) {
   if (Array.isArray(l.update)) {
     const c = /* @__PURE__ */ new Map();
     for (const d of l.update) c.set(String(d[n]), d);
-    i = i.map((d) => c.has(String(d[n])) ? { ...d, ...c.get(String(d[n])) } : d);
+    i = i.map((d) => {
+      const m = String(d[n]);
+      if (!c.has(m)) return d;
+      const g = { ...d, ...c.get(m) };
+      return g[n] = m, g;
+    });
   }
   if (Array.isArray(l.add)) {
     const c = new Set(i.map((d) => String(d[n])));
@@ -168,7 +179,7 @@ function Rt(r, t, e = {}) {
       i = z(i, c[n] ?? c.id, { toColumnId: c.toColumnId, toIndex: c.toIndex }, e);
   return i;
 }
-function $t(r) {
+function qt(r) {
   return {
     // ---- Data ----
     setCardData(t) {
@@ -354,7 +365,7 @@ function Y(r) {
   const e = t.content.firstElementChild;
   return e ? e.cloneNode(!0) : null;
 }
-function _(r, t, e = {}, { cancellable: n = !1 } = {}) {
+function y(r, t, e = {}, { cancellable: n = !1 } = {}) {
   const s = new CustomEvent(t, { detail: e, bubbles: !0, cancelable: n });
   return r.dispatchEvent(s), s;
 }
@@ -384,7 +395,7 @@ function it(r, t, { format: e } = {}) {
     n.textContent = typeof e == "function" ? e(i, s, t) : i == null ? "" : String(i);
   }
   for (const n of r.querySelectorAll("[data-bind-attr]")) {
-    const s = qt(n);
+    const s = Pt(n);
     for (const [i, l] of s) {
       const c = t[l];
       c == null || c === !1 ? n.removeAttribute(i) : n.setAttribute(i, String(c));
@@ -392,7 +403,7 @@ function it(r, t, { format: e } = {}) {
   }
   return r;
 }
-function qt(r) {
+function Pt(r) {
   return (r.getAttribute("data-bind-attr") || "").split(",").map((e) => e.trim()).filter(Boolean).map((e) => {
     const n = e.indexOf(":");
     return n === -1 ? [e, e] : [e.slice(0, n).trim(), e.slice(n + 1).trim()];
@@ -401,7 +412,7 @@ function qt(r) {
 function L(r, t) {
   return r ? r.matches?.(t) ? r : r.closest?.(t) || null : null;
 }
-function Pt(r) {
+function Wt(r) {
   let t = !1, e = null;
   const n = (...s) => {
     if (e = s, t) return;
@@ -415,8 +426,8 @@ function Pt(r) {
     t = !1, e = null;
   }, n;
 }
-const V = 48, Wt = 24;
-function Ut({ root: r, hooks: t }) {
+const V = 48, Ut = 24;
+function jt({ root: r, hooks: t }) {
   const e = {
     dragging: !1,
     cardIds: [],
@@ -439,18 +450,18 @@ function Ut({ root: r, hooks: t }) {
       o.preventDefault();
       return;
     }
-    const C = h.getAttribute("data-board-column-id-value");
-    if (t.isColumnDisallowDrag?.(C)) {
+    const _ = h.getAttribute("data-board-column-id-value");
+    if (t.isColumnDisallowDrag?.(_)) {
       o.preventDefault();
       return;
     }
-    const b = u.getAttribute("data-card-id"), E = t.expandSelection?.(b, C) ?? [b];
-    e.dragging = !0, e.cardIds = E, e.fromColumnId = C, o.dataTransfer.effectAllowed = "move";
+    const b = u.getAttribute("data-card-id"), E = t.expandSelection?.(b, _) ?? [b];
+    e.dragging = !0, e.cardIds = E, e.fromColumnId = _, o.dataTransfer.effectAllowed = "move";
     try {
       o.dataTransfer.setData("text/plain", JSON.stringify({ ids: E }));
     } catch {
     }
-    E.length > 1 && It(o, E.length), t.onDragStart?.({ ids: E, fromColumnId: C }), u.classList.add("sk-card-dragging");
+    E.length > 1 && It(o, E.length), t.onDragStart?.({ ids: E, fromColumnId: _ }), u.classList.add("sk-card-dragging");
   }
   function s(o) {
     if (!e.dragging) return;
@@ -459,14 +470,14 @@ function Ut({ root: r, hooks: t }) {
     const h = u.getAttribute("data-board-column-id-value");
     if (!t.canAcceptDrop?.(e.fromColumnId, h)) return;
     o.preventDefault(), o.dataTransfer.dropEffect = "move", e.pointer.x = o.clientX, e.pointer.y = o.clientY;
-    const C = q(u, o.clientY);
-    O(u, h, C), M();
+    const _ = P(u, o.clientY);
+    O(u, h, _), M();
   }
   function i(o) {
-    e.dragging && (o.preventDefault(), g({ cancelled: !1 }));
+    e.dragging && (o.preventDefault(), C({ cancelled: !1 }));
   }
   function l(o) {
-    e.dragging && e.targetColumnId == null && g({ cancelled: !0 }), I();
+    e.dragging && e.targetColumnId == null && C({ cancelled: !0 }), I();
   }
   let c = null;
   function d(o) {
@@ -492,43 +503,43 @@ function Ut({ root: r, hooks: t }) {
     if (!u) return;
     const h = u.getAttribute("data-board-column-id-value");
     if (!t.canAcceptDrop?.(e.fromColumnId, h)) return;
-    const C = q(u, o.clientY);
-    O(u, h, C), rt(o.clientX, o.clientY), M();
+    const _ = P(u, o.clientY);
+    O(u, h, _), rt(o.clientX, o.clientY), M();
   }
-  function y(o) {
+  function g(o) {
     if (!e.pointerActive) {
       c = null;
       return;
     }
-    c = null, g({ cancelled: e.targetColumnId == null }), I();
+    c = null, C({ cancelled: e.targetColumnId == null }), I();
   }
   function S(o) {
-    c = null, e.pointerActive && (g({ cancelled: !0 }), I());
+    c = null, e.pointerActive && (C({ cancelled: !0 }), I());
   }
   function k(o, u) {
     const h = L(o.cardEl, "[data-board-column-id-value]");
     if (!h) return;
-    const C = h.getAttribute("data-board-column-id-value");
-    if (t.isColumnDisallowDrag?.(C)) return;
-    const b = t.expandSelection?.(o.id, C) ?? [o.id];
-    e.dragging = !0, e.pointerActive = !0, e.cardIds = b, e.fromColumnId = C, o.cardEl.classList.add("sk-card-dragging"), e.ghostEl = wt(o.cardEl, b.length), rt(u.clientX, u.clientY);
+    const _ = h.getAttribute("data-board-column-id-value");
+    if (t.isColumnDisallowDrag?.(_)) return;
+    const b = t.expandSelection?.(o.id, _) ?? [o.id];
+    e.dragging = !0, e.pointerActive = !0, e.cardIds = b, e.fromColumnId = _, o.cardEl.classList.add("sk-card-dragging"), e.ghostEl = wt(o.cardEl, b.length), rt(u.clientX, u.clientY);
     try {
       o.cardEl.setPointerCapture?.(o.pointerId);
     } catch {
     }
-    t.onDragStart?.({ ids: b, fromColumnId: C });
+    t.onDragStart?.({ ids: b, fromColumnId: _ });
   }
   function f(o) {
-    e.dragging && o.key === "Escape" && (e.targetColumnId = null, e.targetIndex = null, P());
+    e.dragging && o.key === "Escape" && (e.targetColumnId = null, e.targetIndex = null, W());
   }
   function A(o, u) {
     e.dragging = !0, e.cardIds = Array.isArray(o) ? o.slice() : [o], e.fromColumnId = u, t.onDragStart?.({ ids: e.cardIds, fromColumnId: u });
   }
   function w(o = {}) {
     const u = !!o.cancelled;
-    u || (e.targetColumnId = o.toColumnId ?? null, e.targetIndex = o.toIndex == null ? null : Number(o.toIndex)), g({ cancelled: u }), I();
+    u || (e.targetColumnId = o.toColumnId ?? null, e.targetIndex = o.toIndex == null ? null : Number(o.toIndex)), C({ cancelled: u }), I();
   }
-  function g({ cancelled: o }) {
+  function C({ cancelled: o }) {
     if (!e.dragging) return;
     const u = {
       cardIds: e.cardIds.slice(),
@@ -540,32 +551,32 @@ function Ut({ root: r, hooks: t }) {
     t.onDrop?.(u);
   }
   function I() {
-    e.dragging = !1, e.pointerActive = !1, e.cardIds = [], e.fromColumnId = null, e.targetColumnId = null, e.targetIndex = null, e.ghostEl && (e.ghostEl.remove(), e.ghostEl = null), P(), bt();
+    e.dragging = !1, e.pointerActive = !1, e.cardIds = [], e.fromColumnId = null, e.targetColumnId = null, e.targetIndex = null, e.ghostEl && (e.ghostEl.remove(), e.ghostEl = null), W(), bt();
     for (const o of r.querySelectorAll(".sk-card-dragging"))
       o.classList.remove("sk-card-dragging");
   }
   function O(o, u, h) {
-    e.targetColumnId = u, e.targetIndex = h, T(o, h);
+    e.targetColumnId = u, e.targetIndex = h, N(o, h);
   }
-  function q(o, u) {
+  function P(o, u) {
     const h = o.querySelector(".sk-cards");
     if (!h) return 0;
-    const C = Array.from(h.querySelectorAll(":scope > [data-card-id]")).filter((b) => !b.classList.contains("sk-card-dragging"));
-    if (C.length === 0) return 0;
-    for (let b = 0; b < C.length; b++) {
-      const E = C[b].getBoundingClientRect();
+    const _ = Array.from(h.querySelectorAll(":scope > [data-card-id]")).filter((b) => !b.classList.contains("sk-card-dragging"));
+    if (_.length === 0) return 0;
+    for (let b = 0; b < _.length; b++) {
+      const E = _[b].getBoundingClientRect();
       if (u < E.top + E.height / 2) return b;
     }
-    return C.length;
+    return _.length;
   }
-  function T(o, u) {
+  function N(o, u) {
     const h = o.querySelector(".sk-cards");
     if (!h) return;
     e.indicatorEl || (e.indicatorEl = document.createElement("li"), e.indicatorEl.className = "sk-drop-indicator", e.indicatorEl.setAttribute("aria-hidden", "true"));
-    const C = e.indicatorEl, b = Array.from(h.querySelectorAll(":scope > [data-card-id]")).filter((E) => !E.classList.contains("sk-card-dragging"));
-    u >= b.length ? h.appendChild(C) : h.insertBefore(C, b[u]);
+    const _ = e.indicatorEl, b = Array.from(h.querySelectorAll(":scope > [data-card-id]")).filter((E) => !E.classList.contains("sk-card-dragging"));
+    u >= b.length ? h.appendChild(_) : h.insertBefore(_, b[u]);
   }
-  function P() {
+  function W() {
     e.indicatorEl?.parentNode && e.indicatorEl.parentNode.removeChild(e.indicatorEl);
   }
   function M() {
@@ -585,44 +596,44 @@ function Ut({ root: r, hooks: t }) {
     if (!u) return;
     const h = u.getBoundingClientRect();
     if (o < h.left + V) {
-      const C = j(h.left + V - o);
-      u.scrollLeft -= C;
+      const _ = j(h.left + V - o);
+      u.scrollLeft -= _;
     } else if (o > h.right - V) {
-      const C = j(o - (h.right - V));
-      u.scrollLeft += C;
+      const _ = j(o - (h.right - V));
+      u.scrollLeft += _;
     }
   }
   function vt(o, u) {
     const h = nt(o, u);
     if (!h) return;
-    const C = h.querySelector(".sk-cards");
-    if (!C) return;
-    const b = C.getBoundingClientRect();
+    const _ = h.querySelector(".sk-cards");
+    if (!_) return;
+    const b = _.getBoundingClientRect();
     if (u < b.top + V) {
       const E = j(b.top + V - u);
-      C.scrollTop -= E;
+      _.scrollTop -= E;
     } else if (u > b.bottom - V) {
       const E = j(u - (b.bottom - V));
-      C.scrollTop += E;
+      _.scrollTop += E;
     }
   }
   function j(o) {
     const u = Math.max(0, Math.min(1, o / V));
-    return Math.ceil(u * Wt);
+    return Math.ceil(u * Ut);
   }
   function nt(o, u) {
     const h = r.querySelectorAll("[data-board-column-id-value]");
-    for (const C of h) {
-      const b = C.getBoundingClientRect();
-      if (o >= b.left && o <= b.right && u >= b.top && u <= b.bottom) return C;
+    for (const _ of h) {
+      const b = _.getBoundingClientRect();
+      if (o >= b.left && o <= b.right && u >= b.top && u <= b.bottom) return _;
     }
     return null;
   }
   function wt(o, u) {
     const h = o.cloneNode(!0);
     if (h.classList.add("sk-card-ghost"), h.style.position = "fixed", h.style.pointerEvents = "none", h.style.opacity = "0.85", h.style.zIndex = "99999", h.style.left = "0px", h.style.top = "0px", u > 1) {
-      const C = document.createElement("span");
-      C.className = "sk-card-stack-badge", C.textContent = String(u), h.appendChild(C);
+      const _ = document.createElement("span");
+      _.className = "sk-card-stack-badge", _.textContent = String(u), h.appendChild(_);
     }
     return document.body.appendChild(h), h;
   }
@@ -635,11 +646,11 @@ function Ut({ root: r, hooks: t }) {
     } catch {
     }
   }
-  return r.addEventListener("dragstart", n), r.addEventListener("dragover", s), r.addEventListener("drop", i), r.addEventListener("dragend", l), r.addEventListener("pointerdown", d), window.addEventListener("pointermove", m), window.addEventListener("pointerup", y), window.addEventListener("pointercancel", S), document.addEventListener("keydown", f), {
+  return r.addEventListener("dragstart", n), r.addEventListener("dragover", s), r.addEventListener("drop", i), r.addEventListener("dragend", l), r.addEventListener("pointerdown", d), window.addEventListener("pointermove", m), window.addEventListener("pointerup", g), window.addEventListener("pointercancel", S), document.addEventListener("keydown", f), {
     beginDrag: A,
     endDrag: w,
     destroy() {
-      r.removeEventListener("dragstart", n), r.removeEventListener("dragover", s), r.removeEventListener("drop", i), r.removeEventListener("dragend", l), r.removeEventListener("pointerdown", d), window.removeEventListener("pointermove", m), window.removeEventListener("pointerup", y), window.removeEventListener("pointercancel", S), document.removeEventListener("keydown", f), I();
+      r.removeEventListener("dragstart", n), r.removeEventListener("dragover", s), r.removeEventListener("drop", i), r.removeEventListener("dragend", l), r.removeEventListener("pointerdown", d), window.removeEventListener("pointermove", m), window.removeEventListener("pointerup", g), window.removeEventListener("pointercancel", S), document.removeEventListener("keydown", f), I();
     },
     isDragging() {
       return e.dragging;
@@ -649,12 +660,12 @@ function Ut({ root: r, hooks: t }) {
     }
   };
 }
-const jt = 6;
-function Kt({
+const Kt = 6;
+function Ht({
   cards: r,
   cardHeight: t,
   gap: e = 8,
-  overscan: n = jt,
+  overscan: n = Kt,
   scrollEl: s,
   renderCard: i,
   // (card, index) => HTMLElement
@@ -662,18 +673,18 @@ function Kt({
 }) {
   const c = t + e, d = document.createElement("li"), m = document.createElement("li");
   d.className = "sk-virtual-spacer", m.className = "sk-virtual-spacer", d.setAttribute("aria-hidden", "true"), m.setAttribute("aria-hidden", "true");
-  let y = /* @__PURE__ */ new Map();
+  let g = /* @__PURE__ */ new Map();
   function S() {
-    const f = r.length, A = s.clientHeight, w = s.scrollTop, g = Math.max(0, Math.floor(w / c) - n), I = Math.ceil(A / c) + n * 2, O = Math.min(f - 1, g + I);
-    l.replaceChildren(), d.style.height = `${g * c}px`, m.style.height = `${Math.max(0, (f - O - 1) * c)}px`, l.appendChild(d);
-    const q = /* @__PURE__ */ new Map();
-    for (let T = g; T <= O; T++) {
-      const P = r[T];
-      if (!P) continue;
-      let M = y.get(T);
-      M || (M = i(P, T)), l.appendChild(M), q.set(T, M);
+    const f = r.length, A = s.clientHeight, w = s.scrollTop, C = Math.max(0, Math.floor(w / c) - n), I = Math.ceil(A / c) + n * 2, O = Math.min(f - 1, C + I);
+    l.replaceChildren(), d.style.height = `${C * c}px`, m.style.height = `${Math.max(0, (f - O - 1) * c)}px`, l.appendChild(d);
+    const P = /* @__PURE__ */ new Map();
+    for (let N = C; N <= O; N++) {
+      const W = r[N];
+      if (!W) continue;
+      let M = g.get(N);
+      M || (M = i(W, N)), l.appendChild(M), P.set(N, M);
     }
-    y = q, l.appendChild(m);
+    g = P, l.appendChild(m);
   }
   function k() {
     S();
@@ -681,10 +692,10 @@ function Kt({
   return s.addEventListener("scroll", k, { passive: !0 }), S(), {
     render: S,
     update(f) {
-      r = f, y.clear(), S();
+      r = f, g.clear(), S();
     },
     destroy() {
-      s.removeEventListener("scroll", k), y.clear(), l.replaceChildren();
+      s.removeEventListener("scroll", k), g.clear(), l.replaceChildren();
     },
     /* Translate a logical card index (in `cards`) to a y-position relative
      * to the scroll container — used by the DnD module so a drop into the
@@ -698,7 +709,7 @@ function Kt({
     }
   };
 }
-function Ht({ cardCount: r, threshold: t, cardHeight: e, virtual: n }) {
+function Yt({ cardCount: r, threshold: t, cardHeight: e, virtual: n }) {
   return n === !0 ? !0 : n === !1 || !Number.isFinite(e) || e <= 0 ? !1 : r >= (Number.isFinite(t) ? t : 200);
 }
 const X = /* @__PURE__ */ new Map();
@@ -710,7 +721,7 @@ function F(r, t) {
 function at(r) {
   return X.get(r) || null;
 }
-function Yt() {
+function zt() {
   return Array.from(X.keys());
 }
 function a(r, t = {}, e = null) {
@@ -993,7 +1004,7 @@ F("email-thread", gt);
 F("image-card", Ct);
 F("cover-progress", _t);
 F("gantt-stub", yt);
-const zt = {
+const Xt = {
   story: lt,
   task: ot,
   bug: dt,
@@ -1008,8 +1019,8 @@ const zt = {
   "cover-progress": _t,
   "gantt-stub": yt,
   sub: D
-}, Xt = 280, Jt = 8;
-class G extends R {
+}, Jt = 280, Qt = 8;
+class Q extends $ {
   initialize() {
     this.state = {
       cards: [],
@@ -1034,13 +1045,13 @@ class G extends R {
       virtualColumns: /* @__PURE__ */ new Map(),
       // columnId → virtual instance
       ready: !1
-    }, this._renderScheduled = !1, this._renderColumnDirty = /* @__PURE__ */ new Set(), this._persistTimer = null, this._scheduleRender = Pt(() => this._renderNow());
+    }, this._renderScheduled = !1, this._renderColumnDirty = /* @__PURE__ */ new Set(), this._persistTimer = null, this._scheduleRender = Wt(() => this._renderNow());
   }
   connect() {
     this.element.classList.add("sk-board"), this.heightValue && (this.element.style.height = this.heightValue), this.domLayoutValue === "autoHeight" && this.element.classList.add("sk-board-auto-height"), this.element.hasAttribute("tabindex") || (this.element.tabIndex = 0), this._parseColumnsFromDom();
     const t = this._parseCardsFromDom();
-    t.length > 0 ? this.state.cards = H(t, this._modelOpts()) : Array.isArray(this.cardDataValue) && this.cardDataValue.length > 0 ? this.state.cards = H(this.cardDataValue, this._modelOpts()) : this.cardDataUrlValue && this._loadFromUrl(this.cardDataUrlValue), this.state.swimlaneField = this.swimlaneFieldValue || "", this.state.quickFilter = this.quickFilterValue || "", this._installDnd(), this._installKeyboard(), this._installFileDrop(), this.api = $t(this), this.element.boardApi = this.api, this._restorePersistedState(), this._scheduleRender(), queueMicrotask(() => {
-      this.state.ready = !0, _(this.element, "board:ready", { api: this.api });
+    t.length > 0 ? this.state.cards = H(t, this._modelOpts()) : Array.isArray(this.cardDataValue) && this.cardDataValue.length > 0 ? this.state.cards = H(this.cardDataValue, this._modelOpts()) : this.cardDataUrlValue && this._loadFromUrl(this.cardDataUrlValue), this.state.swimlaneField = this.swimlaneFieldValue || "", this.state.quickFilter = this.quickFilterValue || "", this._installDnd(), this._installKeyboard(), this._installFileDrop(), this.api = qt(this), this.element.boardApi = this.api, this._restorePersistedState(), this._scheduleRender(), queueMicrotask(() => {
+      this.state.ready = !0, y(this.element, "board:ready", { api: this.api });
     });
   }
   disconnect() {
@@ -1088,8 +1099,8 @@ class G extends R {
         } catch {
         }
       c != null && (m[this.orderFieldValue] = Number(c)), m.title == null && (m.title = n.textContent.trim());
-      const y = n.getAttribute("data-card-swimlane");
-      y != null && (m.__swimlane = y), n.getAttribute("data-card-locked") === "true" && (m.__locked = !0);
+      const g = n.getAttribute("data-card-swimlane");
+      g != null && (m.__swimlane = g), n.getAttribute("data-card-locked") === "true" && (m.__locked = !0);
       const k = n.getAttribute("data-card-color");
       k && (m.__color = k);
       const f = n.getAttribute("data-card-renderer");
@@ -1106,24 +1117,24 @@ class G extends R {
       const n = await e.json();
       Array.isArray(n) ? this.setCardData(n) : (Array.isArray(n.columns) && this.setColumnData(n.columns), Array.isArray(n.cards) && this.setCardData(n.cards));
     } catch (e) {
-      _(this.element, "board:loadError", { url: t, error: String(e) });
+      y(this.element, "board:loadError", { url: t, error: String(e) });
     }
   }
   /* ---------------- Public methods backing the boardApi ---------------- */
   setCardData(t) {
-    this.state.cards = H(t, this._modelOpts()), this._scheduleRender(), _(this.element, "board:cardDataChanged", { cards: this.getCardData() });
+    this.state.cards = H(t, this._modelOpts()), this._scheduleRender(), y(this.element, "board:cardDataChanged", { cards: this.getCardData() });
   }
   getCardData() {
     return this.state.cards.map((t) => ({ ...t }));
   }
   setColumnData(t) {
-    this.state.columns = st(t), this.state.columnOrder = this.state.columns.map((e) => e.id), this._scheduleRender(), _(this.element, "board:columnDataChanged", { columns: this.getColumnData() });
+    this.state.columns = st(t), this.state.columnOrder = this.state.columns.map((e) => e.id), this._scheduleRender(), y(this.element, "board:columnDataChanged", { columns: this.getColumnData() });
   }
   getColumnData() {
     return this._orderedColumns().filter((t) => !t.__synthetic).map((t) => ({ ...t }));
   }
   applyTransaction(t) {
-    return this.state.cards = Rt(this.state.cards, t, this._modelOpts()), this._scheduleRender(), Array.isArray(t?.add) && t.add.forEach((e) => _(this.element, "board:cardAdded", { cardId: e[this.getCardIdValue], columnId: e[this.getColumnIdValue], card: e })), Array.isArray(t?.remove) && t.remove.forEach((e) => _(this.element, "board:cardRemoved", { cardId: typeof e == "object" ? e[this.getCardIdValue] : e })), this.getCardData();
+    return this.state.cards = $t(this.state.cards, t, this._modelOpts()), this._scheduleRender(), Array.isArray(t?.add) && t.add.forEach((e) => y(this.element, "board:cardAdded", { cardId: e[this.getCardIdValue], columnId: e[this.getColumnIdValue], card: e })), Array.isArray(t?.remove) && t.remove.forEach((e) => y(this.element, "board:cardRemoved", { cardId: typeof e == "object" ? e[this.getCardIdValue] : e })), this._checkWipStateChanges(), this.getCardData();
   }
   setColumnCounts(t) {
     this.state.columnCounts = new Map(Object.entries(t || {}).map(([e, n]) => [String(e), Number(n)])), this._scheduleRender();
@@ -1133,10 +1144,10 @@ class G extends R {
   }
   /* selection */
   selectCard(t) {
-    this.cardSelectionValue && (this.cardSelectionValue === "single" && this.state.selection.clear(), this.state.selection.add(String(t)), this.state.lastSelectedId = String(t), this._refreshSelectionDecorations(), _(this.element, "board:cardSelectionChanged", { selectedCardIds: this.getSelectedCardIds() }));
+    this.cardSelectionValue && (this.cardSelectionValue === "single" && this.state.selection.clear(), this.state.selection.add(String(t)), this.state.lastSelectedId = String(t), this._refreshSelectionDecorations(), y(this.element, "board:cardSelectionChanged", { selectedCardIds: this.getSelectedCardIds() }));
   }
   deselectCard(t) {
-    this.state.selection.delete(String(t)), this._refreshSelectionDecorations(), _(this.element, "board:cardSelectionChanged", { selectedCardIds: this.getSelectedCardIds() });
+    this.state.selection.delete(String(t)), this._refreshSelectionDecorations(), y(this.element, "board:cardSelectionChanged", { selectedCardIds: this.getSelectedCardIds() });
   }
   toggleSelection(t) {
     const e = String(t);
@@ -1144,12 +1155,12 @@ class G extends R {
   }
   selectAllInColumn(t) {
     if (this.cardSelectionValue !== "multiple") return;
-    const e = B(this.state.cards, t, this._modelOpts()).map((n) => String(n[this.getCardIdValue]));
+    const e = R(this.state.cards, t, this._modelOpts()).map((n) => String(n[this.getCardIdValue]));
     for (const n of e) this.state.selection.add(n);
-    this._refreshSelectionDecorations(), _(this.element, "board:cardSelectionChanged", { selectedCardIds: this.getSelectedCardIds() });
+    this._refreshSelectionDecorations(), y(this.element, "board:cardSelectionChanged", { selectedCardIds: this.getSelectedCardIds() });
   }
   clearSelection() {
-    this.state.selection.size !== 0 && (this.state.selection.clear(), this._refreshSelectionDecorations(), _(this.element, "board:cardSelectionChanged", { selectedCardIds: [] }));
+    this.state.selection.size !== 0 && (this.state.selection.clear(), this._refreshSelectionDecorations(), y(this.element, "board:cardSelectionChanged", { selectedCardIds: [] }));
   }
   getSelectedCardIds() {
     return Array.from(this.state.selection);
@@ -1169,7 +1180,7 @@ class G extends R {
     const n = this._snapshotCard(t);
     if (!this._beforeMoveOk([t], n?.[this.getColumnIdValue], e.toColumnId, e.toIndex)) return !1;
     const s = this._currentVisibleIndex(t);
-    return this.state.cards = z(this.state.cards, t, e, this._modelOpts()), this._scheduleRender(), _(this.element, "board:cardMoved", {
+    return this.state.cards = z(this.state.cards, t, e, this._modelOpts()), this._scheduleRender(), y(this.element, "board:cardMoved", {
       cardId: t,
       fromColumnId: n?.[this.getColumnIdValue],
       toColumnId: e.toColumnId,
@@ -1180,7 +1191,7 @@ class G extends R {
   moveCards(t, e) {
     if (!t?.length) return !1;
     const n = this._snapshotCard(t[0]);
-    return this._beforeMoveOk(t, n?.[this.getColumnIdValue], e.toColumnId, e.toIndex) ? (this.state.cards = Mt(this.state.cards, t, e, this._modelOpts()), this._scheduleRender(), _(this.element, "board:cardsMoved", {
+    return this._beforeMoveOk(t, n?.[this.getColumnIdValue], e.toColumnId, e.toIndex) ? (this.state.cards = Bt(this.state.cards, t, e, this._modelOpts()), this._scheduleRender(), y(this.element, "board:cardsMoved", {
       cardIds: t,
       fromColumnId: n?.[this.getColumnIdValue],
       toColumnId: e.toColumnId,
@@ -1189,7 +1200,7 @@ class G extends R {
   }
   reorderCardWithinColumn(t, e) {
     const n = this._snapshotCard(t);
-    return n ? (this.state.cards = Bt(this.state.cards, t, e, this._modelOpts()), this._scheduleRender(), _(this.element, "board:cardMoved", {
+    return n ? (this.state.cards = Rt(this.state.cards, t, e, this._modelOpts()), this._scheduleRender(), y(this.element, "board:cardMoved", {
       cardId: t,
       fromColumnId: n[this.getColumnIdValue],
       toColumnId: n[this.getColumnIdValue],
@@ -1198,7 +1209,7 @@ class G extends R {
     }), !0) : !1;
   }
   _beforeMoveOk(t, e, n, s) {
-    if (this.readOnlyValue || _(
+    if (this.readOnlyValue || y(
       this.element,
       "board:beforeMove",
       { cardIds: t, fromColumnId: e, toColumnId: n, toIndex: s },
@@ -1213,25 +1224,25 @@ class G extends R {
   _currentVisibleIndex(t) {
     const e = this._snapshotCard(t);
     if (!e) return -1;
-    const n = B(this.state.cards, e[this.getColumnIdValue], this._modelOpts());
+    const n = R(this.state.cards, e[this.getColumnIdValue], this._modelOpts());
     return K(n, this._columnById(e[this.getColumnIdValue])?.sort, this.orderFieldValue).findIndex((i) => String(i[this.getCardIdValue]) === String(t));
   }
   /* columns */
   setColumnVisible(t, e) {
     const n = this._columnById(t);
-    n && (n.hidden = !e, this._scheduleRender(), _(this.element, "board:columnVisibleChanged", { columnId: t, visible: !!e }));
+    n && (n.hidden = !e, this._scheduleRender(), y(this.element, "board:columnVisibleChanged", { columnId: t, visible: !!e }));
   }
   setColumnCollapsed(t, e) {
     const n = this._columnById(t);
-    n && (n.collapsed = !!e, this._scheduleRender(), _(this.element, "board:columnCollapsedChanged", { columnId: t, collapsed: !!e }));
+    n && (n.collapsed = !!e, this._scheduleRender(), y(this.element, "board:columnCollapsedChanged", { columnId: t, collapsed: !!e }));
   }
   setColumnWidth(t, e) {
     const n = this._columnById(t);
-    n && (n.width = Number(e), this._scheduleRender(), _(this.element, "board:columnResized", { columnId: t, width: n.width }));
+    n && (n.width = Number(e), this._scheduleRender(), y(this.element, "board:columnResized", { columnId: t, width: n.width }));
   }
   moveColumn(t, e) {
     const n = this.state.columnOrder.slice(), s = n.indexOf(String(t));
-    s !== -1 && (n.splice(s, 1), n.splice(Math.max(0, Math.min(e, n.length)), 0, String(t)), this.state.columnOrder = n, this._scheduleRender(), _(this.element, "board:columnMoved", { columnId: t, fromIndex: s, toIndex: e }));
+    s !== -1 && (n.splice(s, 1), n.splice(Math.max(0, Math.min(e, n.length)), 0, String(t)), this.state.columnOrder = n, this._scheduleRender(), y(this.element, "board:columnMoved", { columnId: t, fromIndex: s, toIndex: e }));
   }
   setColumnWip(t, e) {
     const n = this._columnById(t);
@@ -1255,11 +1266,11 @@ class G extends R {
   }
   setColumnSort(t, e) {
     const n = this._columnById(t);
-    n && (n.sort = e || "manual", this._scheduleRender(), _(this.element, "board:columnSortChanged", { columnId: t, sort: n.sort }));
+    n && (n.sort = e || "manual", this._scheduleRender(), y(this.element, "board:columnSortChanged", { columnId: t, sort: n.sort }));
   }
   /* swimlanes */
   setSwimlaneField(t) {
-    this.state.swimlaneField = t || "", this._scheduleRender(), _(this.element, "board:swimlaneChanged", { swimlaneField: this.state.swimlaneField });
+    this.state.swimlaneField = t || "", this._scheduleRender(), y(this.element, "board:swimlaneChanged", { swimlaneField: this.state.swimlaneField });
   }
   setSwimlaneCollapsed(t, e) {
     const n = String(t ?? "");
@@ -1267,10 +1278,10 @@ class G extends R {
   }
   /* filter */
   setQuickFilter(t) {
-    this.state.quickFilter = t || "", this._scheduleRender(), _(this.element, "board:filterChanged", { quickFilter: this.state.quickFilter, predicate: this.state.predicate });
+    this.state.quickFilter = t || "", this._scheduleRender(), y(this.element, "board:filterChanged", { quickFilter: this.state.quickFilter, predicate: this.state.predicate });
   }
   setCardFilter(t) {
-    this.state.predicate = typeof t == "function" ? t : null, this._scheduleRender(), _(this.element, "board:filterChanged", { quickFilter: this.state.quickFilter, predicate: this.state.predicate });
+    this.state.predicate = typeof t == "function" ? t : null, this._scheduleRender(), y(this.element, "board:filterChanged", { quickFilter: this.state.quickFilter, predicate: this.state.predicate });
   }
   /* editing */
   startEditingCard(t) {
@@ -1284,17 +1295,17 @@ class G extends R {
     return i ? (i.dataset.controller = (i.dataset.controller || "") + " card-editor", i.dataset.cardEditorCardIdValue = String(t), n.replaceChildren(i), this._seedEditor(i, e), this.state.editing = { cardId: String(t), editorEl: i, original: { ...e } }, queueMicrotask(() => {
       const l = i.querySelector("[data-editor-input], [data-editor-field]");
       l?.focus?.(), l?.select?.();
-    }), _(this.element, "board:cardEditStarted", { cardId: t }), !0) : !1;
+    }), y(this.element, "board:cardEditStarted", { cardId: t }), !0) : !1;
   }
   commitEditing() {
     const t = this.state.editing;
     if (!t) return !1;
     const e = this._readEditor(t.editorEl, t.original);
-    return this.applyTransaction({ update: [e] }), _(this.element, "board:cardValueChanged", { cardId: t.cardId, oldCard: t.original, newCard: e }), this.state.editing = null, !0;
+    return this.applyTransaction({ update: [e] }), y(this.element, "board:cardValueChanged", { cardId: t.cardId, oldCard: t.original, newCard: e }), this.state.editing = null, !0;
   }
   cancelEditing() {
     const t = this.state.editing;
-    return t ? (this.state.editing = null, this._scheduleRender(), _(this.element, "board:cardEditCancelled", { cardId: t.cardId }), !0) : !1;
+    return t ? (this.state.editing = null, this._scheduleRender(), y(this.element, "board:cardEditCancelled", { cardId: t.cardId }), !0) : !1;
   }
   _defaultEditor(t) {
     return p("form", { class: "sk-card-editor" }, [
@@ -1330,7 +1341,7 @@ class G extends R {
   }
   /* WIP */
   getWipState() {
-    return Ot(this._orderedColumns(), this.state.cards, this._modelOpts());
+    return Mt(this._orderedColumns(), this.state.cards, this._modelOpts());
   }
   _checkWipStateChanges() {
     const t = /* @__PURE__ */ new Set();
@@ -1339,7 +1350,7 @@ class G extends R {
     for (const e of t)
       if (!this.state.wipExceeded.has(e)) {
         const n = this.getWipState().find((s) => String(s.colId) === e);
-        _(this.element, "board:wipExceeded", { columnId: e, count: n?.count, limit: n?.limit });
+        y(this.element, "board:wipExceeded", { columnId: e, count: n?.count, limit: n?.limit });
       }
     this.state.wipExceeded = t;
   }
@@ -1368,7 +1379,7 @@ class G extends R {
           const n = this._columnById(e.id);
           n && (e.width != null && (n.width = e.width), n.collapsed = !!e.collapsed, n.hidden = !!e.hidden, e.wip != null && (n.wip = e.wip), e.sort && (n.sort = e.sort));
         }
-      this.state.swimlaneField = t.swimlaneField || "", this.state.collapsedSwimlanes = new Set(t.collapsedSwimlanes || []), this.state.quickFilter = t.quickFilter || "", this._scheduleRender(), _(this.element, "board:boardStateApplied", { state: t });
+      this.state.swimlaneField = t.swimlaneField || "", this.state.collapsedSwimlanes = new Set(t.collapsedSwimlanes || []), this.state.quickFilter = t.quickFilter || "", this._scheduleRender(), y(this.element, "board:boardStateApplied", { state: t });
     }
   }
   clearPersistedState() {
@@ -1403,7 +1414,7 @@ class G extends R {
     const n = t && t.length ? this._orderedColumns().filter((l) => t.includes(l.id)) : this._orderedColumns().filter((l) => !l.__synthetic && !l.hidden), i = [["card_id", "column", ...e && this.state.swimlaneField ? [this.state.swimlaneField] : [], "title"].join(",")];
     for (const l of n) {
       const c = K(
-        B(this.state.cards, l.id, this._modelOpts()),
+        R(this.state.cards, l.id, this._modelOpts()),
         l.sort,
         this.orderFieldValue
       );
@@ -1442,11 +1453,11 @@ class G extends R {
       i.target?.matches("[data-detail-close]") && this.closeCardDetail();
     }), this._onDocumentClick = (i) => {
       !s.contains(i.target) && !this._cardEl(t)?.contains(i.target) && this.closeCardDetail();
-    }, setTimeout(() => document.addEventListener("click", this._onDocumentClick), 0), _(this.element, "board:cardDetailOpened", { cardId: t, card: e, panelEl: s }), !0;
+    }, setTimeout(() => document.addEventListener("click", this._onDocumentClick), 0), y(this.element, "board:cardDetailOpened", { cardId: t, card: e, panelEl: s }), !0;
   }
   closeCardDetail() {
     const t = this.state.openDetailCardId;
-    return t ? (document.querySelector(`.sk-card-detail[data-card-id="${t}"]`)?.remove(), this.state.openDetailCardId = null, document.removeEventListener("click", this._onDocumentClick), _(this.element, "board:cardDetailClosed", { cardId: t }), !0) : !1;
+    return t ? (document.querySelector(`.sk-card-detail[data-card-id="${t}"]`)?.remove(), this.state.openDetailCardId = null, document.removeEventListener("click", this._onDocumentClick), y(this.element, "board:cardDetailClosed", { cardId: t }), !0) : !1;
   }
   _defaultDetailPanel(t) {
     return p("aside", { class: "sk-card-detail-default" }, [
@@ -1484,14 +1495,14 @@ class G extends R {
     this._renderScheduled = !1;
     const t = this.state.ready, e = !!this.state.swimlaneField;
     let n = this.state.cards;
-    this.state.quickFilter && (n = Vt(n, this.state.quickFilter)), typeof this.state.predicate == "function" && (n = Tt(n, this.state.predicate));
+    this.state.quickFilter && (n = Vt(n, this.state.quickFilter)), typeof this.state.predicate == "function" && (n = Nt(n, this.state.predicate));
     const s = this.filterModeValue || "hide";
     let i = this.element.querySelector(".sk-columns");
     i || (i = p("ol", { class: "sk-columns" }), this.element.replaceChildren(i)), i.style.gap = `${this.gapValue}px`;
-    const l = this._orderedColumns().filter((d) => !d.hidden), c = e ? Nt(n, this.state.swimlaneField) : /* @__PURE__ */ new Map([["", n]]);
+    const l = this._orderedColumns().filter((d) => !d.hidden), c = e ? Ot(n, this.state.swimlaneField) : /* @__PURE__ */ new Map([["", n]]);
     if (i.replaceChildren(), e && c.size > 0)
       for (const [d, m] of c) {
-        const y = p("li", {
+        const g = p("li", {
           class: "sk-swimlane",
           "data-swimlane-value": d || ""
         }), S = p("div", {
@@ -1508,14 +1519,14 @@ class G extends R {
           p("span", { class: "sk-swimlane-count", text: `${m.length}` })
         ]), k = p("div", { class: "sk-swimlane-cols", style: `gap:${this.gapValue}px` });
         for (const f of l) {
-          const A = B(m, f.id, this._modelOpts());
+          const A = R(m, f.id, this._modelOpts());
           k.appendChild(this._renderColumn(f, A, s));
         }
-        y.append(S, k), this.state.collapsedSwimlanes.has(d) && y.classList.add("sk-swimlane-collapsed"), i.appendChild(y);
+        g.append(S, k), this.state.collapsedSwimlanes.has(d) && g.classList.add("sk-swimlane-collapsed"), i.appendChild(g);
       }
     else
       for (const d of l) {
-        const m = B(n, d.id, this._modelOpts());
+        const m = R(n, d.id, this._modelOpts());
         i.appendChild(this._renderColumn(d, m, s));
       }
     this._refreshSelectionDecorations(), t && this._schedulePersist();
@@ -1540,12 +1551,12 @@ class G extends R {
         class: "sk-column-count" + (c ? " sk-column-count-over-wip" : ""),
         text: t.wip != null ? `${i} / ${t.wip}` : String(l)
       })
-    ].filter(Boolean)), y = p("ol", { class: "sk-cards", style: `gap:${this.gapValue}px` });
+    ].filter(Boolean)), g = p("ol", { class: "sk-cards", style: `gap:${this.gapValue}px` });
     if (t.collapsed)
       return d.appendChild(m), d;
     for (const k of s) {
       const f = this._renderCard(k, t);
-      n === "dim" && this.state.quickFilter && !this._cardMatchesQuick(k) && f.classList.add("sk-card-dimmed"), y.appendChild(f);
+      n === "dim" && this.state.quickFilter && !this._cardMatchesQuick(k) && f.classList.add("sk-card-dimmed"), g.appendChild(f);
     }
     if (this.serverSideValue) {
       const k = this.state.columnCounts.get(String(t.id)) ?? i;
@@ -1554,11 +1565,11 @@ class G extends R {
           p("button", {
             type: "button",
             class: "sk-button sk-button-ghost",
-            onclick: () => _(this.element, "board:columnFetchMore", { columnId: t.id, loadedCount: i, totalCount: k }),
+            onclick: () => y(this.element, "board:columnFetchMore", { columnId: t.id, loadedCount: i, totalCount: k }),
             text: `+${k - i} more…`
           })
         ]);
-        y.appendChild(f);
+        g.appendChild(f);
       }
     }
     if (this.addCardValue) {
@@ -1566,27 +1577,27 @@ class G extends R {
         p("button", {
           type: "button",
           class: "sk-button sk-button-ghost",
-          onclick: () => _(this.element, "board:addCardRequested", { columnId: t.id }),
+          onclick: () => y(this.element, "board:addCardRequested", { columnId: t.id }),
           text: k
         })
       ]);
-      y.appendChild(f);
+      g.appendChild(f);
     }
-    d.append(m, y);
+    d.append(m, g);
     const S = Number(this.cardHeightValue);
-    if (Ht({
+    if (Yt({
       cardCount: s.length,
       threshold: this.virtualThresholdValue,
       cardHeight: S,
       virtual: this.virtualValue
     })) {
-      this.state.virtualColumns.get(t.id)?.destroy?.(), y.replaceChildren();
-      const f = Kt({
+      this.state.virtualColumns.get(t.id)?.destroy?.(), g.replaceChildren();
+      const f = Ht({
         cards: s,
         cardHeight: S,
         gap: this.gapValue,
-        scrollEl: y,
-        cardsListEl: y,
+        scrollEl: g,
+        cardsListEl: g,
         renderCard: (A) => this._renderCard(A, t)
       });
       this.state.virtualColumns.set(t.id, f);
@@ -1634,7 +1645,7 @@ class G extends R {
   }
   /* ---------------- DnD wiring ---------------- */
   _installDnd() {
-    this._dnd = Ut({
+    this._dnd = jt({
       root: this.element,
       hooks: {
         isColumnDisallowDrag: (t) => !!this._columnById(t)?.disallow_drag,
@@ -1645,11 +1656,11 @@ class G extends R {
         },
         expandSelection: (t, e) => this.state.selection.has(String(t)) ? this.getSelectedCards().filter((n) => String(n[this.getColumnIdValue]) === String(e)).map((n) => String(n[this.getCardIdValue])) : [String(t)],
         onDragStart: ({ ids: t, fromColumnId: e }) => {
-          _(this.element, "board:dragStarted", { cardIds: t, fromColumnId: e });
+          y(this.element, "board:dragStarted", { cardIds: t, fromColumnId: e });
         },
         onDrop: ({ cardIds: t, fromColumnId: e, toColumnId: n, toIndex: s, cancelled: i }) => {
           if (i || n == null) {
-            _(this.element, "board:dragEnded", { cardIds: t, fromColumnId: e, cancelled: !0 });
+            y(this.element, "board:dragEnded", { cardIds: t, fromColumnId: e, cancelled: !0 });
             return;
           }
           t.length === 1 ? this.moveCard(t[0], { toColumnId: n, toIndex: s }) : this.moveCards(t, { toColumnId: n, toIndex: s });
@@ -1705,7 +1716,7 @@ class G extends R {
     this._cardEl(t)?.focus?.();
   }
   _columnVisibleCards(t) {
-    const e = B(this.state.cards, t, this._modelOpts());
+    const e = R(this.state.cards, t, this._modelOpts());
     return K(e, this._columnById(t)?.sort, this.orderFieldValue);
   }
   _navWithinColumn(t) {
@@ -1739,13 +1750,13 @@ class G extends R {
       if (!e) return;
       t.preventDefault();
       const n = e.getAttribute("data-card-id"), s = this._snapshotCard(n), i = Array.from(t.dataTransfer.files);
-      if (_(
+      if (y(
         this.element,
         "board:fileAttached",
         { cardId: n, files: i, card: s, dataTransfer: t.dataTransfer },
         { cancellable: !0 }
       ).defaultPrevented) return;
-      const c = this.attachmentsFieldValue || "attachments", d = Array.isArray(s?.[c]) ? s[c].slice() : [], m = i.map((y) => ({ name: y.name, size: y.size, type: y.type }));
+      const c = this.attachmentsFieldValue || "attachments", d = Array.isArray(s?.[c]) ? s[c].slice() : [], m = i.map((g) => ({ name: g.name, size: g.size, type: g.type }));
       this.applyTransaction({ update: [{ [this.getCardIdValue]: n, [c]: d.concat(m) }] });
     }));
   }
@@ -1764,21 +1775,21 @@ class G extends R {
     }
   }
 }
-x(G, "values", {
+x(Q, "values", {
   cardData: { type: Array, default: [] },
   cardDataUrl: { type: String, default: "" },
   cardSelection: { type: String, default: "" },
   cardMultiSelectWithClick: { type: Boolean, default: !1 },
   suppressCardClickSelection: { type: Boolean, default: !1 },
   cardHeight: { type: String, default: "auto" },
-  columnWidth: { type: Number, default: Xt },
-  gap: { type: Number, default: Jt },
+  columnWidth: { type: Number, default: Jt },
+  gap: { type: Number, default: Qt },
   virtual: { type: Boolean, default: !1 },
   virtualThreshold: { type: Number, default: 200 },
   height: { type: String, default: "" },
-  getCardId: { type: String, default: $ },
-  getColumnId: { type: String, default: N },
-  orderField: { type: String, default: W },
+  getCardId: { type: String, default: B },
+  getColumnId: { type: String, default: T },
+  orderField: { type: String, default: q },
   domLayout: { type: String, default: "" },
   serverSide: { type: Boolean, default: !1 },
   swimlaneField: { type: String, default: "" },
@@ -1801,7 +1812,7 @@ x(G, "values", {
   acceptFiles: { type: Boolean, default: !1 },
   attachmentsField: { type: String, default: "attachments" }
 });
-class Q extends R {
+class G extends $ {
   constructor() {
     super(...arguments);
     /* Header double-click toggles collapse — same UX as Trello's column menu
@@ -1814,7 +1825,7 @@ class Q extends R {
           this._board()?.setColumnCollapsed?.(this.idValue, !this.collapsedValue);
           return;
         }
-        _(this.element, "board:columnHeaderClicked", { columnId: this.idValue, originalEvent: e });
+        y(this.element, "board:columnHeaderClicked", { columnId: this.idValue, originalEvent: e });
       }
     });
   }
@@ -1831,7 +1842,7 @@ class Q extends R {
     return U(this.element, "board", this.application);
   }
 }
-x(Q, "values", {
+x(G, "values", {
   id: { type: String, default: "" },
   title: { type: String, default: "" },
   wip: { type: Number, default: 0 },
@@ -1848,14 +1859,14 @@ x(Q, "values", {
   color: { type: String, default: "" },
   icon: { type: String, default: "" }
 });
-class kt extends R {
+class kt extends $ {
   constructor() {
     super(...arguments);
     x(this, "_onClick", (e) => {
       const n = this._board();
       if (!n) return;
       const s = this._cardId(), i = this._card(), l = i?.[n.getColumnIdValue] ?? null;
-      if (_(this.element, "board:cardClicked", { cardId: s, card: i, columnId: l, originalEvent: e }), n.suppressCardClickSelectionValue || n.cardSelectionValue === "") return;
+      if (y(this.element, "board:cardClicked", { cardId: s, card: i, columnId: l, originalEvent: e }), n.suppressCardClickSelectionValue || n.cardSelectionValue === "") return;
       const c = e.metaKey || e.ctrlKey, d = e.shiftKey;
       n.cardSelectionValue === "multiple" && (c || d || n.cardMultiSelectWithClickValue) ? n.toggleSelection(s) : (n.clearSelection?.(), n.selectCard(s));
     });
@@ -1863,7 +1874,7 @@ class kt extends R {
       const n = this._board();
       if (!n) return;
       const s = this._cardId(), i = this._card(), l = i?.[n.getColumnIdValue] ?? null;
-      _(this.element, "board:cardDblClicked", { cardId: s, card: i, columnId: l }), n.startEditingCard?.(s);
+      y(this.element, "board:cardDblClicked", { cardId: s, card: i, columnId: l }), n.startEditingCard?.(s);
     });
   }
   connect() {
@@ -1898,7 +1909,7 @@ class kt extends R {
     this._board()?.openCardDetail?.(this._cardId());
   }
 }
-class Z extends R {
+class Z extends $ {
   constructor() {
     super(...arguments);
     x(this, "_onKeyDown", (e) => {
@@ -1946,7 +1957,7 @@ class Z extends R {
 x(Z, "values", {
   cardId: { type: String, default: "" }
 });
-class tt extends R {
+class tt extends $ {
   toggle(t) {
     const e = U(this.element, "board", this.application);
     if (!e) return;
@@ -1957,7 +1968,7 @@ class tt extends R {
 x(tt, "values", {
   value: { type: String, default: "" }
 });
-class et extends R {
+class et extends $ {
   constructor() {
     super(...arguments);
     x(this, "_open", (e) => {
@@ -2040,35 +2051,35 @@ x(et, "values", {
 });
 function Gt(r) {
   const t = r ?? Dt.start();
-  return t.register("board", G), t.register("board-column", Q), t.register("card", kt), t.register("card-editor", Z), t.register("swimlane-header", tt), t.register("column-menu", et), t;
+  return t.register("board", Q), t.register("board-column", G), t.register("card", kt), t.register("card-editor", Z), t.register("swimlane-header", tt), t.register("column-menu", et), t;
 }
-const Qt = {
+const Zt = {
   start: Gt,
-  BoardController: G,
-  BoardColumnController: Q,
+  BoardController: Q,
+  BoardColumnController: G,
   CardController: kt,
   CardEditorController: Z,
   SwimlaneHeaderController: tt,
   ColumnMenuController: et,
   registerRenderer: F,
   getRenderer: at,
-  listRenderers: Yt,
-  renderers: zt,
+  listRenderers: zt,
+  renderers: Xt,
   subRenderers: D
 };
-typeof window < "u" && !window.__stimulusKanbanStarted && (window.__stimulusKanbanStarted = !0, window.StimulusKanban = Qt);
+typeof window < "u" && !window.__stimulusKanbanStarted && (window.__stimulusKanbanStarted = !0, window.StimulusKanban = Zt);
 export {
-  Q as BoardColumnController,
-  G as BoardController,
+  G as BoardColumnController,
+  Q as BoardController,
   kt as CardController,
   Z as CardEditorController,
   et as ColumnMenuController,
   tt as SwimlaneHeaderController,
-  Qt as default,
+  Zt as default,
   at as getRenderer,
-  Yt as listRenderers,
+  zt as listRenderers,
   F as registerRenderer,
-  zt as renderers,
+  Xt as renderers,
   Gt as start,
   D as subRenderers
 };

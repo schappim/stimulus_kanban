@@ -150,15 +150,26 @@ export function applyColumnSort(cards, sort, orderField = DEFAULT_ORDER_FIELD) {
  * on the card. Returns the subset that matches. */
 export function applyQuickFilter(cards, query) {
   if (!query) return cards;
-  const q = String(query).toLowerCase();
-  return cards.filter((c) => cardMatchesQuery(c, q));
+  return cards.filter((c) => cardMatchesQuery(c, query));
 }
+
+// Fields that are structural metadata (identity, column membership, order)
+// rather than user-facing content. Skipped by the quick-filter scan so
+// searching for "doing" doesn't match every card whose column_id is "doing".
+const QUICK_FILTER_SKIP = new Set([
+  DEFAULT_GET_CARD_ID,
+  DEFAULT_GET_COLUMN_ID,
+  DEFAULT_ORDER_FIELD,
+  'id', 'column_id', 'order',
+]);
 
 export function cardMatchesQuery(card, q) {
   if (!q) return true;
   const needle = String(q).toLowerCase();
-  for (const v of Object.values(card)) {
+  for (const [k, v] of Object.entries(card)) {
     if (v == null) continue;
+    if (k.startsWith('__')) continue;       // internal flags (__locked, __color, …)
+    if (QUICK_FILTER_SKIP.has(k)) continue; // skip identity / position metadata
     if (typeof v === 'string' || typeof v === 'number') {
       if (String(v).toLowerCase().includes(needle)) return true;
     }
@@ -333,7 +344,16 @@ export function applyTransaction(cards, tx, options = {}) {
   if (Array.isArray(t.update)) {
     const byId = new Map();
     for (const u of t.update) byId.set(String(u[idField]), u);
-    out = out.map((c) => byId.has(String(c[idField])) ? { ...c, ...byId.get(String(c[idField])) } : c);
+    out = out.map((c) => {
+      const k = String(c[idField]);
+      if (!byId.has(k)) return c;
+      // Preserve the stringified id — host updates often pass a numeric id
+      // and we don't want them to silently re-type the column membership key
+      // (which downstream consumers compare with ===).
+      const merged = { ...c, ...byId.get(k) };
+      merged[idField] = k;
+      return merged;
+    });
   }
 
   if (Array.isArray(t.add)) {

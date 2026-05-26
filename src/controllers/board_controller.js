@@ -241,6 +241,7 @@ export default class BoardController extends Controller {
     this._scheduleRender();
     if (Array.isArray(tx?.add))    tx.add.forEach((a) => emit(this.element, 'board:cardAdded', { cardId: a[this.getCardIdValue], columnId: a[this.getColumnIdValue], card: a }));
     if (Array.isArray(tx?.remove)) tx.remove.forEach((r) => emit(this.element, 'board:cardRemoved', { cardId: typeof r === 'object' ? r[this.getCardIdValue] : r }));
+    this._checkWipStateChanges();
     return this.getCardData();
   }
 
