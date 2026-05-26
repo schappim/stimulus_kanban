@@ -1,0 +1,22 @@
+name: CI
+
+# Repo-root CI. (The Rails scaffold under gem/demo/.github is nested and does
+# not run here — GitHub Actions only executes workflows from the repo root.)
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  js:
+    name: JS core — build + unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:lib   # the IIFE + ESM library bundles must build
+      - run: npm test            # vitest: model + api + renderers + dnd
