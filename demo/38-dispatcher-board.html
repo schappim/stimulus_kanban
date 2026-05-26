@@ -63,7 +63,7 @@
 </head>
 <body>
   <p class="crumbs"><a href="./">← demos</a></p>
-  <h1>38 — Dispatcher board (ServiceM8 "Diary" pattern)</h1>
+  <h1>38 — Dispatcher board (unscheduled pool + day slots)</h1>
   <p class="lede">Unscheduled jobs sit in the left rail. Each tradie has a row of day-slots on the right. Drag a job from the rail to a slot to dispatch it — drop it back on the rail to <em>un</em>schedule. The pool is a one-column board; each tradie row is a multi-column board sharing data via <code>boardApi.applyTransaction</code>.</p>
 
   <template id="disp-card">

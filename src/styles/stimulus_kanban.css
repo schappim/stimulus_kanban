@@ -185,6 +185,11 @@
   overflow: hidden;
   transition: box-shadow 0.12s ease, background 0.12s ease;
   list-style: none;
+  /* The column is a flex column with overflow-y:auto. Without flex-shrink:0
+   * the wrapper inherits the default flex:0 1 auto and gets uniformly
+   * compressed when the column is full — clipping the bottom of every
+   * card. Pin the wrapper to its natural height so the column scrolls. */
+  flex-shrink: 0;
 }
 .sk-board .sk-card-wrapper::before {
   content: '';

@@ -30,13 +30,18 @@
     .fc-card { padding: 8px 10px; }
     .fc-card h4 { margin: 0 0 2px 0; font-size: 13px; }
     .fc-card .meta { color: #6b7280; font-size: 12px; }
-    .fc-card .row { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
-    .fc-card .due { font-size: 11px; padding: 1px 6px; border-radius: 3px; background: #eff6ff; color: #1d4ed8; }
+    .fc-card .row { display: flex; gap: 6px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+    .fc-card .due {
+      font-size: 11px; padding: 2px 8px; border-radius: 4px;
+      background: #eff6ff; color: #1d4ed8;
+      line-height: 1.5; display: inline-block;
+    }
     .fc-card .due.overdue { background: #fef2f2; color: #b91c1c; font-weight: 700; }
     .fc-card .who { font-size: 11px; color: #6b7280; }
     .fc-card .urgent {
-      font-size: 10px; padding: 1px 6px; border-radius: 3px;
+      font-size: 10px; padding: 2px 8px; border-radius: 4px;
       background: #fef2f2; color: #b91c1c; font-weight: 700; text-transform: uppercase;
+      line-height: 1.5; display: inline-block; letter-spacing: 0.04em;
     }
   </style>
 </head>

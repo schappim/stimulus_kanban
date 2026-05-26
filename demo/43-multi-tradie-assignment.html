@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>43 — Multi-tradie assignment | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .mt-card { padding: 8px 10px; }
+    .mt-card h4 { margin: 0 0 4px 0; font-size: 13px; }
+    .mt-card .meta { color: #6b7280; font-size: 12px; }
+    .mt-card .crew {
+      display: flex; align-items: center; gap: 4px; margin-top: 6px;
+    }
+    .mt-card .avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: inline-grid; place-items: center; font: 700 11px system-ui;
+      color: #fff;
+      box-shadow: 0 0 0 2px #fff; /* the white ring makes overlapping avatars read clearly */
+      margin-left: -6px;
+    }
+    .mt-card .avatar:first-child { margin-left: 0; }
+    .mt-card .avatar.lead {
+      box-shadow: 0 0 0 2px #fff, 0 0 0 3px #fbbf24; /* gold ring for the lead */
+    }
+    .mt-card .role-tag {
+      font-size: 10px; color: #6b7280; margin-left: 6px; letter-spacing: 0.02em;
+    }
+    .mt-card .lead-marker {
+      font-size: 9px; color: #b45309; font-weight: 700; text-transform: uppercase;
+      margin-left: 4px; letter-spacing: 0.05em;
+    }
+    /* Legend */
+    .legend {
+      display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0 12px 0;
+      padding: 8px 12px; background: #f9fafb; border-radius: 6px;
+      font-size: 12px; color: #6b7280;
+    }
+    .legend .item { display: flex; align-items: center; gap: 6px; }
+    .legend .avatar { width: 18px; height: 18px; border-radius: 50%;
+      display: inline-grid; place-items: center; font: 700 9px system-ui; color: #fff; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>43 — Multi-tradie assignment (crew on a card)</h1>
+  <p class="lede">One job, multiple workers. The lead carries a gold ring; the rest are stacked overlapping avatars (à la GitHub assignees). Each avatar tooltips with the role on hover. This is a sub-renderer pattern — your card template binds <code>data-mt-crew</code> and the host fills it from the card's <code>crew</code> array.</p>
+
+  <div class="legend">
+    <span class="item"><span class="avatar" style="background:#2563eb">D</span> Dave (gas plumber)</span>
+    <span class="item"><span class="avatar" style="background:#059669">S</span> Sam (apprentice plumber)</span>
+    <span class="item"><span class="avatar" style="background:#b45309">M</span> Mia (commercial)</span>
+    <span class="item"><span class="avatar" style="background:#7c3aed">N</span> Noah (sparky sub)</span>
+    <span class="item"><span class="avatar" style="background:#be123c">R</span> Ravi (gasfitter sub)</span>
+  </div>
+
+  <template id="mt-card">
+    <article class="sk-card mt-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta"><span data-bind="customer"></span> · <span data-bind="suburb"></span></div>
+      <div class="crew" data-mt-crew></div>
+    </article>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="mt-card">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="scheduled" data-board-column-title-value="Scheduled"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="in_progress" data-board-column-title-value="In progress"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="completed" data-board-column-title-value="Completed"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+
+    const people = {
+      D: { name: 'Dave', role: 'gas plumber',         bg: '#2563eb' },
+      S: { name: 'Sam',  role: 'apprentice plumber',  bg: '#059669' },
+      M: { name: 'Mia',  role: 'commercial',          bg: '#b45309' },
+      N: { name: 'Noah', role: 'sparky (sub)',        bg: '#7c3aed' },
+      R: { name: 'Ravi', role: 'gasfitter (sub)',     bg: '#be123c' },
+    };
+
+    // crew shape: [{ initial, lead?: true }]; lead is the primary tradie.
+    const cards = [
+      { id: 1, column_id: 'scheduled', title: 'New HWS + tempering valve install', customer: 'Mr Chen',          suburb: 'Bondi',
+        crew: [{ initial: 'D', lead: true }, { initial: 'S' }] },
+      { id: 2, column_id: 'scheduled', title: 'Café espresso + drainage tie-in',   customer: 'Bluestone Café',   suburb: 'CBD',
+        crew: [{ initial: 'M', lead: true }, { initial: 'N' }, { initial: 'R' }] },
+      { id: 3, column_id: 'in_progress', title: 'Sewer line excavate + cap',       customer: 'Bondi Pavilion',   suburb: 'Bondi',
+        crew: [{ initial: 'D', lead: true }, { initial: 'S' }, { initial: 'R' }] },
+      { id: 4, column_id: 'in_progress', title: 'Switchboard + power for fit-out', customer: 'Highgate Apts',    suburb: 'Surry Hills',
+        crew: [{ initial: 'M', lead: true }, { initial: 'N' }] },
+      { id: 5, column_id: 'completed', title: 'Mixer tap drips slow',              customer: 'Mrs Patel',        suburb: 'Surry Hills',
+        crew: [{ initial: 'S', lead: true }] },
+      { id: 6, column_id: 'scheduled', title: 'Annual gas safety check (12 units)',customer: 'Cottesloe Strata', suburb: 'Vaucluse',
+        crew: [{ initial: 'M', lead: true }, { initial: 'R' }] },
+    ];
+
+    function paintCrew() {
+      for (const wrap of board.querySelectorAll('[data-card-id]')) {
+        const id = wrap.getAttribute('data-card-id');
+        const card = cards.find((c) => String(c.id) === String(id));
+        if (!card) continue;
+        const slot = wrap.querySelector('[data-mt-crew]');
+        if (!slot) continue;
+        slot.innerHTML = '';
+        for (const m of (card.crew || [])) {
+          const p = people[m.initial]; if (!p) continue;
+          const av = document.createElement('span');
+          av.className = 'avatar' + (m.lead ? ' lead' : '');
+          av.style.background = p.bg;
+          av.textContent = m.initial;
+          av.title = `${p.name} (${p.role})${m.lead ? ' — lead' : ''}`;
+          slot.appendChild(av);
+        }
+        if (card.crew?.[0]?.lead) {
+          const lead = people[card.crew[0].initial];
+          const tag = document.createElement('span');
+          tag.className = 'role-tag';
+          tag.textContent = lead?.name || '';
+          slot.appendChild(tag);
+          const marker = document.createElement('span');
+          marker.className = 'lead-marker';
+          marker.textContent = 'lead';
+          slot.appendChild(marker);
+        }
+      }
+    }
+
+    board.addEventListener('board:ready',    (ev) => ev.detail.api.setCardData(cards));
+    board.addEventListener('board:rendered', paintCrew);
+  </script>
+</body>
+</html>

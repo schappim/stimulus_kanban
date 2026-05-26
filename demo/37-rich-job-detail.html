@@ -6,7 +6,11 @@
   <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
   <link rel="stylesheet" href="_shared.css" />
   <style>
-    /* Card face — compact, ServiceM8-ish */
+    /* Break out of the 1100px shared-demo width so the 4 columns + the
+     * 380px detail rail fit comfortably side-by-side on a wide screen. */
+    body { max-width: 1500px; }
+
+    /* Card face — compact, dispatch-board style */
     .jd-card { padding: 8px 10px; }
     .jd-card .top { display: flex; gap: 6px; align-items: baseline; }
     .jd-card .jobno {
@@ -25,10 +29,11 @@
     .jd-card .cust { color: #374151; font-size: 12px; }
     .jd-card .addr { color: #6b7280; font-size: 11px; }
 
-    /* Rail layout */
-    .panel { display: grid; grid-template-columns: 1fr 380px; gap: 0; }
+    /* The detail rail is `position: absolute` (appended inside the board
+     * element by the controller), so we don't reserve a grid column for it.
+     * When the rail is open, the columns scroll horizontally underneath. */
+    .panel { position: relative; }
     .panel .sk-board-stage { min-width: 0; }
-    /* The rail itself is appended into the board — give it some breathing room */
 
     /* ---- Detail panel ---- */
     .jd-detail {
@@ -124,7 +129,7 @@
 </head>
 <body>
   <p class="crumbs"><a href="./">← demos</a></p>
-  <h1>37 — Rich job-detail panel (ServiceM8-style)</h1>
+  <h1>37 — Rich job-detail panel</h1>
   <p class="lede">A real tradie's job-card detail: tap-to-call / SMS / Navigate, photo gallery, materials list with a running total, activity timeline, and action buttons. Click any card.</p>
 
   <!-- The card face (compact) -->
@@ -316,7 +321,7 @@
 
     board.addEventListener('board:ready', (ev) => ev.detail.api.setCardData(jobs));
 
-    // Open the rail on a single click (ServiceM8/Tradify UX). The dblclick
+    // Open the rail on a single click (field-services UX). The dblclick
     // route still works — this just hoists detail-on-click to first class.
     board.addEventListener('board:cardClicked', (ev) => {
       // Ignore clicks that originated from inside the detail panel itself.
