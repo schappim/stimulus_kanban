@@ -64,12 +64,36 @@
     .pool .sk-cards { flex: 1; min-height: 100px; padding: 4px; gap: 4px; }
     .pool .sk-column-header { display: none; }
     .pool .sk-column { background: transparent; border: 0; min-width: 100%; }
+
+    /* --- Horizontal scroll sync polish ----------------------------------
+     * The three tradie rows scroll together (handled by JS below). To
+     * avoid 3 stacked rows of identical day labels + 3 stacked scrollbars,
+     * we keep column headers only on Dave's row (the top of the stack)
+     * and the visible scrollbar only on Mia's row (the bottom). Wheel /
+     * trackpad / keyboard scrolling on any row still sync all three. */
+    .disp #board-sam .sk-column-header,
+    .disp #board-mia .sk-column-header { display: none; }
+
+    /* Without a header, the column body still keeps a small breathing
+     * space at the top so cards don't kiss the top border. */
+    .disp #board-sam .sk-cards,
+    .disp #board-mia .sk-cards { padding-top: 8px; }
+
+    /* Hide redundant scrollbars on rows 1 and 2; leave Mia's visible. */
+    .disp #board-dave .sk-columns,
+    .disp #board-sam .sk-columns {
+      scrollbar-width: none; /* Firefox */
+    }
+    .disp #board-dave .sk-columns::-webkit-scrollbar,
+    .disp #board-sam .sk-columns::-webkit-scrollbar {
+      display: none; /* WebKit / Blink */
+    }
   </style>
 </head>
 <body>
   <p class="crumbs"><a href="./">← demos</a></p>
   <h1>38 — Dispatcher board (unscheduled pool + day slots)</h1>
-  <p class="lede">Unscheduled jobs sit in the left rail. Each tradie has a row of day-slots on the right. Drag a job from the rail to a slot to dispatch it — drop it back on the rail to <em>un</em>schedule. The pool is a one-column board; each tradie row is a multi-column board sharing data via <code>boardApi.applyTransaction</code>.</p>
+  <p class="lede">Unscheduled jobs sit in the left rail. Each tradie has a 10-day row on the right (Mon–Fri × 2 weeks). <strong>Scroll any tradie's row horizontally and the other two follow in lock-step</strong> — the day labels render once on Dave's row and the single visible scrollbar sits beneath Mia's row, so all three feel like one continuous Gantt grid. Drag a job from the rail to a slot to dispatch it; drop back on the rail to <em>un</em>schedule.</p>
 
   <template id="disp-card">
     <article class="sk-card">
@@ -256,10 +280,35 @@
       el.textContent = `${msg}\n${el.textContent}`.split('\n').slice(0, 10).join('\n');
     }
 
-    // Boot every board with its share of the data.
+    // ---- Horizontal scroll sync across the 3 tradie rows -----------------
+    // Hooks the .sk-columns scroll-container on each board. When any one
+    // scrolls, the other two get their scrollLeft set to match. The
+    // `syncing` guard is critical — setting scrollLeft programmatically
+    // fires another 'scroll' event we'd otherwise loop on. The .sk-columns
+    // element is reused across renders (the controller checks for it
+    // before replacing), so we don't need to re-bind on cardMoved.
+    function bindScrollSync() {
+      const rows = ['board-dave', 'board-sam', 'board-mia']
+        .map((id) => document.getElementById(id)?.querySelector('.sk-columns'))
+        .filter(Boolean);
+      if (rows.length < 2) return;
+      let syncing = false;
+      function onScroll(ev) {
+        if (syncing) return;
+        syncing = true;
+        const x = ev.target.scrollLeft;
+        for (const r of rows) if (r !== ev.target) r.scrollLeft = x;
+        // release on the next frame so momentum scrolls don't get throttled
+        requestAnimationFrame(() => { syncing = false; });
+      }
+      for (const r of rows) r.addEventListener('scroll', onScroll, { passive: true });
+    }
+
+    // Boot every board with its share of the data, then wire scroll sync
+    // once all three tradie .sk-columns scrollers exist.
     let booted = 0;
     allBoards.forEach((b) => b.addEventListener('board:ready', () => {
-      if (++booted === allBoards.length) refresh();
+      if (++booted === allBoards.length) { refresh(); bindScrollSync(); }
     }));
   </script>
 </body>
