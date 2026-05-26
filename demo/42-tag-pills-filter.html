@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>42 — Tag pills + click-to-filter | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .tg-card { padding: 8px 10px; }
+    .tg-card h4 { margin: 0 0 4px 0; font-size: 13px; }
+    .tg-card .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+    .tg-card .tag {
+      font: 600 10px system-ui; padding: 1px 7px; border-radius: 999px;
+      letter-spacing: 0.04em; text-transform: lowercase; cursor: pointer;
+      border: 1px solid transparent; line-height: 1.5;
+    }
+    .tg-card .tag:hover { box-shadow: 0 0 0 1px currentColor; }
+    .tg-card .tag.urgent     { background: #fef2f2; color: #b91c1c; }
+    .tg-card .tag.warranty   { background: #fefce8; color: #a16207; }
+    .tg-card .tag.commercial { background: #ecfeff; color: #0e7490; }
+    .tg-card .tag.repeat     { background: #f0fdf4; color: #15803d; }
+    .tg-card .tag.parts      { background: #eff6ff; color: #1d4ed8; }
+    .tg-card .tag.callback   { background: #fdf4ff; color: #86198f; }
+    .filter-bar {
+      display: flex; align-items: center; gap: 8px;
+      margin: 8px 0 12px 0; padding: 6px 10px;
+      background: #f3f4f6; border-radius: 8px; min-height: 32px;
+      font-size: 13px; color: #6b7280;
+    }
+    .filter-bar.has-filter { background: #fef3c7; color: #92400e; }
+    .filter-bar strong { color: #111827; }
+    .filter-bar button {
+      font: inherit; font-size: 12px; padding: 2px 10px;
+      border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer;
+      margin-left: auto;
+    }
+    .filter-bar .pill {
+      display: inline-block; padding: 1px 8px; border-radius: 999px;
+      background: #fff; border: 1px solid currentColor; font-weight: 600;
+      font-size: 11px; text-transform: lowercase;
+    }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>42 — Tag pills + click-to-filter</h1>
+  <p class="lede">Each card has 0–N tag pills. Click any tag → the board filters to cards that share it. Click <em>Clear</em> to reset. Tags use the standard <code>data-bind</code> sub-renderer pattern (one tag per <code>&lt;span&gt;</code>), populated by host glue after <code>board:ready</code>.</p>
+
+  <div class="filter-bar" id="filter-bar">Showing all cards.</div>
+
+  <template id="tg-card">
+    <article class="sk-card tg-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta" data-bind="customer"></div>
+      <div class="tags" data-tg-tags></div>
+    </article>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="tg-card">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"     data-board-column-title-value="To-do"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing"    data-board-column-title-value="Doing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="review"   data-board-column-title-value="Review"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"     data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+
+    const cards = [
+      { id: 1, column_id: 'todo',   title: 'Leaking kitchen tap',         customer: 'Mrs Patel',         tags: ['urgent','callback'] },
+      { id: 2, column_id: 'todo',   title: 'Quote — bathroom rough-in',   customer: 'Smith family',      tags: ['parts'] },
+      { id: 3, column_id: 'todo',   title: 'Annual safety check (gas)',   customer: 'Cottesloe Strata',  tags: ['warranty','repeat'] },
+      { id: 4, column_id: 'doing',  title: 'HWS replace 250L',            customer: 'Mr Chen',           tags: ['urgent','parts'] },
+      { id: 5, column_id: 'doing',  title: 'Café espresso plumbing',      customer: 'BluestoneCafé',     tags: ['commercial'] },
+      { id: 6, column_id: 'review', title: 'Whole-house rewire',          customer: 'Mrs Hollingworth',  tags: ['parts'] },
+      { id: 7, column_id: 'review', title: 'Switchboard upgrade ×4',      customer: 'Highgate Apts',     tags: ['commercial','parts'] },
+      { id: 8, column_id: 'done',   title: 'Toilet running constantly',   customer: 'Lee household',     tags: ['callback'] },
+      { id: 9, column_id: 'doing',  title: 'Burst pipe (after-hours)',    customer: 'Newtown IGA',       tags: ['urgent','commercial'] },
+      { id: 10, column_id: 'todo',  title: 'Quarterly grease trap clean', customer: 'Park Pub',          tags: ['commercial','repeat'] },
+    ];
+
+    let activeTag = null;
+    function applyFilter(tag) {
+      activeTag = tag || null;
+      if (!activeTag) {
+        board.boardApi.setCardFilter(null);
+        document.getElementById('filter-bar').textContent = 'Showing all cards.';
+        document.getElementById('filter-bar').classList.remove('has-filter');
+        return;
+      }
+      board.boardApi.setCardFilter((c) => Array.isArray(c.tags) && c.tags.includes(activeTag));
+      const bar = document.getElementById('filter-bar');
+      bar.innerHTML = `Filtering by tag <span class="pill tag-${activeTag}">${activeTag}</span> — <strong>${cards.filter((c) => c.tags?.includes(activeTag)).length}</strong> match. <button id="tg-clear">Clear filter</button>`;
+      bar.classList.add('has-filter');
+      bar.querySelector('#tg-clear').addEventListener('click', () => applyFilter(null));
+    }
+
+    // Render tags into each card *after* the board has rendered them so the
+    // tag span clicks survive re-renders. The cardConnected event fires per
+    // rendered card so we can decorate each fresh node — but easier here: a
+    // single delegated click on the board for `.tag[data-tag]` clicks.
+    function paintTags() {
+      for (const cardEl of board.querySelectorAll('[data-card-id]')) {
+        const id = cardEl.getAttribute('data-card-id');
+        const card = cards.find((c) => String(c.id) === String(id));
+        if (!card) continue;
+        const slot = cardEl.querySelector('[data-tg-tags]');
+        if (!slot) continue;
+        slot.innerHTML = '';
+        for (const t of (card.tags || [])) {
+          const s = document.createElement('span');
+          s.className = `tag ${t}`;
+          s.textContent = t;
+          s.setAttribute('data-tag', t);
+          slot.appendChild(s);
+        }
+      }
+    }
+
+    board.addEventListener('click', (ev) => {
+      const tag = ev.target.closest?.('[data-tag]')?.getAttribute('data-tag');
+      if (!tag) return;
+      ev.stopPropagation();
+      applyFilter(activeTag === tag ? null : tag);
+    });
+
+    // The board fires `board:rendered` after every DOM re-render — perfect
+    // hook for re-painting the per-card tag pills (the card template clones
+    // don't carry decorations from previous renders).
+    board.addEventListener('board:ready',    (ev) => ev.detail.api.setCardData(cards));
+    board.addEventListener('board:rendered', paintTags);
+  </script>
+</body>
+</html>

@@ -933,6 +933,9 @@ export default class BoardController extends Controller {
     this._refreshSelectionDecorations();
     this._decorateStuckCards();
     if (wasReady) this._schedulePersist();
+    // Fire after the DOM is up so host code can decorate freshly cloned
+    // card nodes (extra pills, hover actions, photo carousels, etc.).
+    emit(this.element, 'board:rendered', {});
   }
 
   _renderColumn(col, cards, filterMode) {

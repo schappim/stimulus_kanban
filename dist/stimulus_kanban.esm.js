@@ -1633,7 +1633,7 @@ class Q extends $ {
         const h = B(n, c.id, this._modelOpts());
         i.appendChild(this._renderColumn(c, h, s));
       }
-    this._refreshSelectionDecorations(), this._decorateStuckCards(), t && this._schedulePersist();
+    this._refreshSelectionDecorations(), this._decorateStuckCards(), t && this._schedulePersist(), C(this.element, "board:rendered", {});
   }
   _renderColumn(t, e, n) {
     const s = K(e, t.sort, this.orderFieldValue), i = s.length, a = this.serverSideValue ? this.state.columnCounts.get(String(t.id)) ?? i : i, d = t.wip != null && i > t.wip, c = p("li", {
