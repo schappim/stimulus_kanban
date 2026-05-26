@@ -63,7 +63,19 @@
 
     .pool .sk-cards { flex: 1; min-height: 100px; padding: 4px; gap: 4px; }
     .pool .sk-column-header { display: none; }
-    .pool .sk-column { background: transparent; border: 0; min-width: 100%; }
+    /* The library renders each column with an inline `width: 280px`
+     * (the default column width). In the 240px-wide pool sidebar that
+     * causes 40px of horizontal overflow + the cards inside get
+     * clipped by the wrapper's overflow:hidden. Clamp the column to
+     * its parent with max-width — max-width caps the computed size
+     * without needing !important. */
+    .pool .sk-column {
+      background: transparent; border: 0;
+      max-width: 100%;
+      min-width: 0;
+      flex: 1 1 auto;       /* allow flex shrink so max-width takes effect */
+      box-sizing: border-box;
+    }
 
     /* --- Horizontal scroll sync polish ----------------------------------
      * The three tradie rows scroll together (handled by JS below). To
