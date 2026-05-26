@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>49 — Photo carousel on card face | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .ph-card { padding: 0; overflow: hidden; }
+    .ph-card .photos {
+      display: grid; gap: 1px;
+      background: #e5e7eb;
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      aspect-ratio: 2 / 1;
+    }
+    /* First photo spans both rows, big; remaining 3 stack on the right */
+    .ph-card .photos .p {
+      background-size: cover; background-position: center;
+      background-color: #f3f4f6; position: relative;
+    }
+    .ph-card .photos .p:first-child { grid-row: 1 / span 2; }
+    .ph-card .photos .p .count {
+      position: absolute; right: 6px; bottom: 6px;
+      background: rgba(0,0,0,0.55); color: #fff;
+      font: 700 10px ui-monospace, Menlo, monospace;
+      padding: 2px 6px; border-radius: 4px;
+    }
+    /* If a card has no photos, drop the strip entirely */
+    .ph-card .photos.empty { display: none; }
+    .ph-card .body { padding: 8px 10px; }
+    .ph-card h4 { margin: 0 0 2px 0; font-size: 13px; }
+    .ph-card .meta { color: #6b7280; font-size: 12px; }
+    .ph-card .row { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+    .ph-card .pill {
+      display: inline-block; font: 600 10px system-ui; padding: 2px 8px;
+      border-radius: 4px; color: #fff; line-height: 1.5;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .ph-card .pill.callout  { background: #dc2626; }
+    .ph-card .pill.install  { background: #2563eb; }
+    .ph-card .pill.warranty { background: #f59e0b; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>49 — Photo carousel on card face (4 thumbnails visible)</h1>
+  <p class="lede">A 2-up + 3-stack photo strip rendered right on the card face. The first photo is the hero (wide), the next three stack vertically. A <code>+N</code> badge on the last tile shows extra photos when the job has more than four. Cards with no photos hide the strip entirely so they don't waste vertical space.</p>
+
+  <template id="ph-card">
+    <article class="sk-card ph-card">
+      <div class="photos" data-ph-photos></div>
+      <div class="body">
+        <h4 class="sk-card-title" data-bind="title"></h4>
+        <div class="meta"><span data-bind="customer"></span> · <span data-bind="suburb"></span></div>
+        <div class="row">
+          <span data-bind="type_label" data-bind-attr="class:type_pill_class"></span>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="ph-card">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="scheduled"   data-board-column-title-value="Scheduled"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="in_progress" data-board-column-title-value="In progress"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="completed"   data-board-column-title-value="Completed"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    const lab = { callout: 'CALLOUT', install: 'INSTALL', warranty: 'WARRANTY' };
+    const enrich = (c) => ({ ...c,
+      type_label: lab[c.type] || c.type.toUpperCase(),
+      type_pill_class: `pill ${c.type}`,
+    });
+
+    // Each card has 0..N photo URLs. We render up to 4 on the face and
+    // surface the rest as a "+N" badge on the last tile.
+    const photo = (i) => `https://picsum.photos/seed/sk-${i}/200/200`;
+    const cards = [
+      enrich({ id: 1, column_id: 'scheduled', title: 'Bathroom rough-in',         customer: 'Williams residence', suburb: 'Mosman',     type: 'install',
+        photos: [photo(11), photo(12), photo(13), photo(14)] }),
+      enrich({ id: 2, column_id: 'scheduled', title: 'HWS replace 250L',          customer: 'Mr Chen',            suburb: 'Bondi',      type: 'install',
+        photos: [photo(21)] }),
+      enrich({ id: 3, column_id: 'scheduled', title: 'Leaking kitchen tap',       customer: 'Mrs Patel',          suburb: 'Surry Hills',type: 'callout',
+        photos: [] /* no photos → strip hidden */ }),
+
+      enrich({ id: 4, column_id: 'in_progress', title: 'Sewer line excavate + cap', customer: 'Bondi Pavilion',   suburb: 'Bondi',      type: 'install',
+        photos: [photo(41), photo(42), photo(43), photo(44), photo(45), photo(46), photo(47)] /* 7 photos → +3 */ }),
+      enrich({ id: 5, column_id: 'in_progress', title: 'Café espresso plumbing',  customer: 'Bluestone Café',     suburb: 'CBD',        type: 'install',
+        photos: [photo(51), photo(52)] }),
+
+      enrich({ id: 6, column_id: 'completed',  title: 'Annual gas safety (12mo)',customer: 'Cottesloe Strata',   suburb: 'Vaucluse',   type: 'warranty',
+        photos: [photo(61), photo(62), photo(63)] }),
+    ];
+    board.addEventListener('board:ready', (ev) => ev.detail.api.setCardData(cards));
+
+    function paintPhotos() {
+      for (const wrap of board.querySelectorAll('[data-card-id]')) {
+        const id = wrap.getAttribute('data-card-id');
+        const card = cards.find((c) => String(c.id) === String(id));
+        if (!card) continue;
+        const strip = wrap.querySelector('[data-ph-photos]');
+        if (!strip) continue;
+        const ps = card.photos || [];
+        strip.innerHTML = '';
+        if (ps.length === 0) { strip.classList.add('empty'); continue; }
+        strip.classList.remove('empty');
+        const shown = ps.slice(0, 4);
+        const extras = ps.length - shown.length;
+        shown.forEach((url, i) => {
+          const d = document.createElement('div');
+          d.className = 'p';
+          d.style.backgroundImage = `url(${url})`;
+          if (i === shown.length - 1 && extras > 0) {
+            const tag = document.createElement('span');
+            tag.className = 'count';
+            tag.textContent = `+${extras}`;
+            d.appendChild(tag);
+          }
+          strip.appendChild(d);
+        });
+      }
+    }
+    board.addEventListener('board:rendered', paintPhotos);
+  </script>
+</body>
+</html>
