@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>50 — Optimistic in-flight pulse | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .op-card { padding: 8px 10px; }
+    .op-card h4 { margin: 0 0 2px 0; font-size: 13px; }
+    .op-card .meta { color: #6b7280; font-size: 12px; }
+    .op-card .row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .op-card button {
+      font: inherit; font-size: 11px; padding: 2px 8px;
+      border: 1px solid #d1d5db; border-radius: 4px; background: #fff; cursor: pointer;
+    }
+    .op-card button:hover { background: #f3f4f6; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>50 — Optimistic in-flight pulse</h1>
+  <p class="lede">Mark a card as <em>saving</em> with <code>boardApi.setCardPending(id, true)</code> and the wrapper gets a soft blue pulse animation. On failure, <code>setCardError(id, true, msg)</code> swaps it to a red pulse + red ring + <code>data-card-error-msg</code> attribute for tooltips/SR. The host clears the marker on success or dismissal. This is the JS-side counterpart of the Rails companion gem's Turbo Stream confirm/error flow.</p>
+
+  <template id="op-card">
+    <article class="sk-card op-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta"><span data-bind="customer"></span></div>
+      <div class="row">
+        <button data-act="save">Save…</button>
+        <button data-act="save-fail">Save (will fail)</button>
+        <button data-act="clear">Clear</button>
+      </div>
+    </article>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="op-card"
+       data-board-suppress-card-click-selection-value="true">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"  data-board-column-title-value="To-do"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing" data-board-column-title-value="Doing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"  data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// click "Save…" to pulse blue; "Save (will fail)" to pulse red after 800ms</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    board.addEventListener('board:ready', (ev) => ev.detail.api.setCardData([
+      { id: 1, column_id: 'todo',  title: 'Site visit — 14 Bayview St', customer: 'Ms Avery' },
+      { id: 2, column_id: 'todo',  title: 'Quote — bathroom rough-in',  customer: 'Smith family' },
+      { id: 3, column_id: 'doing', title: 'Whole-house rewire',         customer: 'Mrs Hollingworth' },
+      { id: 4, column_id: 'done',  title: 'Toilet running constantly',  customer: 'Lee household' },
+    ]));
+
+    function log(msg) {
+      const el = document.getElementById('log');
+      el.textContent = `${msg}\n${el.textContent}`.split('\n').slice(0, 10).join('\n');
+    }
+
+    board.addEventListener('click', (ev) => {
+      const btn = ev.target.closest?.('button[data-act]');
+      if (!btn) return;
+      ev.stopPropagation();
+      const cardEl = btn.closest('[data-card-id]');
+      const id = cardEl.getAttribute('data-card-id');
+      const act = btn.getAttribute('data-act');
+
+      if (act === 'save') {
+        board.boardApi.setCardError(id, false);
+        board.boardApi.setCardPending(id, true);
+        log(`save start: card ${id}`);
+        setTimeout(() => {
+          board.boardApi.setCardPending(id, false);
+          log(`save ✓ card ${id}`);
+        }, 1500);
+      } else if (act === 'save-fail') {
+        board.boardApi.setCardError(id, false);
+        board.boardApi.setCardPending(id, true);
+        log(`save start: card ${id}`);
+        setTimeout(() => {
+          board.boardApi.setCardPending(id, false);
+          board.boardApi.setCardError(id, true, 'HTTP 422: validation failed');
+          log(`save ✗ card ${id} — server returned 422`);
+        }, 800);
+      } else if (act === 'clear') {
+        board.boardApi.setCardPending(id, false);
+        board.boardApi.setCardError(id, false);
+        log(`cleared markers on card ${id}`);
+      }
+    });
+  </script>
+</body>
+</html>

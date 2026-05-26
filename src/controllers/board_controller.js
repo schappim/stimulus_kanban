@@ -627,6 +627,42 @@ export default class BoardController extends Controller {
     return new Date().toISOString();
   }
 
+  /* Optimistic in-flight markers
+   * ----------------------------
+   * `setCardPending(id, true)` marks a card as "saving" — the wrapper gets
+   * `data-card-pending="true"` and a CSS pulse animation. Use it whenever
+   * you fire a moveCard/applyTransaction that won't be confirmed until a
+   * server round-trip. Call `setCardPending(id, false)` on success.
+   *
+   * `setCardError(id, true, msg)` is the failure side: a red pulse + a
+   * `data-card-error-msg` for tooltips/screen readers. The host clears it
+   * explicitly. */
+  setCardPending(cardId, on = true) {
+    const id = String(cardId);
+    const cardEl = this._cardEl(id);
+    if (!cardEl) return false;
+    if (on) cardEl.setAttribute('data-card-pending', 'true');
+    else cardEl.removeAttribute('data-card-pending');
+    return true;
+  }
+  setCardError(cardId, on = true, msg) {
+    const id = String(cardId);
+    const cardEl = this._cardEl(id);
+    if (!cardEl) return false;
+    if (on) {
+      cardEl.setAttribute('data-card-error', 'true');
+      if (msg) cardEl.setAttribute('data-card-error-msg', String(msg));
+    } else {
+      cardEl.removeAttribute('data-card-error');
+      cardEl.removeAttribute('data-card-error-msg');
+    }
+    return true;
+  }
+  isCardPending(cardId) {
+    const cardEl = this._cardEl(String(cardId));
+    return cardEl?.getAttribute('data-card-pending') === 'true';
+  }
+
   getCardEnteredAt(cardId) {
     return this.state.enteredColumnAt.get(String(cardId)) || null;
   }

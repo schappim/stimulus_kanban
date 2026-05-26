@@ -324,6 +324,16 @@ function qt(r) {
     setAgingClock(t) {
       typeof t == "function" ? r._aging_now = t : r._aging_now = () => (/* @__PURE__ */ new Date()).toISOString(), r._decorateStuckCards();
     },
+    // ---- Optimistic in-flight markers ----
+    setCardPending(t, e = !0) {
+      r.setCardPending(t, e);
+    },
+    setCardError(t, e = !0, n) {
+      r.setCardError(t, e, n);
+    },
+    isCardPending(t) {
+      return r.isCardPending(t);
+    },
     // ---- Persistence ----
     getBoardState() {
       return r.getBoardState();
@@ -1412,6 +1422,27 @@ class Q extends $ {
   }
   _aging_now() {
     return (/* @__PURE__ */ new Date()).toISOString();
+  }
+  /* Optimistic in-flight markers
+   * ----------------------------
+   * `setCardPending(id, true)` marks a card as "saving" — the wrapper gets
+   * `data-card-pending="true"` and a CSS pulse animation. Use it whenever
+   * you fire a moveCard/applyTransaction that won't be confirmed until a
+   * server round-trip. Call `setCardPending(id, false)` on success.
+   *
+   * `setCardError(id, true, msg)` is the failure side: a red pulse + a
+   * `data-card-error-msg` for tooltips/screen readers. The host clears it
+   * explicitly. */
+  setCardPending(t, e = !0) {
+    const n = String(t), s = this._cardEl(n);
+    return s ? (e ? s.setAttribute("data-card-pending", "true") : s.removeAttribute("data-card-pending"), !0) : !1;
+  }
+  setCardError(t, e = !0, n) {
+    const s = String(t), i = this._cardEl(s);
+    return i ? (e ? (i.setAttribute("data-card-error", "true"), n && i.setAttribute("data-card-error-msg", String(n))) : (i.removeAttribute("data-card-error"), i.removeAttribute("data-card-error-msg")), !0) : !1;
+  }
+  isCardPending(t) {
+    return this._cardEl(String(t))?.getAttribute("data-card-pending") === "true";
   }
   getCardEnteredAt(t) {
     return this.state.enteredColumnAt.get(String(t)) || null;

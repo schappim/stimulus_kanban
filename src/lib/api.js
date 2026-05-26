@@ -85,6 +85,11 @@ export function createBoardApi(board) {
       board._decorateStuckCards();
     },
 
+    // ---- Optimistic in-flight markers ----
+    setCardPending(cardId, on = true)      { board.setCardPending(cardId, on); },
+    setCardError(cardId, on = true, msg)   { board.setCardError(cardId, on, msg); },
+    isCardPending(cardId)                  { return board.isCardPending(cardId); },
+
     // ---- Persistence ----
     getBoardState()                    { return board.getBoardState(); },
     applyBoardState(state)             { return board.applyBoardState(state); },
