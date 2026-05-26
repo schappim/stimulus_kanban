@@ -1,0 +1,26 @@
+/*
+ *= require_tree .
+ *= require_self
+ */
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  max-width: 1400px;
+  margin: 32px auto;
+  padding: 0 24px;
+  color: #1f2937;
+}
+
+header.page h1 { margin-bottom: 4px; }
+p.lede { color: #6b7280; max-width: 75ch; }
+ul.features { color: #374151; font-size: 14px; line-height: 1.7; }
+ul.features li code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+
+.sk-board { height: 620px; }
+footer.page-foot {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 13px;
+}

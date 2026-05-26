@@ -1,0 +1,39 @@
+<% content_for :title, "Sprint — stimulus_kanban_rails demo" %>
+
+<header class="page">
+  <h1>Sprint board</h1>
+  <p class="lede">
+    Drag a story between columns. Every move flies through
+    <code>PATCH /boards/stories/cards/:id/move</code> with an optimistic id,
+    persists via <code>SprintBoard#apply_move!</code>, and broadcasts to every
+    connected tab over <code>turbo_stream_from "sprint:current"</code>.
+    Open this page in two browser windows side-by-side and drag in one — the
+    other updates within a frame.
+  </p>
+  <ul class="features">
+    <li><strong>Server-side board declaration</strong> — see <code>app/boards/sprint_board.rb</code></li>
+    <li><strong>WIP limits</strong> on To-do (5), Doing (3), Review (2) — surfaced as a red column header when over</li>
+    <li><strong>Workflow guard</strong> — a story can't enter Doing without points; try dragging an empty one and watch the move revert</li>
+    <li><strong>accept_from</strong> chain — Review only accepts from Doing; Done only from Review</li>
+    <li><strong>Optimistic-id reconciliation</strong> — the originator's tab suppresses its own broadcast echo (no double-render)</li>
+    <li><strong>Bulk move</strong> — Cmd/Ctrl-click cards to multi-select, then drag the pile; one <code>move_bulk</code> round-trip, atomic transaction</li>
+    <li><strong>Live multi-tab sync</strong> via <code>turbo_stream_from(*streamables)</code> with tenant-scoping via <code>StimulusKanbanRails.streamables_for</code></li>
+  </ul>
+</header>
+
+<%# Render through the shipped board partial. It mounts the `board` +
+    `board-sync` controllers, subscribes the page to the Turbo Stream,
+    and lays out columns + cards from the SprintBoard declaration. %>
+<%= stimulus_kanban_board(
+      board: @board,
+      cards: @stories,
+      card_selection: "multiple") %>
+
+<footer class="page-foot">
+  <small>
+    Backed by Action Cable. Open <code>/cable</code> in a second tab to see the
+    WebSocket frames. View the Board class at
+    <code>gem/demo/app/boards/sprint_board.rb</code> and the engine routes
+    table by running <code>bin/rails routes -g cards</code>.
+  </small>
+</footer>
