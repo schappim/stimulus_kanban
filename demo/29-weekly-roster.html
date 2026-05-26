@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>29 — Weekly roster | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .roster-card { padding: 10px 12px; }
+    .roster-card .time { font-family: ui-monospace, monospace; font-size: 11px; color: #2563eb; font-weight: 600; }
+    .roster-card h4 { margin: 4px 0; font-size: 13px; }
+    .roster-card .meta { color: #6b7280; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>29 — Weekly job roster (swimlanes by tradie)</h1>
+  <p class="lede">Days of the week are columns; each tradie's lane runs across the board. Drag a job from <em>Tuesday</em> to <em>Wednesday</em> to reschedule. Every move emits <code>board:cardMoved</code> — wire it to your back-end and the roster stays in sync.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-renderer-value="roster-card"
+       data-board-swimlane-field-value="assignee"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="mon" data-board-column-title-value="Monday"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="tue" data-board-column-title-value="Tuesday"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="wed" data-board-column-title-value="Wednesday"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="thu" data-board-column-title-value="Thursday"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="fri" data-board-column-title-value="Friday"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <template id="roster-card">
+    <article class="sk-card roster-card">
+      <span class="time" data-bind="time_slot"></span>
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta" data-bind="suburb"></div>
+    </article>
+  </template>
+
+  <pre class="log" id="log">// board:cardMoved</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1,  column_id: 'mon', assignee: 'Dave (Sparky)',    time_slot: '8:00–10:00',  title: 'Install 6× GPOs in new office fit-out',  suburb: 'Surry Hills' },
+        { id: 2,  column_id: 'mon', assignee: 'Sarah (Plumber)',  time_slot: '8:30–12:00',  title: 'Hot water swap — 50L to 250L gas',        suburb: 'Bondi' },
+        { id: 3,  column_id: 'mon', assignee: 'Mike (Chippy)',    time_slot: '7:00–15:00',  title: 'Deck framing — day 1 (90 m²)',            suburb: 'Mosman' },
+        { id: 4,  column_id: 'tue', assignee: 'Dave (Sparky)',    time_slot: '9:00–11:00',  title: 'Switchboard upgrade — 1ph to 3ph',        suburb: 'Newtown' },
+        { id: 5,  column_id: 'tue', assignee: 'Sarah (Plumber)',  time_slot: '10:00–14:00', title: 'Bathroom rough-in (renovation)',          suburb: 'Paddington' },
+        { id: 6,  column_id: 'wed', assignee: 'Jamie (Painter)',  time_slot: '7:30–16:00',  title: 'Internal walls — 3 bed, 1 living',        suburb: 'Marrickville' },
+        { id: 7,  column_id: 'wed', assignee: 'Dave (Sparky)',    time_slot: '13:00–15:00', title: 'Smoke alarm replacements (×9)',            suburb: 'Manly' },
+        { id: 8,  column_id: 'thu', assignee: 'Mike (Chippy)',    time_slot: '7:00–15:00',  title: 'Deck framing — day 2 + decking',           suburb: 'Mosman' },
+        { id: 9,  column_id: 'thu', assignee: 'Sarah (Plumber)',  time_slot: '11:00–13:00', title: 'Gas cooktop install (Westinghouse 90cm)',  suburb: 'Bondi Junction' },
+        { id: 10, column_id: 'fri', assignee: 'Jamie (Painter)',  time_slot: '8:00–14:00',  title: 'Exterior gable + gutters',                 suburb: 'Coogee' },
+        { id: 11, column_id: 'fri', assignee: 'Dave (Sparky)',    time_slot: '9:00–10:30',  title: 'Emergency: no power on one phase',         suburb: 'Cronulla' },
+      ]);
+    });
+    board.addEventListener('board:cardMoved', (ev) => {
+      const log = document.getElementById('log');
+      log.textContent = `${ev.detail.fromColumnId} → ${ev.detail.toColumnId}  (card #${ev.detail.cardId})\n` + log.textContent;
+    });
+  </script>
+</body>
+</html>
