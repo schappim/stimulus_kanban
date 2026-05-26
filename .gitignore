@@ -1,0 +1,9 @@
+node_modules/
+dist-demos/
+.DS_Store
+*.log
+.vite/
+.cache/
+coverage/
+.env
+.env.local

@@ -1,0 +1,69 @@
+{
+  "name": "@ninjaai/stimulus_kanban",
+  "version": "0.1.0",
+  "description": "HTML-first Kanban board for Stimulus.js (Hotwire) — drag-and-drop columns of cards, WIP limits, swimlanes, multi-card selection, inline editing, custom card renderers, virtual scrolling, server-side card model, and a full public boardApi. Companion gem ships live multi-user moves over Turbo Streams.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Marcus Schappi",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/schappim/stimulus_kanban#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/schappim/stimulus_kanban.git"
+  },
+  "bugs": {
+    "url": "https://github.com/schappim/stimulus_kanban/issues"
+  },
+  "keywords": [
+    "stimulus",
+    "hotwire",
+    "turbo",
+    "kanban",
+    "board",
+    "drag-and-drop",
+    "swimlanes",
+    "wip-limits"
+  ],
+  "main": "dist/stimulus_kanban.esm.js",
+  "module": "dist/stimulus_kanban.esm.js",
+  "unpkg": "dist/stimulus_kanban.js",
+  "jsdelivr": "dist/stimulus_kanban.js",
+  "exports": {
+    ".": {
+      "import": "./dist/stimulus_kanban.esm.js",
+      "default": "./dist/stimulus_kanban.esm.js"
+    },
+    "./style.css": "./dist/stimulus_kanban.css",
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:lib": "FORMAT=iife vite build --config vite.lib.config.js && FORMAT=es vite build --config vite.lib.config.js",
+    "build:lib:iife": "FORMAT=iife vite build --config vite.lib.config.js",
+    "build:lib:esm": "FORMAT=es vite build --config vite.lib.config.js",
+    "build:lib:watch": "FORMAT=iife vite build --config vite.lib.config.js --watch",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build:lib && npm test"
+  },
+  "peerDependencies": {
+    "@hotwired/stimulus": "^3.2.2"
+  },
+  "devDependencies": {
+    "@hotwired/stimulus": "^3.2.2",
+    "jsdom": "^25.0.1",
+    "vite": "^6.4.2",
+    "vitest": "^3.2.4"
+  }
+}
