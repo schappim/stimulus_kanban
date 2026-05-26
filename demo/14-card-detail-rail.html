@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>14 — Card detail rail | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>14 — Card detail rail</h1>
+  <p class="lede">Same template, different layout — the detail slides in from the board's right edge instead of floating over the card.</p>
+
+  <template id="story-detail">
+    <aside>
+      <header>
+        <h3 data-bind="title"></h3>
+        <button data-detail-close class="sk-button">×</button>
+      </header>
+      <dl>
+        <dt>Status</dt><dd data-bind="status"></dd>
+        <dt>Assignee</dt><dd data-bind="assignee_name"></dd>
+        <dt>Points</dt><dd data-bind="points"></dd>
+      </dl>
+      <p data-bind="description"></p>
+    </aside>
+  </template>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-detail-template-value="story-detail"
+       data-board-detail-layout-value="rail"
+       data-board-detail-width-value="380"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"  data-board-column-title-value="To do"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing" data-board-column-title-value="Doing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"  data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    document.getElementById('board').addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'todo',  title: 'Refactor column reducer',    status: 'todo',  assignee_name: 'Alice', points: 3, description: 'Split moveCard into pure / DOM phases.' },
+        { id: 2, column_id: 'doing', title: 'Add audit-log migration',     status: 'doing', assignee_name: 'Bob',   points: 5, description: 'Opt-in migration shipped with the Rails gem.' },
+        { id: 3, column_id: 'done',  title: 'Ship demos',                   status: 'done',  assignee_name: 'Carol', points: 2, description: '25+ HTML demo pages, vite-served.' },
+      ]);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>10 — Quick filter | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>10 — Quick filter</h1>
+  <p class="lede">Type to filter — non-matching cards hide. Toggle the filter mode to dim them instead.</p>
+
+  <div class="toolbar">
+    <input id="q" placeholder="Search cards…" />
+    <label>Mode
+      <select id="mode">
+        <option value="hide">hide</option>
+        <option value="dim">dim</option>
+      </select>
+    </label>
+    <button id="clear">Clear</button>
+  </div>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-filter-mode-value="hide"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="backlog" data-board-column-title-value="Backlog"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing"   data-board-column-title-value="Doing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"    data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'backlog', title: 'Fix flaky e2e test on Safari' },
+        { id: 2, column_id: 'backlog', title: 'Implement audit log' },
+        { id: 3, column_id: 'doing',   title: 'Profile slow homepage' },
+        { id: 4, column_id: 'doing',   title: 'Switch CDN provider' },
+        { id: 5, column_id: 'done',    title: 'Send retention emails' },
+        { id: 6, column_id: 'backlog', title: 'Add Sentry breadcrumbs' },
+      ]);
+    });
+    document.getElementById('q').addEventListener('input', (ev) => board.boardApi.setQuickFilter(ev.target.value));
+    document.getElementById('mode').addEventListener('change', (ev) => {
+      board.setAttribute('data-board-filter-mode-value', ev.target.value);
+      board.boardApi.setQuickFilter(board.boardApi.getQuickFilter()); // re-render
+    });
+    document.getElementById('clear').addEventListener('click', () => {
+      document.getElementById('q').value = '';
+      board.boardApi.setQuickFilter('');
+    });
+  </script>
+</body>
+</html>

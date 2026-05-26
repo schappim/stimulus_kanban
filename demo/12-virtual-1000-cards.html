@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>12 — Virtual scrolling | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>12 — Virtual scrolling with 1,000 cards</h1>
+  <p class="lede">Card height is fixed at <code>64</code>, so the busy column virtualises automatically past the 200-card threshold.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-height-value="64"
+       data-board-virtual-threshold-value="200"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="inbox" data-board-column-title-value="Inbox"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="acked" data-board-column-title-value="Acked"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"  data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    board.addEventListener('board:ready', (ev) => {
+      const cards = [];
+      for (let i = 0; i < 1000; i++) cards.push({ id: `i-${i}`, column_id: 'inbox', title: `Ticket #${i+1}: investigate alert` });
+      for (let i = 0; i < 30; i++)   cards.push({ id: `a-${i}`, column_id: 'acked', title: `Acked #${i+1}` });
+      for (let i = 0; i < 50; i++)   cards.push({ id: `d-${i}`, column_id: 'done',  title: `Done #${i+1}` });
+      ev.detail.api.setCardData(cards);
+    });
+  </script>
+</body>
+</html>

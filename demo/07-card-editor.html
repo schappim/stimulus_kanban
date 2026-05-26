@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>07 — Inline editor | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>07 — Inline card editor (template)</h1>
+  <p class="lede">Double-click a card. The cloned <code>&lt;template id="story-editor"&gt;</code> swaps in with each <code>data-editor-field</code> seeded from the card. Enter / Tab commits; Esc cancels.</p>
+
+  <template id="story-editor">
+    <form class="sk-card-editor">
+      <input data-editor-input data-editor-field="title" placeholder="Title" />
+      <select data-editor-field="points">
+        <option>1</option><option>2</option><option>3</option><option>5</option><option>8</option><option>13</option>
+      </select>
+      <div class="sk-card-editor-actions">
+        <button data-editor-commit class="sk-button sk-button-primary">Save</button>
+        <button data-editor-cancel type="button" class="sk-button">Cancel</button>
+      </div>
+    </form>
+  </template>
+
+  <div class="panel" data-controller="board"
+       data-board-card-editor-value="story-editor"
+       data-board-card-renderer-value="story"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="backlog" data-board-column-title-value="Backlog"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="next"    data-board-column-title-value="Up next"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"    data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// board:cardValueChanged events</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'backlog', key: 'STK-1', title: 'Implement WIP overlay', status: 'todo',   points: 3 },
+        { id: 2, column_id: 'backlog', key: 'STK-2', title: 'Refactor reducer naming', status: 'todo',   points: 1 },
+        { id: 3, column_id: 'next',    key: 'STK-3', title: 'Add boardApi.openCardDetail', status: 'doing',  points: 5 },
+        { id: 4, column_id: 'done',    key: 'STK-4', title: 'Scaffold gem skeleton', status: 'done',  points: 2 },
+      ]);
+    });
+    document.getElementById('log');
+    board.addEventListener('board:cardValueChanged', (ev) => {
+      const log = document.getElementById('log');
+      log.textContent = JSON.stringify({ cardId: ev.detail.cardId, before: ev.detail.oldCard, after: ev.detail.newCard }, null, 2) + '\n\n' + log.textContent;
+    });
+  </script>
+</body>
+</html>

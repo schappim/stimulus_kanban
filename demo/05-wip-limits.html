@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>05 — WIP limits | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>05 — WIP limits</h1>
+  <p class="lede">Doing has WIP=2. Drop a third card in and the column turns red + <code>board:wipExceeded</code> fires (once per crossing, not per card).</p>
+
+  <div class="panel" data-controller="board" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"
+          data-board-column-title-value="To do">
+        <ol class="sk-cards">
+          <li data-card-id="a">A</li>
+          <li data-card-id="b">B</li>
+          <li data-card-id="c">C</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="doing"
+          data-board-column-title-value="Doing"
+          data-board-column-wip-value="2">
+        <ol class="sk-cards">
+          <li data-card-id="d">D</li>
+          <li data-card-id="e">E</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="done"
+          data-board-column-title-value="Done">
+        <ol class="sk-cards"></ol>
+      </li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// board:wipExceeded events</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const log = document.getElementById('log');
+    document.getElementById('board').addEventListener('board:wipExceeded', (ev) => {
+      log.textContent = JSON.stringify(ev.detail) + '\n' + log.textContent;
+    });
+  </script>
+</body>
+</html>

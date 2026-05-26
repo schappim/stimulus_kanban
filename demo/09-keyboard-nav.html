@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>09 — Keyboard nav | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>09 — Keyboard navigation</h1>
+  <p class="lede">Click in the board, then use the arrow keys to navigate. <kbd>Cmd</kbd> + arrows actually moves the active card across columns / rows.</p>
+
+  <div class="panel" data-controller="board"
+       data-board-card-selection-value="multiple" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"  data-board-column-title-value="To do">
+        <ol class="sk-cards">
+          <li data-card-id="1">Read RFC</li>
+          <li data-card-id="2">Write proposal</li>
+          <li data-card-id="3">Schedule review</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="doing" data-board-column-title-value="Doing">
+        <ol class="sk-cards">
+          <li data-card-id="4">Implement spec</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="done"  data-board-column-title-value="Done">
+        <ol class="sk-cards">
+          <li data-card-id="5">Publish post</li>
+        </ol>
+      </li>
+    </ol>
+  </div>
+
+  <p class="tip">Keys: ↑/↓ move within column · ←/→ move across columns · <kbd>Cmd</kbd>+arrows actually moves the card · <kbd>Space</kbd> toggles selection · <kbd>Enter</kbd> opens the editor · <kbd>Cmd</kbd>+A selects column.</p>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>StimulusKanban.start();</script>
+</body>
+</html>

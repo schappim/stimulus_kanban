@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>06 — Swimlanes | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>06 — Swimlanes by assignee</h1>
+  <p class="lede">Same columns, but every column is split horizontally into bands by <code>card.assignee</code>. Dropping into a different band reassigns the field and emits <code>board:cardValueChanged</code>.</p>
+
+  <div class="toolbar">
+    <label>Swimlane by
+      <select id="lanePicker">
+        <option value="assignee">assignee</option>
+        <option value="priority">priority</option>
+        <option value="">— off —</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="panel" data-controller="board"
+       data-board-swimlane-field-value="assignee"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"  data-board-column-title-value="To do"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing" data-board-column-title-value="Doing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"  data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'todo',  title: 'Triage incoming bugs', assignee: 'Alice',   priority: 'high' },
+        { id: 2, column_id: 'todo',  title: 'Refresh marketing site', assignee: 'Bob',    priority: 'low' },
+        { id: 3, column_id: 'doing', title: 'Implement two-factor', assignee: 'Alice',   priority: 'high' },
+        { id: 4, column_id: 'doing', title: 'Migrate payments',      assignee: 'Carol',   priority: 'medium' },
+        { id: 5, column_id: 'done',  title: 'Ship landing page',     assignee: 'Bob',     priority: 'low' },
+        { id: 6, column_id: 'todo',  title: 'Audit dependencies',    assignee: 'Carol',   priority: 'medium' },
+      ]);
+    });
+    document.getElementById('lanePicker').addEventListener('change', (ev) => {
+      board.boardApi.setSwimlaneField(ev.target.value);
+    });
+  </script>
+</body>
+</html>

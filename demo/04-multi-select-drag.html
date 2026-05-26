@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>04 — Multi-card drag | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>04 — Multi-card drag</h1>
+  <p class="lede">Cmd/Ctrl-click cards to add to selection, then drag any selected card to move the pile. Order is preserved.</p>
+
+  <div class="panel" data-controller="board"
+       data-board-card-selection-value="multiple" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo" data-board-column-title-value="To do">
+        <ol class="sk-cards">
+          <li data-card-id="1">Task A</li>
+          <li data-card-id="2">Task B</li>
+          <li data-card-id="3">Task C</li>
+          <li data-card-id="4">Task D</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="doing" data-board-column-title-value="Doing">
+        <ol class="sk-cards">
+          <li data-card-id="5">Task E</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="done" data-board-column-title-value="Done">
+        <ol class="sk-cards"></ol>
+      </li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// selection + move events</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const log = document.getElementById('log');
+    const board = document.getElementById('board');
+    board.addEventListener('board:cardSelectionChanged', (ev) => {
+      log.textContent = `selected: ${JSON.stringify(ev.detail.selectedCardIds)}\n` + log.textContent;
+    });
+    board.addEventListener('board:cardsMoved', (ev) => {
+      log.textContent = `moved pile: ${JSON.stringify(ev.detail)}\n` + log.textContent;
+    });
+  </script>
+</body>
+</html>

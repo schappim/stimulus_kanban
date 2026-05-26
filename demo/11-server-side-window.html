@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>11 — Server-side card model | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>11 — Server-side card model</h1>
+  <p class="lede">Each column shows the first window the "server" returned. The "+N more…" pill at the bottom fires <code>board:columnFetchMore</code>, which the host applies via <code>applyTransaction</code>.</p>
+
+  <div class="panel" data-controller="board"
+       data-board-server-side-value="true" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="open"
+          data-board-column-title-value="Open"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="acked"
+          data-board-column-title-value="Acked"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="resolved"
+          data-board-column-title-value="Resolved"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// board:columnFetchMore</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    const TOTAL = { open: 240, acked: 86, resolved: 1124 };
+    const PAGE = 25;
+    const loaded = { open: 0, acked: 0, resolved: 0 };
+
+    function makeCards(col, from, count) {
+      const out = [];
+      for (let i = 0; i < count; i++) {
+        out.push({ id: `${col}-${from + i}`, column_id: col, title: `${col[0].toUpperCase()}${col.slice(1)} card #${from + i + 1}` });
+      }
+      return out;
+    }
+
+    board.addEventListener('board:ready', (ev) => {
+      const api = ev.detail.api;
+      api.setCardData([
+        ...makeCards('open', 0, PAGE),
+        ...makeCards('acked', 0, PAGE),
+        ...makeCards('resolved', 0, PAGE),
+      ]);
+      api.setColumnCounts(TOTAL);
+      loaded.open = loaded.acked = loaded.resolved = PAGE;
+    });
+
+    board.addEventListener('board:columnFetchMore', (ev) => {
+      const log = document.getElementById('log');
+      const col = ev.detail.columnId;
+      const remaining = Math.max(0, TOTAL[col] - loaded[col]);
+      const fetched = Math.min(PAGE, remaining);
+      if (fetched === 0) return;
+      const next = makeCards(col, loaded[col], fetched);
+      board.boardApi.applyTransaction({ add: next });
+      loaded[col] += fetched;
+      log.textContent = `fetched ${fetched} more for ${col}; loaded=${loaded[col]} / ${TOTAL[col]}\n` + log.textContent;
+    });
+  </script>
+</body>
+</html>

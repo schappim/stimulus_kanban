@@ -1,0 +1,23 @@
+/* Shared demo chrome — kept tiny so each page can be read end-to-end. */
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 0 20px;
+  color: #1f2937;
+}
+h1 { margin-bottom: 4px; }
+p.lede { color: #6b7280; margin-top: 0; }
+.crumbs a { color: #2563eb; text-decoration: none; }
+.crumbs a:hover { text-decoration: underline; }
+.panel { height: 540px; margin-top: 16px; }
+.tip { color: #6b7280; font-size: 13px; margin-top: 12px; }
+.toolbar { display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+.toolbar input, .toolbar select, .toolbar button {
+  font: inherit; padding: 4px 10px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff;
+}
+.toolbar button { cursor: pointer; }
+pre.log {
+  margin-top: 12px; padding: 10px 12px; background: #0f172a; color: #e2e8f0;
+  border-radius: 6px; max-height: 140px; overflow: auto; font: 12px ui-monospace, monospace;
+}

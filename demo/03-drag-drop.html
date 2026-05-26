@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>03 — Drag &amp; drop | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>03 — Drag &amp; drop between and within columns</h1>
+  <p class="lede">Pointer drag with an insertion-bar drop indicator. Logs every <code>board:cardMoved</code> event below the board.</p>
+
+  <div class="panel" data-controller="board" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="backlog" data-board-column-title-value="Backlog">
+        <ol class="sk-cards">
+          <li data-card-id="1">Investigate flaky test</li>
+          <li data-card-id="2">Profile slow endpoint</li>
+          <li data-card-id="3">Onboarding doc draft</li>
+          <li data-card-id="4">Audit feature flags</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="next" data-board-column-title-value="Up next">
+        <ol class="sk-cards">
+          <li data-card-id="5">Add boardApi smoke test</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="doing" data-board-column-title-value="Doing">
+        <ol class="sk-cards">
+          <li data-card-id="6">Add accept-from rule</li>
+          <li data-card-id="7">Implement detail panel</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="done" data-board-column-title-value="Done">
+        <ol class="sk-cards">
+          <li data-card-id="8">Ship v0.1</li>
+        </ol>
+      </li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// board:cardMoved events appear here</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const log = document.getElementById('log');
+    document.getElementById('board').addEventListener('board:cardMoved', (ev) => {
+      log.textContent = JSON.stringify(ev.detail, null, 2) + '\n' + log.textContent;
+    });
+  </script>
+</body>
+</html>

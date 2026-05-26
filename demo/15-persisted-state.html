@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>15 — Persisted state | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>15 — Persisted board state</h1>
+  <p class="lede">Column order, widths, collapse state, swimlane + quick filter all round-trip through <code>localStorage["skanban:demo-15"]</code>. Reload — your changes stick.</p>
+
+  <div class="toolbar">
+    <input id="q" placeholder="Filter…" />
+    <button id="reset">Reset state</button>
+  </div>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-persist-key-value="demo-15"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"  data-board-column-title-value="To do"  data-board-column-width-value="240"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing" data-board-column-title-value="Doing"   data-board-column-width-value="240"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"  data-board-column-title-value="Done"    data-board-column-width-value="240"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'todo',  title: 'Write changelog' },
+        { id: 2, column_id: 'todo',  title: 'Update screenshots' },
+        { id: 3, column_id: 'doing', title: 'Polish docs site' },
+        { id: 4, column_id: 'done',  title: 'Cut release branch' },
+      ]);
+    });
+    document.getElementById('q').addEventListener('input', (e) => board.boardApi.setQuickFilter(e.target.value));
+    document.getElementById('reset').addEventListener('click', () => {
+      board.boardApi.clearPersistedState();
+      location.reload();
+    });
+  </script>
+</body>
+</html>

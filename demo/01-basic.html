@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>01 — Basic board | stimulus_kanban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>01 — Basic board</h1>
+  <p class="lede">Server-rendered <code>&lt;ol&gt;</code> of columns with <code>&lt;li&gt;</code> cards. No JS data hand-off — the board hydrates the markup as-is.</p>
+
+  <div class="panel" data-controller="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column"
+          data-board-column-id-value="todo"
+          data-board-column-title-value="To do">
+        <ol class="sk-cards">
+          <li data-card-id="1">Buy milk</li>
+          <li data-card-id="2">Walk dog</li>
+          <li data-card-id="3">Renew passport</li>
+        </ol>
+      </li>
+      <li data-controller="board-column"
+          data-board-column-id-value="doing"
+          data-board-column-title-value="Doing">
+        <ol class="sk-cards">
+          <li data-card-id="4">Write spec</li>
+        </ol>
+      </li>
+      <li data-controller="board-column"
+          data-board-column-id-value="done"
+          data-board-column-title-value="Done">
+        <ol class="sk-cards">
+          <li data-card-id="5">Ship v0.1</li>
+        </ol>
+      </li>
+    </ol>
+  </div>
+
+  <p class="tip">Try: drag a card between columns; double-click to inline-edit; click to select; arrow keys to navigate.</p>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>StimulusKanban.start();</script>
+</body>
+</html>

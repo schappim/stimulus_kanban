@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>stimulus_kanban demos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 920px; margin: 40px auto; padding: 0 20px; color: #1f2937; }
+    h1 { margin-bottom: 4px; }
+    p.lede { color: #6b7280; margin-top: 0; }
+    ol { padding-left: 20px; line-height: 1.85; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: #f3f4f6; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+    section { margin-top: 32px; }
+    h2 { font-size: 16px; color: #374151; }
+  </style>
+</head>
+<body>
+  <h1>stimulus_kanban — demos</h1>
+  <p class="lede">A live demo per capability in the spec. Each page is a self-contained HTML file that mounts the IIFE bundle from <code>../dist/</code>.</p>
+
+  <section>
+    <h2>Fundamentals</h2>
+    <ol>
+      <li><a href="01-basic.html">01 — Basic board</a></li>
+      <li><a href="02-json-data.html">02 — JSON data via setCardData</a></li>
+      <li><a href="03-drag-drop.html">03 — Drag &amp; drop between columns</a></li>
+      <li><a href="04-multi-select-drag.html">04 — Multi-card drag</a></li>
+      <li><a href="05-wip-limits.html">05 — WIP limits</a></li>
+      <li><a href="06-swimlanes-assignee.html">06 — Swimlanes by assignee</a></li>
+      <li><a href="07-card-editor.html">07 — Inline card editor</a></li>
+      <li><a href="08-custom-renderer-story.html">08 — Custom card renderer (story)</a></li>
+      <li><a href="09-keyboard-nav.html">09 — Keyboard navigation</a></li>
+      <li><a href="10-quick-filter.html">10 — Quick filter</a></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Scale &amp; persistence</h2>
+    <ol start="11">
+      <li><a href="11-server-side-window.html">11 — Server-side card model</a></li>
+      <li><a href="12-virtual-1000-cards.html">12 — Virtual scrolling with 1,000 cards</a></li>
+      <li><a href="13-card-detail-popover.html">13 — Card detail popover</a></li>
+      <li><a href="14-card-detail-rail.html">14 — Card detail rail</a></li>
+      <li><a href="15-persisted-state.html">15 — Persisted board state</a></li>
+      <li><a href="16-read-only-board.html">16 — Read-only board</a></li>
+      <li><a href="17-add-card-add-column.html">17 — Add-card / add-column affordances</a></li>
+      <li><a href="18-accept-from-rules.html">18 — accept-from drop rules</a></li>
+      <li><a href="19-cancellable-before-move.html">19 — Cancellable before-move (workflow)</a></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Industry scenarios</h2>
+    <ol start="20">
+      <li><a href="20-incident-board-renderer.html">20 — Incident response board</a></li>
+      <li><a href="21-pr-review-board.html">21 — Pull-request review board</a></li>
+      <li><a href="22-support-inbox-board.html">22 — Support inbox</a></li>
+      <li><a href="23-leads-pipeline-currency.html">23 — Sales pipeline (currency)</a></li>
+      <li><a href="24-image-cards-clickToZoom.html">24 — Image cards with click-to-zoom</a></li>
+      <li><a href="25-drag-to-attach-files.html">25 — Drag-to-attach files</a></li>
+      <li><a href="26-email-thread.html">26 — Email triage board</a></li>
+      <li><a href="27-order-fulfilment.html">27 — Order fulfilment board</a></li>
+    </ol>
+  </section>
+</body>
+</html>

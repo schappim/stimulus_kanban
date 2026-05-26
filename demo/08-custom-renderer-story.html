@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>08 — Custom renderer | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>08 — Custom card renderer (template)</h1>
+  <p class="lede">A <code>&lt;template id="story-card"&gt;</code> with <code>data-bind</code> / <code>data-bind-attr</code> markup. Identical contract to <code>stimulus_grid</code> renderers.</p>
+
+  <template id="story-card">
+    <article class="sk-card">
+      <header class="sk-card-header">
+        <span class="sk-card-key" data-bind="key"></span>
+        <span class="sk-pill" data-bind="status" data-bind-attr="data-status:status"></span>
+      </header>
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <footer class="sk-card-footer">
+        <span class="sk-card-points" data-bind-text="points"></span>
+        <span class="sk-card-meta" data-bind="assignee_name"></span>
+      </footer>
+    </article>
+  </template>
+
+  <div class="panel" data-controller="board"
+       data-board-card-renderer-value="story-card" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"  data-board-column-title-value="To do"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing" data-board-column-title-value="Doing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"  data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    document.getElementById('board').addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'todo',  key: 'WEB-12', title: 'Server-render the loading state', status: 'todo',   points: 3, assignee_name: 'Carol' },
+        { id: 2, column_id: 'doing', key: 'WEB-14', title: 'Optimise Turbo Stream coalescing', status: 'doing',  points: 5, assignee_name: 'Alice' },
+        { id: 3, column_id: 'doing', key: 'WEB-15', title: 'Audit JS bundle size',             status: 'doing',  points: 2, assignee_name: 'Bob' },
+        { id: 4, column_id: 'done',  key: 'WEB-09', title: 'Add boardApi smoke test',          status: 'done',  points: 1, assignee_name: 'Alice' },
+      ]);
+    });
+  </script>
+</body>
+</html>

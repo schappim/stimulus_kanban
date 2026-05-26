@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>02 — JSON data | stimulus_kanban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>02 — JSON data via <code>setCardData</code></h1>
+  <p class="lede">Empty markup, JSON hand-off. Same board controller, same DOM contract — the cards just arrive after <code>board:ready</code>.</p>
+
+  <div class="panel" data-controller="board" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"  data-board-column-title-value="To do"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing" data-board-column-title-value="Doing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"  data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    document.getElementById('board').addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 'a', column_id: 'todo',  title: 'Add tests', order: 0 },
+        { id: 'b', column_id: 'todo',  title: 'Write docs', order: 1 },
+        { id: 'c', column_id: 'doing', title: 'Implement drag/drop', order: 0 },
+        { id: 'd', column_id: 'done',  title: 'Scaffold project', order: 0 },
+      ]);
+    });
+  </script>
+</body>
+</html>
