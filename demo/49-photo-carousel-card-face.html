@@ -45,7 +45,9 @@
 <body>
   <p class="crumbs"><a href="./">← demos</a></p>
   <h1>49 — Photo carousel on card face (4 thumbnails visible)</h1>
-  <p class="lede">A 2-up + 3-stack photo strip rendered right on the card face. The first photo is the hero (wide), the next three stack vertically. A <code>+N</code> badge on the last tile shows extra photos when the job has more than four. Cards with no photos hide the strip entirely so they don't waste vertical space.</p>
+  <p class="lede">A 2-up + 3-stack photo strip rendered right on the card face. The first photo is the hero (wide), the next three stack vertically. A <code>+N</code> badge on the last tile shows extra photos when the job has more than four. Cards with no photos hide the strip entirely so they don't waste vertical space. <strong>Drag any card (including by its photo strip) between columns</strong> — the carousel re-paints in its new home via the <code>board:rendered</code> hook.</p>
+
+  <p class="tip">Tip: cards are draggable from anywhere on the card body, including the photo area. Try dragging <em>Sewer line excavate</em> from <em>In progress</em> over to <em>Completed</em>.</p>
 
   <template id="ph-card">
     <article class="sk-card ph-card">
