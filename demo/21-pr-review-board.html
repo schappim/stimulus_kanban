@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>21 — PR review | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>21 — Pull-request review board</h1>
+  <p class="lede">Built-in <code>pr</code> renderer: repo + number + reviewer avatars + CI dot + diff stats. accept_from chains the review lifecycle.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-renderer-value="pr"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="open"     data-board-column-title-value="Open"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="review"   data-board-column-title-value="In review"   data-board-column-accept-cards-from-value='["open"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="approved" data-board-column-title-value="Approved"     data-board-column-accept-cards-from-value='["review"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="merged"   data-board-column-title-value="Merged"        data-board-column-accept-cards-from-value='["approved"]'><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const reviewers = [
+      { name: 'Alice', avatar: 'https://i.pravatar.cc/40?img=1' },
+      { name: 'Bob',   avatar: 'https://i.pravatar.cc/40?img=2' },
+      { name: 'Carol', avatar: 'https://i.pravatar.cc/40?img=3' },
+    ];
+    document.getElementById('board').addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'open',     repo: 'web-app',  number: 1402, title: 'Add boardApi.openCardDetail',   ci: 'pass',    diff_added: 184, diff_removed: 12,  reviewers: [reviewers[0]] },
+        { id: 2, column_id: 'review',   repo: 'web-app',  number: 1403, title: 'Refactor swimlane reducer',     ci: 'pending', diff_added: 87,  diff_removed: 41,  reviewers: [reviewers[1], reviewers[2]] },
+        { id: 3, column_id: 'review',   repo: 'rails-app', number: 880, title: 'Wire Turbo Stream optimistic IDs', ci: 'fail',  diff_added: 220, diff_removed: 130, reviewers: [reviewers[0]] },
+        { id: 4, column_id: 'approved', repo: 'web-app',  number: 1399, title: 'Bump @hotwired/stimulus to 3.3', ci: 'pass',    diff_added: 4,   diff_removed: 4,   reviewers: [reviewers[1]] },
+        { id: 5, column_id: 'merged',   repo: 'rails-app', number: 875, title: 'Add audit_log migration',        ci: 'pass',    diff_added: 142, diff_removed: 0,   reviewers: [reviewers[0], reviewers[2]] },
+      ]);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>26 — Email triage | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>26 — Email triage board</h1>
+  <p class="lede"><code>email-thread</code> renderer (subject + sender + snippet + unread dot). Drag through Triage → Reply → Done.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-renderer-value="email-thread"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="inbox"  data-board-column-title-value="Inbox"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="reply"   data-board-column-title-value="Reply today"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="waiting" data-board-column-title-value="Waiting on reply"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"    data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    document.getElementById('board').addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'inbox', subject: 'Quick question about the v0.2 rollout', sender: 'marcus@chickcom.com', snippet: 'Can we confirm the freeze date — accounts need a heads up on the audit trail.', unread: true },
+        { id: 2, column_id: 'inbox', subject: 'Re: Pilot customer feedback',            sender: 'carol@bigcorp.io',    snippet: 'They want the rail-style detail panel, not the popover. We agreed.',           unread: true },
+        { id: 3, column_id: 'reply', subject: 'Re: Renewal — pricing 2026',              sender: 'invoices@stripe.com', snippet: 'Adjusted seat count to 12; total $1,432.',                                       unread: false },
+        { id: 4, column_id: 'waiting', subject: 'NDA for prospect Pinwheel',             sender: 'legal@firm.example',  snippet: 'Awaiting their counsel\'s comments by Thursday.',                              unread: false },
+        { id: 5, column_id: 'done', subject: 'Re: Onboarding doc',                       sender: 'kel@ninja.ai',         snippet: 'Approved, merged the PR.',                                                     unread: false },
+      ]);
+    });
+  </script>
+</body>
+</html>

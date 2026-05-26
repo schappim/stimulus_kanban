@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>20 — Incident board | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>20 — Incident response board</h1>
+  <p class="lede">Built-in <code>incident</code> renderer: priority pill, page count, time-since-opened. Swimlanes by on-call assignee.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-renderer-value="incident"
+       data-board-swimlane-field-value="on_call"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="firing"   data-board-column-title-value="Firing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="acked"    data-board-column-title-value="Acked"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="mitigated" data-board-column-title-value="Mitigated"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="resolved" data-board-column-title-value="Resolved"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const now = Date.now();
+    document.getElementById('board').addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'firing',    title: 'Postgres replica lag > 30s', priority: 'p1', pages: 3, opened_at: new Date(now - 12 * 60 * 1000).toISOString(), on_call: 'Alice' },
+        { id: 2, column_id: 'firing',    title: 'Stripe webhook backlog',       priority: 'p2', pages: 1, opened_at: new Date(now - 25 * 60 * 1000).toISOString(), on_call: 'Bob' },
+        { id: 3, column_id: 'acked',     title: 'CDN cache hit rate < 80%',     priority: 'p3', pages: 0, opened_at: new Date(now - 2 * 60 * 60 * 1000).toISOString(), on_call: 'Alice' },
+        { id: 4, column_id: 'mitigated', title: 'SES bounce spike',              priority: 'p2', pages: 0, opened_at: new Date(now - 4 * 60 * 60 * 1000).toISOString(), on_call: 'Carol' },
+        { id: 5, column_id: 'resolved',  title: 'Auth token rotation',           priority: 'p4', pages: 0, opened_at: new Date(now - 24 * 60 * 60 * 1000).toISOString(), on_call: 'Bob' },
+      ]);
+    });
+  </script>
+</body>
+</html>

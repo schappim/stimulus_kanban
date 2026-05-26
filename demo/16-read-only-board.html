@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>16 — Read-only board | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>16 — Read-only board</h1>
+  <p class="lede">Drag, inline edit, and add-card are disabled. Cards are still selectable + clickable for downstream UI (a master/detail rail, audit log, etc.).</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-read-only-value="true"
+       data-board-card-selection-value="single">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="open" data-board-column-title-value="Open">
+        <ol class="sk-cards">
+          <li data-card-id="1">INC-104 — Primary DB high CPU</li>
+          <li data-card-id="2">INC-105 — Stripe webhook lag</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="acked" data-board-column-title-value="Acked">
+        <ol class="sk-cards">
+          <li data-card-id="3">INC-103 — Slow image CDN</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="resolved" data-board-column-title-value="Resolved">
+        <ol class="sk-cards">
+          <li data-card-id="4">INC-101 — SES suppression list</li>
+        </ol>
+      </li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>StimulusKanban.start();</script>
+</body>
+</html>

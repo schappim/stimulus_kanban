@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>17 — Add affordances | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>17 — Add-card / add-column affordances</h1>
+  <p class="lede">Each column gets a <code>+ Add card</code> row. Click fires <code>board:addCardRequested</code> — the host applies the actual transaction (here we just append a stub).</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-add-card-value="true"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"  data-board-column-title-value="To do"   data-board-column-add-card-label-value="+ New task"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing" data-board-column-title-value="Doing"   data-board-column-add-card-label-value="+ Pick one up"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"  data-board-column-title-value="Done"    data-board-column-add-card-label-value="+ Log a win"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    let nextId = 1000;
+    board.addEventListener('board:addCardRequested', (ev) => {
+      const id = `n-${nextId++}`;
+      board.boardApi.applyTransaction({
+        add: [{ id, column_id: ev.detail.columnId, title: 'New card' }],
+      });
+      // Immediately open the inline editor for the new card so the user can type the title.
+      requestAnimationFrame(() => board.boardApi.startEditingCard(id));
+    });
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'todo', title: 'Set up CI' },
+        { id: 2, column_id: 'doing', title: 'Ship Rails gem' },
+      ]);
+    });
+  </script>
+</body>
+</html>

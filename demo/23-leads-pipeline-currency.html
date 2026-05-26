@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>23 — Sales pipeline | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>23 — Sales pipeline (currency)</h1>
+  <p class="lede"><code>lead</code> renderer: company + value (Intl.NumberFormat) + stage pill. Column totals are computed live below.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-renderer-value="lead"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="contacted" data-board-column-title-value="Contacted"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="qualified" data-board-column-title-value="Qualified"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="proposal"  data-board-column-title-value="Proposal"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="won"        data-board-column-title-value="Won"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="totals">// pipeline totals</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const fmt = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+    const board = document.getElementById('board');
+    function recompute() {
+      const totals = {};
+      for (const c of board.boardApi.getCardData()) {
+        totals[c.column_id] = (totals[c.column_id] || 0) + Number(c.value || 0);
+      }
+      const lines = Object.entries(totals).map(([k, v]) => `${k.padEnd(12, ' ')}${fmt.format(v)}`);
+      document.getElementById('totals').textContent = lines.join('\n');
+    }
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'contacted', name: 'Lewis Carter',   company: 'Acme Co',       value: 25000,  currency: 'AUD', stage: 'open' },
+        { id: 2, column_id: 'contacted', name: 'Rachel Kim',     company: 'Pinwheel',      value: 12000,  currency: 'AUD', stage: 'open' },
+        { id: 3, column_id: 'qualified', name: 'David Chen',     company: 'NorthernRiver', value: 60000,  currency: 'AUD', stage: 'open' },
+        { id: 4, column_id: 'proposal',  name: 'Mara Hill',       company: 'BigCorp',        value: 180000, currency: 'AUD', stage: 'review' },
+        { id: 5, column_id: 'won',       name: 'Akihiro Sato',    company: 'OneOne',         value: 78000,  currency: 'AUD', stage: 'done' },
+      ]);
+      recompute();
+    });
+    board.addEventListener('board:cardMoved',  recompute);
+    board.addEventListener('board:cardDataChanged', recompute);
+  </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>22 — Support inbox | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>22 — Support inbox</h1>
+  <p class="lede"><code>support-ticket</code> renderer (subject + customer + channel + SLA countdown). WIP=5 on "Working".</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-renderer-value="support-ticket"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="new"      data-board-column-title-value="New"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="working"  data-board-column-title-value="Working" data-board-column-wip-value="5"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="waiting"  data-board-column-title-value="Waiting on customer"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="solved"   data-board-column-title-value="Solved"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const now = Date.now();
+    const due = (h) => new Date(now + h * 3600 * 1000).toISOString();
+    document.getElementById('board').addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 'T-1', column_id: 'new',     subject: 'Can\'t log in after password reset', customer_name: 'Sarah at Acme', channel: 'email',  sla_due_at: due(2) },
+        { id: 'T-2', column_id: 'new',     subject: 'Bug: drag-drop not working on iPad',  customer_name: 'Joe',           channel: 'chat',   sla_due_at: due(0.5) },
+        { id: 'T-3', column_id: 'working', subject: 'Feature request: export to CSV',       customer_name: 'BigCorp',       channel: 'email',  sla_due_at: due(24) },
+        { id: 'T-4', column_id: 'working', subject: 'Question about pricing tiers',         customer_name: 'Jane',          channel: 'chat',   sla_due_at: due(8) },
+        { id: 'T-5', column_id: 'waiting', subject: 'Needs screenshot of failed import',    customer_name: 'Sam',           channel: 'email',  sla_due_at: due(-2) },
+        { id: 'T-6', column_id: 'solved',  subject: 'Confirmed: refund processed',           customer_name: 'Mei',           channel: 'phone',  sla_due_at: due(48) },
+      ]);
+    });
+  </script>
+</body>
+</html>

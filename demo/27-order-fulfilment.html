@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>27 — Order fulfilment | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>27 — Order fulfilment board</h1>
+  <p class="lede"><code>order</code> renderer (order # + customer + total + items + status pill). Workflow: Paid → Packed → Shipped → Delivered.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-renderer-value="order"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="paid"     data-board-column-title-value="Paid"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="packed"   data-board-column-title-value="Packed"
+          data-board-column-accept-cards-from-value='["paid"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="shipped"  data-board-column-title-value="Shipped"
+          data-board-column-accept-cards-from-value='["packed"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="delivered" data-board-column-title-value="Delivered"
+          data-board-column-accept-cards-from-value='["shipped"]'><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    document.getElementById('board').addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'paid',   order_number: 'AU-1042', customer_name: 'Sarah Chen', total: 184,  currency: 'AUD', items_count: 3, status: 'open' },
+        { id: 2, column_id: 'paid',   order_number: 'AU-1041', customer_name: 'Lucas R.',   total: 65,   currency: 'AUD', items_count: 1, status: 'open' },
+        { id: 3, column_id: 'packed', order_number: 'AU-1040', customer_name: 'Mei Wu',     total: 320,  currency: 'AUD', items_count: 5, status: 'open' },
+        { id: 4, column_id: 'shipped', order_number: 'AU-1039', customer_name: 'Aroha B.',  total: 720,  currency: 'AUD', items_count: 8, status: 'review' },
+        { id: 5, column_id: 'delivered', order_number: 'AU-1037', customer_name: 'Liam Park', total: 95,  currency: 'AUD', items_count: 2, status: 'done' },
+      ]);
+    });
+  </script>
+</body>
+</html>

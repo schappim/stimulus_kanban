@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>24 — Image cards | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>24 — Image cards (click-to-zoom)</h1>
+  <p class="lede"><code>image-card</code> renderer with a hero image + caption. Click the image for a full-viewport overlay.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-renderer-value="image-card"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="brief"     data-board-column-title-value="Brief"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="draft"     data-board-column-title-value="Draft"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="approved"  data-board-column-title-value="Approved"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    document.getElementById('board').addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'brief',    image_url: 'https://picsum.photos/seed/sk-1/320/180', caption: 'Hero — homepage' },
+        { id: 2, column_id: 'brief',    image_url: 'https://picsum.photos/seed/sk-2/320/180', caption: 'Banner — campaign' },
+        { id: 3, column_id: 'draft',    image_url: 'https://picsum.photos/seed/sk-3/320/180', caption: 'Email header v3' },
+        { id: 4, column_id: 'approved', image_url: 'https://picsum.photos/seed/sk-4/320/180', caption: 'Social — Reels v2' },
+      ]);
+    });
+  </script>
+</body>
+</html>

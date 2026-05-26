@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>19 — Cancellable before-move | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>19 — Cancellable <code>board:beforeMove</code> (workflow guard)</h1>
+  <p class="lede">Drop into <strong>Done</strong> only succeeds if the card has <code>tested = true</code>. The handler calls <code>ev.preventDefault()</code> when not — the optimistic move reverts.</p>
+
+  <div class="panel" data-controller="board" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"   data-board-column-title-value="To do"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="testing" data-board-column-title-value="Testing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"   data-board-column-title-value="Done (requires tested)"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// vetoed moves logged here</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    const log = document.getElementById('log');
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'todo',    title: 'Add WIP overlay',         tested: false },
+        { id: 2, column_id: 'testing', title: 'Polish virtual scroll',   tested: true },
+        { id: 3, column_id: 'testing', title: 'Swimlane drag reassign',  tested: false },
+      ]);
+    });
+    board.addEventListener('board:beforeMove', (ev) => {
+      if (ev.detail.toColumnId !== 'done') return;
+      for (const id of ev.detail.cardIds) {
+        const card = board.boardApi.getCardData().find((c) => c.id === id);
+        if (!card?.tested) {
+          ev.preventDefault();
+          log.textContent = `Refused move of ${id} → done: tested = false\n` + log.textContent;
+          return;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

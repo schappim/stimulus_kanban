@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>18 — Accept-from rules | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>18 — <code>accept_from</code> drop rules</h1>
+  <p class="lede"><strong>Review</strong> only accepts cards coming from <strong>Doing</strong>; <strong>Done</strong> only accepts from <strong>Review</strong>. Try to drag a card from Backlog straight to Done — the drop is refused.</p>
+
+  <div class="panel" data-controller="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="backlog" data-board-column-title-value="Backlog">
+        <ol class="sk-cards">
+          <li data-card-id="1">Spec triage</li>
+          <li data-card-id="2">Spike DnD perf</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="doing"   data-board-column-title-value="Doing"
+          data-board-column-accept-cards-from-value='["backlog","review"]'>
+        <ol class="sk-cards">
+          <li data-card-id="3">Refactor model.js</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="review"  data-board-column-title-value="Review"
+          data-board-column-accept-cards-from-value='["doing"]'>
+        <ol class="sk-cards">
+          <li data-card-id="4">Review PR #42</li>
+        </ol>
+      </li>
+      <li data-controller="board-column" data-board-column-id-value="done"    data-board-column-title-value="Done"
+          data-board-column-accept-cards-from-value='["review"]'>
+        <ol class="sk-cards"></ol>
+      </li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>StimulusKanban.start();</script>
+</body>
+</html>

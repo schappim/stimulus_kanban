@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>25 — Drag-to-attach | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>25 — Drag-to-attach files</h1>
+  <p class="lede">With <code>data-board-accept-files-value="true"</code>, dropping files on a card fires a cancellable <code>board:fileAttached</code>. If the host doesn't <code>preventDefault</code>, the file metadata is appended to <code>card.attachments</code>.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-accept-files-value="true"
+       data-board-attachments-field-value="attachments"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"  data-board-column-title-value="To do"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing" data-board-column-title-value="Doing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"  data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// board:fileAttached</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    const log = document.getElementById('log');
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'todo',  title: 'Draft v0.2 launch post', attachments: [] },
+        { id: 2, column_id: 'doing', title: 'Customer interview notes', attachments: [] },
+      ]);
+    });
+    board.addEventListener('board:fileAttached', (ev) => {
+      const names = ev.detail.files.map((f) => `${f.name} (${f.size} B)`);
+      log.textContent = `attached to ${ev.detail.cardId}: ${names.join(', ')}\n` + log.textContent;
+    });
+  </script>
+</body>
+</html>
