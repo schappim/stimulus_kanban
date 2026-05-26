@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>35 — Apprentice training | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>35 — Apprentice training tracker</h1>
+  <p class="lede">Each card is a competency unit. Drag it through <em>Learning</em> → <em>Competent</em> → <em>Signed off</em> as the apprentice demonstrates it on site. Swimlanes by apprentice so the supervisor sees everyone's progress in one view. Built-in <code>task</code> renderer ticks the checkbox once <em>Signed off</em>.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-renderer-value="task"
+       data-board-swimlane-field-value="apprentice"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="not_started" data-board-column-title-value="Not started"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="learning"    data-board-column-title-value="Learning"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="competent"   data-board-column-title-value="Competent"
+          data-board-column-accept-cards-from-value='["learning"]'><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="signed_off"  data-board-column-title-value="Signed off"
+          data-board-column-accept-cards-from-value='["competent"]'><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    document.getElementById('board').addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'not_started', apprentice: 'Tom (1st yr)',  title: 'Identify cable colour codes (AS/NZS 3000)', due_at: '2026-06-30', done: false },
+        { id: 2, column_id: 'not_started', apprentice: 'Tom (1st yr)',  title: 'Use a multimeter safely',                     due_at: '2026-06-30', done: false },
+        { id: 3, column_id: 'learning',    apprentice: 'Tom (1st yr)',  title: 'Install single GPOs to spec',                 due_at: '2026-08-15', done: false },
+        { id: 4, column_id: 'learning',    apprentice: 'Pia (2nd yr)',  title: 'Wire 3-phase motor reversing starter',        due_at: '2026-07-12', done: false },
+        { id: 5, column_id: 'competent',   apprentice: 'Pia (2nd yr)',  title: 'Test RCDs to AS/NZS 3760',                    due_at: '2026-05-22', done: true },
+        { id: 6, column_id: 'competent',   apprentice: 'Jess (3rd yr)', title: 'Switchboard upgrade — domestic',              due_at: '2026-05-12', done: true },
+        { id: 7, column_id: 'signed_off',  apprentice: 'Jess (3rd yr)', title: 'Issue CCEW after testing',                    due_at: '2026-04-30', done: true },
+        { id: 8, column_id: 'signed_off',  apprentice: 'Pia (2nd yr)',  title: 'Bend EMT conduit to spec',                    due_at: '2026-03-15', done: true },
+        { id: 9, column_id: 'not_started', apprentice: 'Jess (3rd yr)', title: 'Solar inverter commissioning',                due_at: '2026-09-01', done: false },
+      ]);
+    });
+  </script>
+</body>
+</html>
