@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>44 — Recurring-job badge | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .rc-card { padding: 8px 10px; }
+    .rc-card h4 { margin: 0 0 2px 0; font-size: 13px; line-height: 1.3; }
+    .rc-card .meta { color: #6b7280; font-size: 12px; }
+    .rc-card .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font: 600 10px system-ui; padding: 2px 8px; border-radius: 999px;
+      background: #ecfdf5; color: #047857;
+      letter-spacing: 0.04em; text-transform: lowercase; line-height: 1.5;
+      margin-top: 6px;
+    }
+    .rc-card .badge .glyph { font-size: 12px; line-height: 1; }
+    /* Different cadences get different tints */
+    .rc-card .badge.weekly    { background: #eff6ff; color: #1d4ed8; }
+    .rc-card .badge.monthly   { background: #fefce8; color: #a16207; }
+    .rc-card .badge.quarterly { background: #fdf4ff; color: #86198f; }
+    .rc-card .badge.annual    { background: #ecfdf5; color: #047857; }
+    /* Next-due hint */
+    .rc-card .next {
+      font-size: 11px; color: #6b7280; margin-left: 6px;
+    }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>44 — Recurring-job badge (↻ for annual safety checks, monthly maintenance)</h1>
+  <p class="lede">Some jobs aren't one-offs — they regenerate on a schedule. A small ↻ badge on the card face says "I'll be back" so the dispatcher doesn't accidentally archive what's actually a perpetual booking. Cadence (weekly / monthly / quarterly / annual) is colour-coded and the next-due date hangs off the badge.</p>
+
+  <template id="rc-card">
+    <article class="sk-card rc-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta"><span data-bind="customer"></span> · <span data-bind="suburb"></span></div>
+      <div data-rc-recurring></div>
+    </article>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="rc-card">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="upcoming" data-board-column-title-value="Upcoming"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="this_week" data-board-column-title-value="This week"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="completed" data-board-column-title-value="Completed (most recent)"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+
+    // recur shape: { cadence: 'weekly'|'monthly'|'quarterly'|'annual', next: ISO }.
+    // If recur is absent, the card is a one-off — no badge.
+    const cards = [
+      { id: 1, column_id: 'upcoming', title: 'Annual gas safety (12 units)', customer: 'Cottesloe Strata', suburb: 'Vaucluse',
+        recur: { cadence: 'annual',    next: '2026-06-04' } },
+      { id: 2, column_id: 'upcoming', title: 'Grease-trap pump out',         customer: 'Park Pub',         suburb: 'Newtown',
+        recur: { cadence: 'quarterly', next: '2026-06-10' } },
+      { id: 3, column_id: 'upcoming', title: 'Hot-water-system service',     customer: 'Lee household',    suburb: 'Manly',
+        recur: { cadence: 'annual',    next: '2026-06-14' } },
+      { id: 4, column_id: 'upcoming', title: 'New tap install',              customer: 'Mr Liu',           suburb: 'Surry Hills' /* one-off */ },
+
+      { id: 5, column_id: 'this_week', title: 'Café espresso line flush',    customer: 'Bluestone Café',   suburb: 'CBD',
+        recur: { cadence: 'monthly',   next: '2026-05-28' } },
+      { id: 6, column_id: 'this_week', title: 'Public-pool dosing check',    customer: 'Bondi Pavilion',   suburb: 'Bondi',
+        recur: { cadence: 'weekly',    next: '2026-05-29' } },
+      { id: 7, column_id: 'this_week', title: 'Burst pipe (after-hours)',    customer: 'Newtown IGA',      suburb: 'Newtown' /* one-off */ },
+
+      { id: 8, column_id: 'completed', title: 'Annual gas safety (12 units)',customer: 'Cottesloe Strata', suburb: 'Vaucluse',
+        recur: { cadence: 'annual',    next: '2027-05-26', last_done: '2026-05-26' } },
+      { id: 9, column_id: 'completed', title: 'HWS replace 250L',            customer: 'Mr Chen',          suburb: 'Bondi' /* one-off */ },
+    ];
+
+    const labelFor = { weekly: 'weekly', monthly: 'monthly', quarterly: 'quarterly', annual: 'annual' };
+    function paintRecur() {
+      for (const wrap of board.querySelectorAll('[data-card-id]')) {
+        const id = wrap.getAttribute('data-card-id');
+        const card = cards.find((c) => String(c.id) === String(id));
+        if (!card) continue;
+        const slot = wrap.querySelector('[data-rc-recurring]');
+        if (!slot) continue;
+        slot.innerHTML = '';
+        if (!card.recur) continue;
+        const b = document.createElement('span');
+        b.className = `badge ${card.recur.cadence}`;
+        b.innerHTML = `<span class="glyph">↻</span><span>${labelFor[card.recur.cadence] || card.recur.cadence}</span>`;
+        slot.appendChild(b);
+        const nxt = document.createElement('span');
+        nxt.className = 'next';
+        nxt.textContent = card.recur.last_done
+          ? `last done ${card.recur.last_done} · next ${card.recur.next}`
+          : `next ${card.recur.next}`;
+        slot.appendChild(nxt);
+      }
+    }
+
+    board.addEventListener('board:ready',    (ev) => ev.detail.api.setCardData(cards));
+    board.addEventListener('board:rendered', paintRecur);
+  </script>
+</body>
+</html>
