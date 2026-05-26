@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>40 — Filter chips | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .fc-chips {
+      display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 12px 0;
+      padding: 6px; background: #f3f4f6; border-radius: 8px;
+    }
+    .fc-chips button {
+      font: inherit; font-size: 13px;
+      padding: 4px 12px;
+      border: 1px solid transparent;
+      background: #fff;
+      border-radius: 999px;
+      cursor: pointer;
+      color: #374151;
+    }
+    .fc-chips button:hover { background: #f9fafb; border-color: #e5e7eb; }
+    .fc-chips button.active {
+      background: #1f2937; color: #fff; border-color: #1f2937;
+    }
+    .fc-chips button .n {
+      display: inline-block; margin-left: 4px; font-size: 11px; opacity: 0.7;
+    }
+    .fc-chips button.active .n { opacity: 1; }
+    .fc-card { padding: 8px 10px; }
+    .fc-card h4 { margin: 0 0 2px 0; font-size: 13px; }
+    .fc-card .meta { color: #6b7280; font-size: 12px; }
+    .fc-card .row { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
+    .fc-card .due { font-size: 11px; padding: 1px 6px; border-radius: 3px; background: #eff6ff; color: #1d4ed8; }
+    .fc-card .due.overdue { background: #fef2f2; color: #b91c1c; font-weight: 700; }
+    .fc-card .who { font-size: 11px; color: #6b7280; }
+    .fc-card .urgent {
+      font-size: 10px; padding: 1px 6px; border-radius: 3px;
+      background: #fef2f2; color: #b91c1c; font-weight: 700; text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>40 — Filter chips (Today / This week / Overdue / Mine / Unassigned / Urgent)</h1>
+  <p class="lede">Each chip wires <code>boardApi.setCardFilter(predicate)</code> to a simple JS function. The badge next to each chip shows how many cards would pass. Click a chip to toggle; click <em>All</em> to clear.</p>
+
+  <div class="fc-chips" id="chips" role="toolbar" aria-label="Filters">
+    <button data-fc="all" class="active">All <span class="n">·</span></button>
+    <button data-fc="today">Today <span class="n">·</span></button>
+    <button data-fc="week">This week <span class="n">·</span></button>
+    <button data-fc="overdue">Overdue <span class="n">·</span></button>
+    <button data-fc="mine">Mine (Dave) <span class="n">·</span></button>
+    <button data-fc="unassigned">Unassigned <span class="n">·</span></button>
+    <button data-fc="urgent">Urgent <span class="n">·</span></button>
+  </div>
+
+  <template id="fc-card">
+    <article class="sk-card fc-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta"><span data-bind="customer"></span></div>
+      <div class="row">
+        <span data-bind="due_label" data-bind-attr="class:due_class"></span>
+        <span class="who" data-bind="assignee_label"></span>
+        <span data-bind="urgent_label" data-bind-attr="class:urgent_class"></span>
+      </div>
+    </article>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="fc-card">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"     data-board-column-title-value="To-do"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing"    data-board-column-title-value="Doing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="review"   data-board-column-title-value="Review"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"     data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+
+    // Today's date is fixed for the demo (so "Today" / "Overdue" land
+    // consistently regardless of when the page is loaded).
+    const TODAY = new Date('2026-05-26');
+    function isoFromOffset(days) {
+      const d = new Date(TODAY); d.setDate(TODAY.getDate() + days);
+      return d.toISOString().slice(0, 10);
+    }
+    function daysBetween(a, b) {
+      const ms = new Date(a) - new Date(b);
+      return Math.round(ms / 86400000);
+    }
+    function fmtDue(dueIso) {
+      if (!dueIso) return { label: 'no due', cls: 'due' };
+      const delta = daysBetween(dueIso, TODAY);
+      if (delta < 0)  return { label: `${-delta}d overdue`, cls: 'due overdue' };
+      if (delta === 0) return { label: 'today',            cls: 'due' };
+      if (delta === 1) return { label: 'tomorrow',         cls: 'due' };
+      return { label: `in ${delta}d`, cls: 'due' };
+    }
+
+    const ME = 'Dave';
+
+    const raw = [
+      { id: 1,  column_id: 'todo',   title: 'Leaking kitchen tap',          customer: 'Mrs Patel',       due: isoFromOffset(-2), assignee: 'Dave',  urgent: true },
+      { id: 2,  column_id: 'todo',   title: 'Bathroom rough-in',            customer: 'Williams',        due: isoFromOffset(0),  assignee: 'Dave',  urgent: false },
+      { id: 3,  column_id: 'todo',   title: 'Quote — site visit',           customer: 'Mr Chen',         due: isoFromOffset(3),  assignee: 'Sam',   urgent: false },
+      { id: 4,  column_id: 'doing',  title: 'HWS replace 250L',             customer: 'Mr Chen',         due: isoFromOffset(0),  assignee: 'Dave',  urgent: true },
+      { id: 5,  column_id: 'doing',  title: 'Switchboard upgrade',          customer: 'Highgate Apts',   due: isoFromOffset(-1), assignee: null,    urgent: false },
+      { id: 6,  column_id: 'review', title: 'Annual safety check (12mo)',   customer: 'Cottesloe Strata', due: isoFromOffset(7),  assignee: null,   urgent: false },
+      { id: 7,  column_id: 'review', title: 'Methven tapware (kitchen)',    customer: 'Khoury family',   due: isoFromOffset(2),  assignee: 'Mia',   urgent: false },
+      { id: 8,  column_id: 'done',   title: 'Toilet running constantly',    customer: 'Lee household',   due: isoFromOffset(-5), assignee: 'Dave',  urgent: false },
+      { id: 9,  column_id: 'todo',   title: 'Emergency — burst pipe',       customer: 'Newtown IGA',     due: isoFromOffset(0),  assignee: 'Dave',  urgent: true },
+      { id: 10, column_id: 'todo',   title: 'Sewer line excavate + cap',    customer: 'Bondi Pavilion',  due: isoFromOffset(5),  assignee: 'Mia',   urgent: false },
+      { id: 11, column_id: 'doing',  title: 'Pool pump + spa wiring',       customer: 'Mr Daniels',      due: isoFromOffset(1),  assignee: null,    urgent: false },
+      { id: 12, column_id: 'todo',   title: 'Office BAS — quarterly',       customer: 'Office',          due: isoFromOffset(4),  assignee: 'Dave',  urgent: false },
+    ];
+    // Pre-compute display fields so the renderer is purely declarative.
+    const cards = raw.map((c) => {
+      const due = fmtDue(c.due);
+      return {
+        ...c,
+        due_label: due.label,
+        due_class: due.cls,
+        assignee_label: c.assignee ? `· ${c.assignee}` : '· unassigned',
+        urgent_label: c.urgent ? 'urgent' : '',
+        urgent_class: c.urgent ? 'urgent' : 'hidden',
+      };
+    });
+
+    const board = document.getElementById('board');
+
+    // Predicate library — each chip names one of these.
+    const startOfWeek = new Date(TODAY); startOfWeek.setDate(TODAY.getDate() - TODAY.getDay());
+    const endOfWeek   = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6);
+    const predicates = {
+      all:        () => true,
+      today:      (c) => c.due === isoFromOffset(0),
+      week:       (c) => c.due && new Date(c.due) >= startOfWeek && new Date(c.due) <= endOfWeek,
+      overdue:    (c) => c.due && new Date(c.due) < TODAY,
+      mine:       (c) => c.assignee === ME,
+      unassigned: (c) => !c.assignee,
+      urgent:     (c) => !!c.urgent,
+    };
+
+    function recountChips() {
+      for (const btn of document.querySelectorAll('.fc-chips button')) {
+        const id = btn.getAttribute('data-fc');
+        const n = cards.filter(predicates[id]).length;
+        btn.querySelector('.n').textContent = n;
+      }
+    }
+
+    let active = 'all';
+    function setActive(name) {
+      active = name;
+      for (const btn of document.querySelectorAll('.fc-chips button')) {
+        btn.classList.toggle('active', btn.getAttribute('data-fc') === name);
+      }
+      board.boardApi.setCardFilter(predicates[name]);
+    }
+
+    document.getElementById('chips').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('button[data-fc]');
+      if (!btn) return;
+      const name = btn.getAttribute('data-fc');
+      if (active === name && name !== 'all') {
+        setActive('all');
+      } else {
+        setActive(name);
+      }
+    });
+
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData(cards);
+      recountChips();
+      setActive('all');
+    });
+  </script>
+  <style>
+    .hidden { display: none; }
+  </style>
+</body>
+</html>
