@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>32 — Sparky quote pipeline | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>32 — Sparky quote pipeline (live AUD totals)</h1>
+  <p class="lede">Domestic + commercial electrical contractor. Every column shows the running total of open quotes in AUD; <code>+ New enquiry</code> appends a stub card and opens the inline editor for the title.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-renderer-value="lead"
+       data-board-add-card-value="true"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="enquiry"  data-board-column-title-value="Enquiry"
+          data-board-column-add-card-label-value="+ New enquiry"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="quoting"  data-board-column-title-value="Quoting"
+          data-board-column-wip-value="6"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="sent"     data-board-column-title-value="Quote sent"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="won"      data-board-column-title-value="Won"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="lost"     data-board-column-title-value="Lost"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="totals">// pipeline totals</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const fmt = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+    const board = document.getElementById('board');
+    let nextId = 1000;
+    function totals() {
+      const sums = {};
+      let open = 0;
+      for (const c of board.boardApi.getCardData()) {
+        sums[c.column_id] = (sums[c.column_id] || 0) + Number(c.value || 0);
+        if (c.column_id !== 'lost') open += Number(c.value || 0);
+      }
+      document.getElementById('totals').textContent =
+        ['enquiry','quoting','sent','won','lost']
+          .map((k) => `${k.padEnd(10,' ')}${fmt.format(sums[k] || 0)}`)
+          .concat([`─────────────────`, `OPEN PIPE ${fmt.format(open)}`])
+          .join('\n');
+    }
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'enquiry', name: 'Mark T.',           company: 'Newtown café fit-out',          value: 8400,  currency: 'AUD', stage: 'open' },
+        { id: 2, column_id: 'enquiry', name: 'Bondi Strata',      company: '18 units common-area lighting', value: 22000, currency: 'AUD', stage: 'open' },
+        { id: 3, column_id: 'quoting', name: 'Mrs Hollingworth',  company: 'Whole-house rewire (3 bed)',    value: 14500, currency: 'AUD', stage: 'open' },
+        { id: 4, column_id: 'quoting', name: 'Foley &amp; Sons',  company: 'New warehouse — power &amp; data', value: 68000, currency: 'AUD', stage: 'open' },
+        { id: 5, column_id: 'sent',    name: 'Mr Daniels',         company: 'Pool pump + spa wiring',        value: 3200,  currency: 'AUD', stage: 'review' },
+        { id: 6, column_id: 'sent',    name: 'Highgate Apts',      company: 'Switchboard upgrade ×4',         value: 18400, currency: 'AUD', stage: 'review' },
+        { id: 7, column_id: 'won',     name: 'BrightStart Preschool', company: '12 GPOs + data drops',        value: 4800,  currency: 'AUD', stage: 'done' },
+        { id: 8, column_id: 'lost',    name: 'Ms Avis',            company: 'Outdoor lighting refresh',        value: 2100,  currency: 'AUD', stage: 'open' },
+      ]);
+      totals();
+    });
+    board.addEventListener('board:cardMoved',  totals);
+    board.addEventListener('board:cardDataChanged', totals);
+    board.addEventListener('board:addCardRequested', (ev) => {
+      const id = `n-${nextId++}`;
+      board.boardApi.applyTransaction({ add: [{ id, column_id: ev.detail.columnId, name: 'New enquiry', company: '—', value: 0, currency: 'AUD', stage: 'open' }] });
+      requestAnimationFrame(() => board.boardApi.startEditingCard(id));
+    });
+  </script>
+</body>
+</html>
