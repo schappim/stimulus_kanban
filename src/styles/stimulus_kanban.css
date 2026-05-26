@@ -585,3 +585,58 @@
 
 /* Flag */
 .sk-flag { font-size: 14px; }
+
+/* Bulk-action toolbar — appears when N≥1 cards are selected. The toolbar
+ * is appended to <body> so it floats over any board layout. */
+.sk-bulk-toolbar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 6px; align-items: center;
+  padding: 8px 10px;
+  background: var(--sk-bulk-bg, #0f172a);
+  color: var(--sk-bulk-fg, #f3f4f6);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+  z-index: 9999;
+  font: 13px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.sk-bulk-toolbar-bottom { bottom: 24px; }
+.sk-bulk-toolbar-top    { top: 24px; }
+
+.sk-bulk-toolbar .sk-bulk-label {
+  font-weight: 600;
+  padding-right: 4px;
+  border-right: 1px solid rgba(255,255,255,0.18);
+  margin-right: 4px;
+}
+.sk-bulk-toolbar .sk-bulk-btn,
+.sk-bulk-toolbar .sk-bulk-clear {
+  font: inherit;
+  padding: 5px 10px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.04);
+  color: inherit;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.sk-bulk-toolbar .sk-bulk-btn:hover {
+  background: rgba(255,255,255,0.12);
+}
+.sk-bulk-toolbar .sk-bulk-btn-primary {
+  background: #2563eb; border-color: #2563eb;
+}
+.sk-bulk-toolbar .sk-bulk-btn-primary:hover {
+  background: #1d4ed8;
+}
+.sk-bulk-toolbar .sk-bulk-btn-danger {
+  color: #fecaca; border-color: rgba(254,202,202,0.3);
+}
+.sk-bulk-toolbar .sk-bulk-btn-danger:hover {
+  background: #7f1d1d; color: #fff;
+}
+.sk-bulk-toolbar .sk-bulk-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+.sk-bulk-toolbar .sk-bulk-clear {
+  padding: 3px 8px; font-size: 16px; line-height: 1; color: rgba(255,255,255,0.75);
+}
+.sk-bulk-toolbar .sk-bulk-clear:hover { color: #fff; }

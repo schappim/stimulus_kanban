@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>39 — Bulk action toolbar | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .bk-card { padding: 8px 10px; }
+    .bk-card h4 { margin: 0 0 2px 0; font-size: 13px; }
+    .bk-card .meta { color: #6b7280; font-size: 12px; }
+    .bk-card .tag {
+      display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px;
+      background: #eff6ff; color: #1d4ed8; font-weight: 600; margin-right: 4px;
+    }
+    .bk-card .tag.urgent  { background: #fef2f2; color: #b91c1c; }
+    .bk-card .tag.warranty { background: #fefce8; color: #a16207; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>39 — Bulk action toolbar</h1>
+  <p class="lede">Cmd/Ctrl-click cards to multi-select (or shift-click for a range). When at least one card is selected, a floating toolbar appears with bulk actions. Built on the shipped <code>attachBulkActionToolbar()</code> helper.</p>
+
+  <template id="bk-card">
+    <article class="sk-card bk-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta"><span data-bind="customer"></span> · <span data-bind="suburb"></span></div>
+    </article>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="bk-card"
+       data-board-card-selection-value="multiple"
+       data-board-card-multi-select-with-click-value="true">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"     data-board-column-title-value="To-do"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="quoting"  data-board-column-title-value="Quoting"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="sent"     data-board-column-title-value="Quote sent"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="won"      data-board-column-title-value="Won"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="archived" data-board-column-title-value="Archived"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// click a card to select. Cmd/Ctrl-click or just click to add.</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    const log = (msg) => {
+      const el = document.getElementById('log');
+      el.textContent = `${msg}\n${el.textContent}`.split('\n').slice(0, 10).join('\n');
+    };
+
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'todo',    title: 'Site visit — 14 Bayview St', customer: 'Ms Avery',     suburb: 'Coogee' },
+        { id: 2, column_id: 'todo',    title: 'Quote — bathroom rough-in',  customer: 'Smith family', suburb: 'Newtown' },
+        { id: 3, column_id: 'quoting', title: 'Rewire 3-bed semi',          customer: 'Mrs Hollingworth', suburb: 'Marrickville' },
+        { id: 4, column_id: 'quoting', title: 'Warehouse — power + data',   customer: 'Foley & Sons', suburb: 'Mascot' },
+        { id: 5, column_id: 'sent',    title: 'Pool pump + spa wiring',     customer: 'Mr Daniels',   suburb: 'Cronulla' },
+        { id: 6, column_id: 'sent',    title: 'Switchboard upgrade ×4',     customer: 'Highgate Apts', suburb: 'Surry Hills' },
+        { id: 7, column_id: 'won',     title: '12 GPOs + data drops',       customer: 'BrightStart',  suburb: 'Bondi' },
+        { id: 8, column_id: 'todo',    title: 'Annual safety check (12mo)', customer: 'Cottesloe Strata', suburb: 'Vaucluse' },
+      ]);
+    });
+
+    // Attach the toolbar — the entire UX is in this one call.
+    StimulusKanban.attachBulkActionToolbar(board, {
+      minSelection: 1,
+      position: 'bottom',
+      actions: [
+        {
+          id: 'move-to-quoting',
+          label: 'Move to Quoting',
+          primary: true,
+          onClick: (ids, api) => {
+            api.bulkMove({ fromIds: ids, toColumnId: 'quoting', toIndex: 0 });
+            log(`moved ${ids.length} → Quoting`);
+            api.clearSelection();
+          },
+        },
+        {
+          id: 'tag-urgent',
+          label: 'Tag urgent',
+          onClick: (ids, api) => {
+            const updates = ids.map((id) => ({ id, urgent: true }));
+            api.applyTransaction({ update: updates });
+            log(`tagged ${ids.length} urgent`);
+          },
+          disabled: (ids) => ids.length === 0,
+        },
+        {
+          id: 'reassign',
+          label: 'Reassign…',
+          onClick: (ids) => {
+            const who = window.prompt('Reassign to which tradie?', 'Dave');
+            if (who) log(`reassigned ${ids.length} to ${who}`);
+          },
+        },
+        {
+          id: 'email',
+          label: 'Email customer',
+          onClick: (ids, api) => {
+            const cards = ids.map((id) => api.getCardData().find((c) => String(c.id) === id));
+            const subjects = cards.map((c) => c?.title || '').join(', ');
+            log(`drafting email re: ${subjects}`);
+          },
+        },
+        {
+          id: 'archive',
+          label: 'Archive',
+          danger: true,
+          onClick: (ids, api) => {
+            api.bulkMove({ fromIds: ids, toColumnId: 'archived', toIndex: 0 });
+            log(`archived ${ids.length}`);
+            api.clearSelection();
+          },
+        },
+      ],
+    });
+
+    board.addEventListener('board:cardSelectionChanged', (ev) => {
+      log(`selection: ${ev.detail.selectedCardIds.length} card(s)`);
+    });
+  </script>
+</body>
+</html>

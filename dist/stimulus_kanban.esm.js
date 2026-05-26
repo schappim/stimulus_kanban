@@ -1,22 +1,22 @@
-var At = Object.defineProperty;
-var Et = (r, t, e) => t in r ? At(r, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : r[t] = e;
-var x = (r, t, e) => Et(r, typeof t != "symbol" ? t + "" : t, e);
-import { Controller as $, Application as Dt } from "@hotwired/stimulus";
+var It = Object.defineProperty;
+var Et = (r, t, e) => t in r ? It(r, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : r[t] = e;
+var D = (r, t, e) => Et(r, typeof t != "symbol" ? t + "" : t, e);
+import { Controller as $, Application as xt } from "@hotwired/stimulus";
 const B = "id", T = "column_id", q = "order";
 function H(r, t = {}) {
   const e = t.getCardId || B, n = t.getColumnId || T, s = t.orderField || q, i = Array.isArray(r) ? r.filter((d) => d != null) : [], l = /* @__PURE__ */ new Map();
   for (const d of i) {
-    const m = String(d[n] ?? "");
-    l.has(m) || l.set(m, []), l.get(m).push(d);
+    const h = String(d[n] ?? "");
+    l.has(h) || l.set(h, []), l.get(h).push(d);
   }
   const c = [];
-  for (const [d, m] of l)
-    m.slice().sort((b, k) => {
-      const f = b[s], I = k[s];
-      return f == null && I == null ? 0 : f == null ? 1 : I == null ? -1 : Number(f) - Number(I);
-    }).forEach((b, k) => {
-      const f = { ...b };
-      f[e] = String(b[e] ?? ""), f[n] = d, f[s] = b[s] == null ? k : Number(b[s]), c.push(f);
+  for (const [d, h] of l)
+    h.slice().sort((k, b) => {
+      const g = k[s], A = b[s];
+      return g == null && A == null ? 0 : g == null ? 1 : A == null ? -1 : Number(g) - Number(A);
+    }).forEach((k, b) => {
+      const g = { ...k };
+      g[e] = String(k[e] ?? ""), g[n] = d, g[s] = k[s] == null ? b : Number(k[s]), c.push(g);
     });
   return c;
 }
@@ -38,26 +38,26 @@ function R(r, t, e = {}) {
   const n = e.getColumnId || T;
   return r.filter((s) => String(s[n]) === String(t));
 }
-const xt = (r, t) => String(r ?? "").localeCompare(String(t ?? ""), void 0, { numeric: !0, sensitivity: "base" });
+const Dt = (r, t) => String(r ?? "").localeCompare(String(t ?? ""), void 0, { numeric: !0, sensitivity: "base" });
 function Ft(r, t, e) {
   const n = r?.[e], s = t?.[e];
-  return n == null && s == null ? 0 : n == null ? -1 : s == null ? 1 : typeof n == "number" && typeof s == "number" ? n - s : xt(n, s);
+  return n == null && s == null ? 0 : n == null ? -1 : s == null ? 1 : typeof n == "number" && typeof s == "number" ? n - s : Dt(n, s);
 }
 function K(r, t, e = q) {
   if (!t || t === "manual")
     return r.slice().sort((l, c) => {
-      const d = l[e], m = c[e];
-      return d == null && m == null ? 0 : d == null ? 1 : m == null ? -1 : Number(d) - Number(m);
+      const d = l[e], h = c[e];
+      return d == null && h == null ? 0 : d == null ? 1 : h == null ? -1 : Number(d) - Number(h);
     });
   const [n, s] = String(t).split(":");
   if (!s) return r.slice();
   const i = n === "desc" ? -1 : 1;
   return r.slice().sort((l, c) => i * Ft(l, c, s));
 }
-function Vt(r, t) {
+function Lt(r, t) {
   return t ? r.filter((e) => Tt(e, t)) : r;
 }
-const Lt = /* @__PURE__ */ new Set([
+const Vt = /* @__PURE__ */ new Set([
   B,
   T,
   q,
@@ -69,7 +69,7 @@ function Tt(r, t) {
   if (!t) return !0;
   const e = String(t).toLowerCase();
   for (const [n, s] of Object.entries(r))
-    if (s != null && !n.startsWith("__") && !Lt.has(n) && (typeof s == "string" || typeof s == "number") && String(s).toLowerCase().includes(e))
+    if (s != null && !n.startsWith("__") && !Vt.has(n) && (typeof s == "string" || typeof s == "number") && String(s).toLowerCase().includes(e))
       return !0;
   return !1;
 }
@@ -109,41 +109,41 @@ function Mt(r, t, e = {}) {
   });
 }
 function z(r, t, e, n = {}) {
-  const s = n.getCardId || B, i = n.getColumnId || T, l = n.orderField || q, c = String(t), d = r.map((C) => ({ ...C })), m = d.find((C) => String(C[s]) === c);
-  if (!m) return r;
-  const g = String(m[i]), b = String(e.toColumnId ?? g), k = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex);
-  m[i] = b;
-  const f = d.filter((C) => String(C[i]) === g && String(C[s]) !== c).sort((C, A) => Number(C[l] ?? 0) - Number(A[l] ?? 0)), I = d.filter((C) => String(C[i]) === b && String(C[s]) !== c).sort((C, A) => Number(C[l] ?? 0) - Number(A[l] ?? 0)), w = Math.max(0, Math.min(k, I.length));
-  return I.splice(w, 0, m), f.forEach((C, A) => {
-    C[l] = A;
-  }), I.forEach((C, A) => {
-    C[l] = A;
+  const s = n.getCardId || B, i = n.getColumnId || T, l = n.orderField || q, c = String(t), d = r.map((C) => ({ ...C })), h = d.find((C) => String(C[s]) === c);
+  if (!h) return r;
+  const m = String(h[i]), k = String(e.toColumnId ?? m), b = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex);
+  h[i] = k;
+  const g = d.filter((C) => String(C[i]) === m && String(C[s]) !== c).sort((C, I) => Number(C[l] ?? 0) - Number(I[l] ?? 0)), A = d.filter((C) => String(C[i]) === k && String(C[s]) !== c).sort((C, I) => Number(C[l] ?? 0) - Number(I[l] ?? 0)), w = Math.max(0, Math.min(b, A.length));
+  return A.splice(w, 0, h), g.forEach((C, I) => {
+    C[l] = I;
+  }), A.forEach((C, I) => {
+    C[l] = I;
   }), d;
 }
 function Bt(r, t, e, n = {}) {
   const s = n.getCardId || B, i = n.getColumnId || T, l = n.orderField || q;
   if (!Array.isArray(t) || t.length === 0) return r;
-  const c = new Set(t.map(String)), d = String(e.toColumnId), m = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex), g = r.map((w) => ({ ...w })), b = g.filter((w) => c.has(String(w[s]))).sort((w, C) => {
-    const A = g.indexOf(w), O = g.indexOf(C);
-    return A - O;
+  const c = new Set(t.map(String)), d = String(e.toColumnId), h = e.toIndex == null ? Number.POSITIVE_INFINITY : Number(e.toIndex), m = r.map((w) => ({ ...w })), k = m.filter((w) => c.has(String(w[s]))).sort((w, C) => {
+    const I = m.indexOf(w), O = m.indexOf(C);
+    return I - O;
   });
-  if (b.length === 0) return r;
-  const k = /* @__PURE__ */ new Map();
-  for (const w of g) {
+  if (k.length === 0) return r;
+  const b = /* @__PURE__ */ new Map();
+  for (const w of m) {
     if (c.has(String(w[s]))) continue;
     const C = String(w[i]);
-    k.has(C) || k.set(C, []), k.get(C).push(w);
+    b.has(C) || b.set(C, []), b.get(C).push(w);
   }
-  for (const w of k.values())
-    w.sort((C, A) => Number(C[l] ?? 0) - Number(A[l] ?? 0));
-  for (const w of b) w[i] = d;
-  const f = k.get(d) || [], I = Math.max(0, Math.min(m, f.length));
-  f.splice(I, 0, ...b), k.set(d, f);
-  for (const w of k.values())
-    w.forEach((C, A) => {
-      C[l] = A;
+  for (const w of b.values())
+    w.sort((C, I) => Number(C[l] ?? 0) - Number(I[l] ?? 0));
+  for (const w of k) w[i] = d;
+  const g = b.get(d) || [], A = Math.max(0, Math.min(h, g.length));
+  g.splice(A, 0, ...k), b.set(d, g);
+  for (const w of b.values())
+    w.forEach((C, I) => {
+      C[l] = I;
     });
-  return g;
+  return m;
 }
 function Rt(r, t, e, n = {}) {
   const s = n.getCardId || B, i = n.getColumnId || T, l = String(t), c = r.find((d) => String(d[s]) === l);
@@ -161,17 +161,17 @@ function $t(r, t, e = {}) {
     const c = /* @__PURE__ */ new Map();
     for (const d of l.update) c.set(String(d[n]), d);
     i = i.map((d) => {
-      const m = String(d[n]);
-      if (!c.has(m)) return d;
-      const g = { ...d, ...c.get(m) };
-      return g[n] = m, g;
+      const h = String(d[n]);
+      if (!c.has(h)) return d;
+      const m = { ...d, ...c.get(h) };
+      return m[n] = h, m;
     });
   }
   if (Array.isArray(l.add)) {
     const c = new Set(i.map((d) => String(d[n])));
     for (const d of l.add) {
-      const m = String(d[n] ?? "");
-      m && !c.has(m) && (i.push({ ...d, [n]: m, [s]: String(d[s] ?? "") }), c.add(m));
+      const h = String(d[n] ?? "");
+      h && !c.has(h) && (i.push({ ...d, [n]: h, [s]: String(d[s] ?? "") }), c.add(h));
     }
   }
   if (Array.isArray(l.move))
@@ -409,7 +409,7 @@ function Pt(r) {
     return n === -1 ? [e, e] : [e.slice(0, n).trim(), e.slice(n + 1).trim()];
   });
 }
-function L(r, t) {
+function V(r, t) {
   return r ? r.matches?.(t) ? r : r.closest?.(t) || null : null;
 }
 function Wt(r) {
@@ -426,7 +426,7 @@ function Wt(r) {
     t = !1, e = null;
   }, n;
 }
-const V = 48, Ut = 24;
+const L = 48, Ut = 24;
 function jt({ root: r, hooks: t }) {
   const e = {
     dragging: !1,
@@ -442,15 +442,15 @@ function jt({ root: r, hooks: t }) {
     ghostEl: null
   };
   function n(o) {
-    const u = L(o.target, "[data-card-id]");
+    const u = V(o.target, "[data-card-id]");
     if (!u) return;
-    const h = L(u, "[data-board-column-id-value]");
-    if (!h) return;
+    const f = V(u, "[data-board-column-id-value]");
+    if (!f) return;
     if (u.getAttribute("data-card-locked") === "true") {
       o.preventDefault();
       return;
     }
-    const _ = h.getAttribute("data-board-column-id-value");
+    const _ = f.getAttribute("data-board-column-id-value");
     if (t.isColumnDisallowDrag?.(_)) {
       o.preventDefault();
       return;
@@ -461,28 +461,28 @@ function jt({ root: r, hooks: t }) {
       o.dataTransfer.setData("text/plain", JSON.stringify({ ids: E }));
     } catch {
     }
-    E.length > 1 && It(o, E.length), t.onDragStart?.({ ids: E, fromColumnId: _ }), u.classList.add("sk-card-dragging");
+    E.length > 1 && At(o, E.length), t.onDragStart?.({ ids: E, fromColumnId: _ }), u.classList.add("sk-card-dragging");
   }
   function s(o) {
     if (!e.dragging) return;
-    const u = L(o.target, "[data-board-column-id-value]");
+    const u = V(o.target, "[data-board-column-id-value]");
     if (!u) return;
-    const h = u.getAttribute("data-board-column-id-value");
-    if (!t.canAcceptDrop?.(e.fromColumnId, h)) return;
+    const f = u.getAttribute("data-board-column-id-value");
+    if (!t.canAcceptDrop?.(e.fromColumnId, f)) return;
     o.preventDefault(), o.dataTransfer.dropEffect = "move", e.pointer.x = o.clientX, e.pointer.y = o.clientY;
     const _ = P(u, o.clientY);
-    O(u, h, _), M();
+    O(u, f, _), M();
   }
   function i(o) {
     e.dragging && (o.preventDefault(), C({ cancelled: !1 }));
   }
   function l(o) {
-    e.dragging && e.targetColumnId == null && C({ cancelled: !0 }), A();
+    e.dragging && e.targetColumnId == null && C({ cancelled: !0 }), I();
   }
   let c = null;
   function d(o) {
     if (o.pointerType !== "touch" && o.pointerType !== "pen") return;
-    const u = L(o.target, "[data-card-id]");
+    const u = V(o.target, "[data-card-id]");
     u && u.getAttribute("data-card-locked") !== "true" && (c = {
       cardEl: u,
       id: u.getAttribute("data-card-id"),
@@ -491,35 +491,35 @@ function jt({ root: r, hooks: t }) {
       pointerId: o.pointerId
     });
   }
-  function m(o) {
+  function h(o) {
     if (c && !e.pointerActive) {
       const S = o.clientX - c.x, E = o.clientY - c.y;
       if (Math.hypot(S, E) < 6) return;
-      k(c, o);
+      b(c, o);
     }
     if (!e.pointerActive) return;
     e.pointer.x = o.clientX, e.pointer.y = o.clientY;
     const u = nt(o.clientX, o.clientY);
     if (!u) return;
-    const h = u.getAttribute("data-board-column-id-value");
-    if (!t.canAcceptDrop?.(e.fromColumnId, h)) return;
+    const f = u.getAttribute("data-board-column-id-value");
+    if (!t.canAcceptDrop?.(e.fromColumnId, f)) return;
     const _ = P(u, o.clientY);
-    O(u, h, _), rt(o.clientX, o.clientY), M();
+    O(u, f, _), rt(o.clientX, o.clientY), M();
   }
-  function g(o) {
+  function m(o) {
     if (!e.pointerActive) {
       c = null;
       return;
     }
-    c = null, C({ cancelled: e.targetColumnId == null }), A();
+    c = null, C({ cancelled: e.targetColumnId == null }), I();
   }
-  function b(o) {
-    c = null, e.pointerActive && (C({ cancelled: !0 }), A());
+  function k(o) {
+    c = null, e.pointerActive && (C({ cancelled: !0 }), I());
   }
-  function k(o, u) {
-    const h = L(o.cardEl, "[data-board-column-id-value]");
-    if (!h) return;
-    const _ = h.getAttribute("data-board-column-id-value");
+  function b(o, u) {
+    const f = V(o.cardEl, "[data-board-column-id-value]");
+    if (!f) return;
+    const _ = f.getAttribute("data-board-column-id-value");
     if (t.isColumnDisallowDrag?.(_)) return;
     const S = t.expandSelection?.(o.id, _) ?? [o.id];
     e.dragging = !0, e.pointerActive = !0, e.cardIds = S, e.fromColumnId = _, o.cardEl.classList.add("sk-card-dragging"), e.ghostEl = wt(o.cardEl, S.length), rt(u.clientX, u.clientY);
@@ -529,15 +529,15 @@ function jt({ root: r, hooks: t }) {
     }
     t.onDragStart?.({ ids: S, fromColumnId: _ });
   }
-  function f(o) {
+  function g(o) {
     e.dragging && o.key === "Escape" && (e.targetColumnId = null, e.targetIndex = null, W());
   }
-  function I(o, u) {
+  function A(o, u) {
     e.dragging = !0, e.cardIds = Array.isArray(o) ? o.slice() : [o], e.fromColumnId = u, t.onDragStart?.({ ids: e.cardIds, fromColumnId: u });
   }
   function w(o = {}) {
     const u = !!o.cancelled;
-    u || (e.targetColumnId = o.toColumnId ?? null, e.targetIndex = o.toIndex == null ? null : Number(o.toIndex)), C({ cancelled: u }), A();
+    u || (e.targetColumnId = o.toColumnId ?? null, e.targetIndex = o.toIndex == null ? null : Number(o.toIndex)), C({ cancelled: u }), I();
   }
   function C({ cancelled: o }) {
     if (!e.dragging) return;
@@ -550,18 +550,18 @@ function jt({ root: r, hooks: t }) {
     };
     t.onDrop?.(u);
   }
-  function A() {
-    e.dragging = !1, e.pointerActive = !1, e.cardIds = [], e.fromColumnId = null, e.targetColumnId = null, e.targetIndex = null, e.ghostEl && (e.ghostEl.remove(), e.ghostEl = null), W(), bt();
+  function I() {
+    e.dragging = !1, e.pointerActive = !1, e.cardIds = [], e.fromColumnId = null, e.targetColumnId = null, e.targetIndex = null, e.ghostEl && (e.ghostEl.remove(), e.ghostEl = null), W(), kt();
     for (const o of r.querySelectorAll(".sk-card-dragging"))
       o.classList.remove("sk-card-dragging");
   }
-  function O(o, u, h) {
-    e.targetColumnId = u, e.targetIndex = h, N(o, h);
+  function O(o, u, f) {
+    e.targetColumnId = u, e.targetIndex = f, N(o, f);
   }
   function P(o, u) {
-    const h = o.querySelector(".sk-cards");
-    if (!h) return 0;
-    const _ = Array.from(h.querySelectorAll(":scope > [data-card-id]")).filter((S) => !S.classList.contains("sk-card-dragging"));
+    const f = o.querySelector(".sk-cards");
+    if (!f) return 0;
+    const _ = Array.from(f.querySelectorAll(":scope > [data-card-id]")).filter((S) => !S.classList.contains("sk-card-dragging"));
     if (_.length === 0) return 0;
     for (let S = 0; S < _.length; S++) {
       const E = _[S].getBoundingClientRect();
@@ -570,11 +570,11 @@ function jt({ root: r, hooks: t }) {
     return _.length;
   }
   function N(o, u) {
-    const h = o.querySelector(".sk-cards");
-    if (!h) return;
+    const f = o.querySelector(".sk-cards");
+    if (!f) return;
     e.indicatorEl || (e.indicatorEl = document.createElement("li"), e.indicatorEl.className = "sk-drop-indicator", e.indicatorEl.setAttribute("aria-hidden", "true"));
-    const _ = e.indicatorEl, S = Array.from(h.querySelectorAll(":scope > [data-card-id]")).filter((E) => !E.classList.contains("sk-card-dragging"));
-    u >= S.length ? h.appendChild(_) : h.insertBefore(_, S[u]);
+    const _ = e.indicatorEl, S = Array.from(f.querySelectorAll(":scope > [data-card-id]")).filter((E) => !E.classList.contains("sk-card-dragging"));
+    u >= S.length ? f.appendChild(_) : f.insertBefore(_, S[u]);
   }
   function W() {
     e.indicatorEl?.parentNode && e.indicatorEl.parentNode.removeChild(e.indicatorEl);
@@ -583,74 +583,74 @@ function jt({ root: r, hooks: t }) {
     if (e.rafToken != null) return;
     const o = () => {
       if (e.rafToken = null, !e.dragging) return;
-      const { x: u, y: h } = e.pointer;
-      St(u), vt(u, h), e.rafToken = requestAnimationFrame(o);
+      const { x: u, y: f } = e.pointer;
+      St(u), vt(u, f), e.rafToken = requestAnimationFrame(o);
     };
     e.rafToken = requestAnimationFrame(o);
   }
-  function bt() {
+  function kt() {
     e.rafToken != null && (cancelAnimationFrame(e.rafToken), e.rafToken = null);
   }
   function St(o) {
     const u = r.querySelector(".sk-columns");
     if (!u) return;
-    const h = u.getBoundingClientRect();
-    if (o < h.left + V) {
-      const _ = j(h.left + V - o);
+    const f = u.getBoundingClientRect();
+    if (o < f.left + L) {
+      const _ = j(f.left + L - o);
       u.scrollLeft -= _;
-    } else if (o > h.right - V) {
-      const _ = j(o - (h.right - V));
+    } else if (o > f.right - L) {
+      const _ = j(o - (f.right - L));
       u.scrollLeft += _;
     }
   }
   function vt(o, u) {
-    const h = nt(o, u);
-    if (!h) return;
-    const _ = h.querySelector(".sk-cards");
+    const f = nt(o, u);
+    if (!f) return;
+    const _ = f.querySelector(".sk-cards");
     if (!_) return;
     const S = _.getBoundingClientRect();
-    if (u < S.top + V) {
-      const E = j(S.top + V - u);
+    if (u < S.top + L) {
+      const E = j(S.top + L - u);
       _.scrollTop -= E;
-    } else if (u > S.bottom - V) {
-      const E = j(u - (S.bottom - V));
+    } else if (u > S.bottom - L) {
+      const E = j(u - (S.bottom - L));
       _.scrollTop += E;
     }
   }
   function j(o) {
-    const u = Math.max(0, Math.min(1, o / V));
+    const u = Math.max(0, Math.min(1, o / L));
     return Math.ceil(u * Ut);
   }
   function nt(o, u) {
-    const h = r.querySelectorAll("[data-board-column-id-value]");
-    for (const _ of h) {
+    const f = r.querySelectorAll("[data-board-column-id-value]");
+    for (const _ of f) {
       const S = _.getBoundingClientRect();
       if (o >= S.left && o <= S.right && u >= S.top && u <= S.bottom) return _;
     }
     return null;
   }
   function wt(o, u) {
-    const h = o.cloneNode(!0);
-    if (h.classList.add("sk-card-ghost"), h.style.position = "fixed", h.style.pointerEvents = "none", h.style.opacity = "0.85", h.style.zIndex = "99999", h.style.left = "0px", h.style.top = "0px", u > 1) {
+    const f = o.cloneNode(!0);
+    if (f.classList.add("sk-card-ghost"), f.style.position = "fixed", f.style.pointerEvents = "none", f.style.opacity = "0.85", f.style.zIndex = "99999", f.style.left = "0px", f.style.top = "0px", u > 1) {
       const _ = document.createElement("span");
-      _.className = "sk-card-stack-badge", _.textContent = String(u), h.appendChild(_);
+      _.className = "sk-card-stack-badge", _.textContent = String(u), f.appendChild(_);
     }
-    return document.body.appendChild(h), h;
+    return document.body.appendChild(f), f;
   }
   function rt(o, u) {
     e.ghostEl && (e.ghostEl.style.transform = `translate(${o + 8}px, ${u + 8}px)`);
   }
-  function It(o, u) {
+  function At(o, u) {
     try {
       o.dataTransfer.setData("application/x-stimulus-kanban-count", String(u));
     } catch {
     }
   }
-  return r.addEventListener("dragstart", n), r.addEventListener("dragover", s), r.addEventListener("drop", i), r.addEventListener("dragend", l), r.addEventListener("pointerdown", d), window.addEventListener("pointermove", m), window.addEventListener("pointerup", g), window.addEventListener("pointercancel", b), document.addEventListener("keydown", f), {
-    beginDrag: I,
+  return r.addEventListener("dragstart", n), r.addEventListener("dragover", s), r.addEventListener("drop", i), r.addEventListener("dragend", l), r.addEventListener("pointerdown", d), window.addEventListener("pointermove", h), window.addEventListener("pointerup", m), window.addEventListener("pointercancel", k), document.addEventListener("keydown", g), {
+    beginDrag: A,
     endDrag: w,
     destroy() {
-      r.removeEventListener("dragstart", n), r.removeEventListener("dragover", s), r.removeEventListener("drop", i), r.removeEventListener("dragend", l), r.removeEventListener("pointerdown", d), window.removeEventListener("pointermove", m), window.removeEventListener("pointerup", g), window.removeEventListener("pointercancel", b), document.removeEventListener("keydown", f), A();
+      r.removeEventListener("dragstart", n), r.removeEventListener("dragover", s), r.removeEventListener("drop", i), r.removeEventListener("dragend", l), r.removeEventListener("pointerdown", d), window.removeEventListener("pointermove", h), window.removeEventListener("pointerup", m), window.removeEventListener("pointercancel", k), document.removeEventListener("keydown", g), I();
     },
     isDragging() {
       return e.dragging;
@@ -671,41 +671,41 @@ function Ht({
   // (card, index) => HTMLElement
   cardsListEl: l
 }) {
-  const c = t + e, d = document.createElement("li"), m = document.createElement("li");
-  d.className = "sk-virtual-spacer", m.className = "sk-virtual-spacer", d.setAttribute("aria-hidden", "true"), m.setAttribute("aria-hidden", "true");
-  let g = /* @__PURE__ */ new Map();
-  function b() {
-    const f = r.length, I = s.clientHeight, w = s.scrollTop, C = Math.max(0, Math.floor(w / c) - n), A = Math.ceil(I / c) + n * 2, O = Math.min(f - 1, C + A);
-    l.replaceChildren(), d.style.height = `${C * c}px`, m.style.height = `${Math.max(0, (f - O - 1) * c)}px`, l.appendChild(d);
+  const c = t + e, d = document.createElement("li"), h = document.createElement("li");
+  d.className = "sk-virtual-spacer", h.className = "sk-virtual-spacer", d.setAttribute("aria-hidden", "true"), h.setAttribute("aria-hidden", "true");
+  let m = /* @__PURE__ */ new Map();
+  function k() {
+    const g = r.length, A = s.clientHeight, w = s.scrollTop, C = Math.max(0, Math.floor(w / c) - n), I = Math.ceil(A / c) + n * 2, O = Math.min(g - 1, C + I);
+    l.replaceChildren(), d.style.height = `${C * c}px`, h.style.height = `${Math.max(0, (g - O - 1) * c)}px`, l.appendChild(d);
     const P = /* @__PURE__ */ new Map();
     for (let N = C; N <= O; N++) {
       const W = r[N];
       if (!W) continue;
-      let M = g.get(N);
+      let M = m.get(N);
       M || (M = i(W, N)), l.appendChild(M), P.set(N, M);
     }
-    g = P, l.appendChild(m);
+    m = P, l.appendChild(h);
   }
-  function k() {
-    b();
+  function b() {
+    k();
   }
-  return s.addEventListener("scroll", k, { passive: !0 }), b(), {
-    render: b,
-    update(f) {
-      r = f, g.clear(), b();
+  return s.addEventListener("scroll", b, { passive: !0 }), k(), {
+    render: k,
+    update(g) {
+      r = g, m.clear(), k();
     },
     destroy() {
-      s.removeEventListener("scroll", k), g.clear(), l.replaceChildren();
+      s.removeEventListener("scroll", b), m.clear(), l.replaceChildren();
     },
     /* Translate a logical card index (in `cards`) to a y-position relative
      * to the scroll container — used by the DnD module so a drop into the
      * logical N-th slot of a virtualised column resolves correctly even
      * when N isn't currently rendered. */
-    indexToY(f) {
-      return f * c;
+    indexToY(g) {
+      return g * c;
     },
-    yToIndex(f) {
-      return Math.max(0, Math.floor(f / c));
+    yToIndex(g) {
+      return Math.max(0, Math.floor(g / c));
     }
   };
 }
@@ -733,7 +733,7 @@ function a(r, t = {}, e = null) {
     s == null || s === !1 || n.appendChild(typeof s == "string" ? document.createTextNode(s) : s);
   return n;
 }
-const v = (r) => r == null || r === "", D = {
+const v = (r) => r == null || r === "", x = {
   statusPill(r, { colorMap: t = {}, iconMap: e = {} } = {}) {
     const n = r == null ? "" : String(r), s = t[n] || "#9ca3af", i = e[n];
     return a(
@@ -838,10 +838,10 @@ const v = (r) => r == null || r === "", D = {
 function lt({ card: r }) {
   const t = a("article", { class: "sk-card sk-card-story" }), e = a("header", { class: "sk-card-header" }, [
     a("span", { class: "sk-card-key", text: r.key || "" }),
-    D.statusPill(r.status, { colorMap: J })
+    x.statusPill(r.status, { colorMap: J })
   ]), n = a("h4", { class: "sk-card-title", text: r.title || "" }), s = a("footer", { class: "sk-card-footer" }, [
     v(r.points) ? null : a("span", { class: "sk-card-points", text: `${r.points} pts` }),
-    v(r.assignee_name) ? null : D.avatar(r.assignee_name, { url: r.assignee_avatar })
+    v(r.assignee_name) ? null : x.avatar(r.assignee_name, { url: r.assignee_avatar })
   ].filter(Boolean));
   return t.append(e, n, s), t;
 }
@@ -855,7 +855,7 @@ function ot({ card: r }) {
     }),
     a("span", { class: r.done ? "sk-card-title sk-card-title-done" : "sk-card-title", text: r.title || "" })
   ]);
-  return t.appendChild(e), v(r.due_at) || t.appendChild(D.dueDate(r.due_at)), t;
+  return t.appendChild(e), v(r.due_at) || t.appendChild(x.dueDate(r.due_at)), t;
 }
 function dt({ card: r }) {
   const t = String(r.severity || "minor").toLowerCase(), e = { critical: "#dc2626", major: "#f97316", minor: "#facc15", cosmetic: "#94a3b8" }, n = a("article", { class: "sk-card sk-card-bug", "data-severity": t });
@@ -866,7 +866,7 @@ function dt({ card: r }) {
     ]),
     a("h4", { class: "sk-card-title", text: r.title || "" }),
     r.reporter_name ? a("footer", { class: "sk-card-footer" }, [
-      D.avatar(r.reporter_name, { url: r.reporter_avatar, title: `Reported by ${r.reporter_name}` })
+      x.avatar(r.reporter_name, { url: r.reporter_avatar, title: `Reported by ${r.reporter_name}` })
     ]) : null
   ), n;
 }
@@ -879,7 +879,7 @@ function ct({ card: r }) {
     ].filter(Boolean)),
     a("h4", { class: "sk-card-title", text: r.title || "" }),
     a("footer", { class: "sk-card-footer" }, [
-      v(r.opened_at) ? null : D.relativeTime(r.opened_at)
+      v(r.opened_at) ? null : x.relativeTime(r.opened_at)
     ].filter(Boolean))
   ), n;
 }
@@ -889,11 +889,11 @@ function ut({ card: r }) {
     a("div", { class: "sk-card-body", text: r.body || r.title || "" }),
     a("footer", { class: "sk-card-footer" }, [
       v(r.author) ? null : a("span", { class: "sk-card-meta", text: r.author }),
-      v(r.updated_at) ? null : D.relativeTime(r.updated_at)
+      v(r.updated_at) ? null : x.relativeTime(r.updated_at)
     ].filter(Boolean))
   ), t;
 }
-function mt({ card: r }) {
+function ht({ card: r }) {
   const t = String(r.ci || "").toLowerCase(), e = t === "pass" ? "sk-ci sk-ci-pass" : t === "fail" ? "sk-ci sk-ci-fail" : t === "pending" ? "sk-ci sk-ci-pending" : "sk-ci", n = a("article", { class: "sk-card sk-card-pr" });
   return n.append(
     a("header", { class: "sk-card-header" }, [
@@ -910,12 +910,12 @@ function mt({ card: r }) {
       Array.isArray(r.reviewers) && r.reviewers.length > 0 ? a(
         "span",
         { class: "sk-card-reviewers" },
-        r.reviewers.slice(0, 3).map((s) => D.avatar(s.name, { url: s.avatar, size: 18 }))
+        r.reviewers.slice(0, 3).map((s) => x.avatar(s.name, { url: s.avatar, size: 18 }))
       ) : null
     ].filter(Boolean))
   ), n;
 }
-function ht({ card: r }) {
+function mt({ card: r }) {
   const t = a("article", { class: "sk-card sk-card-ticket" });
   return t.append(
     a("header", { class: "sk-card-header" }, [
@@ -924,7 +924,7 @@ function ht({ card: r }) {
     ].filter(Boolean)),
     a("h4", { class: "sk-card-title", text: r.subject || r.title || "" }),
     a("div", { class: "sk-card-meta", text: r.customer_name || "" }),
-    v(r.sla_due_at) ? null : a("footer", { class: "sk-card-footer" }, [D.dueDate(r.sla_due_at)])
+    v(r.sla_due_at) ? null : a("footer", { class: "sk-card-footer" }, [x.dueDate(r.sla_due_at)])
   ), t;
 }
 function ft({ card: r }) {
@@ -933,8 +933,8 @@ function ft({ card: r }) {
     a("h4", { class: "sk-card-title", text: r.name || "" }),
     a("div", { class: "sk-card-meta", text: r.company || "" }),
     a("footer", { class: "sk-card-footer" }, [
-      v(r.value) ? null : D.currency(r.value, { currency: r.currency || "AUD" }),
-      v(r.stage) ? null : D.statusPill(r.stage, { colorMap: J })
+      v(r.value) ? null : x.currency(r.value, { currency: r.currency || "AUD" }),
+      v(r.stage) ? null : x.statusPill(r.stage, { colorMap: J })
     ].filter(Boolean))
   ), t;
 }
@@ -943,11 +943,11 @@ function pt({ card: r }) {
   return t.append(
     a("header", { class: "sk-card-header" }, [
       a("span", { class: "sk-card-key", text: `#${r.order_number || r.id || ""}` }),
-      D.statusPill(r.status, { colorMap: J })
+      x.statusPill(r.status, { colorMap: J })
     ]),
     v(r.customer_name) ? null : a("div", { class: "sk-card-meta", text: r.customer_name }),
     a("footer", { class: "sk-card-footer" }, [
-      v(r.total) ? null : D.currency(r.total, { currency: r.currency || "AUD" }),
+      v(r.total) ? null : x.currency(r.total, { currency: r.currency || "AUD" }),
       v(r.items_count) ? null : a("span", { class: "sk-card-meta", text: `${r.items_count} items` })
     ].filter(Boolean))
   ), t;
@@ -979,7 +979,7 @@ function Ct({ card: r }) {
 }
 function _t({ card: r }) {
   const t = a("article", { class: "sk-card sk-card-cover" });
-  return v(r.image_url) || t.appendChild(a("img", { class: "sk-card-hero", src: r.image_url, alt: r.title || "" })), t.appendChild(a("h4", { class: "sk-card-title", text: r.title || "" })), r.progress != null && t.appendChild(D.progressBar(r.progress)), t;
+  return v(r.image_url) || t.appendChild(a("img", { class: "sk-card-hero", src: r.image_url, alt: r.title || "" })), t.appendChild(a("h4", { class: "sk-card-title", text: r.title || "" })), r.progress != null && t.appendChild(x.progressBar(r.progress)), t;
 }
 function yt({ card: r }) {
   const t = a("article", { class: "sk-card sk-card-gantt" });
@@ -988,7 +988,7 @@ function yt({ card: r }) {
     a("div", { class: "sk-gantt-bar" }, [
       a("div", { class: "sk-gantt-fill", style: `width:${Math.round((Number(r.progress) || 0) * 100)}%` })
     ]),
-    v(r.due_at) ? null : D.dueDate(r.due_at)
+    v(r.due_at) ? null : x.dueDate(r.due_at)
   ), t;
 }
 F("story", lt);
@@ -996,8 +996,8 @@ F("task", ot);
 F("bug", dt);
 F("incident", ct);
 F("note", ut);
-F("pr", mt);
-F("support-ticket", ht);
+F("pr", ht);
+F("support-ticket", mt);
 F("lead", ft);
 F("order", pt);
 F("email-thread", gt);
@@ -1010,15 +1010,15 @@ const Xt = {
   bug: dt,
   incident: ct,
   note: ut,
-  pr: mt,
-  "support-ticket": ht,
+  pr: ht,
+  "support-ticket": mt,
   lead: ft,
   order: pt,
   "email-thread": gt,
   "image-card": Ct,
   "cover-progress": _t,
   "gantt-stub": yt,
-  sub: D
+  sub: x
 }, Jt = 280, Qt = 8;
 class Q extends $ {
   initialize() {
@@ -1091,22 +1091,22 @@ class Q extends $ {
   _parseCardsFromDom() {
     const t = [], e = this.element.querySelectorAll("[data-card-id]");
     for (const n of e) {
-      const s = n.getAttribute("data-card-id"), l = L(n, "[data-board-column-id-value]")?.getAttribute("data-board-column-id-value") || n.getAttribute("data-column-id") || "", c = n.getAttribute("data-card-order"), d = n.getAttribute("data-card-json");
-      let m = { [this.getCardIdValue]: s, [this.getColumnIdValue]: l };
+      const s = n.getAttribute("data-card-id"), l = V(n, "[data-board-column-id-value]")?.getAttribute("data-board-column-id-value") || n.getAttribute("data-column-id") || "", c = n.getAttribute("data-card-order"), d = n.getAttribute("data-card-json");
+      let h = { [this.getCardIdValue]: s, [this.getColumnIdValue]: l };
       if (d)
         try {
-          Object.assign(m, JSON.parse(d));
+          Object.assign(h, JSON.parse(d));
         } catch {
         }
-      c != null && (m[this.orderFieldValue] = Number(c)), m.title == null && (m.title = n.textContent.trim());
-      const g = n.getAttribute("data-card-swimlane");
-      g != null && (m.__swimlane = g), n.getAttribute("data-card-locked") === "true" && (m.__locked = !0);
-      const k = n.getAttribute("data-card-color");
-      k && (m.__color = k);
-      const f = n.getAttribute("data-card-renderer");
-      f && (m.__renderer = f);
-      const I = n.getAttribute("data-card-editor");
-      I && (m.__editor = I), t.push(m);
+      c != null && (h[this.orderFieldValue] = Number(c)), h.title == null && (h.title = n.textContent.trim());
+      const m = n.getAttribute("data-card-swimlane");
+      m != null && (h.__swimlane = m), n.getAttribute("data-card-locked") === "true" && (h.__locked = !0);
+      const b = n.getAttribute("data-card-color");
+      b && (h.__color = b);
+      const g = n.getAttribute("data-card-renderer");
+      g && (h.__renderer = g);
+      const A = n.getAttribute("data-card-editor");
+      A && (h.__editor = A), t.push(h);
     }
     return t;
   }
@@ -1419,13 +1419,13 @@ class Q extends $ {
         this.orderFieldValue
       );
       for (const d of c) {
-        const m = [
+        const h = [
           this._csvCell(d[this.getCardIdValue]),
           this._csvCell(l.title),
           ...e && this.state.swimlaneField ? [this._csvCell(d[this.state.swimlaneField])] : [],
           this._csvCell(d.title || "")
         ];
-        i.push(m.join(","));
+        i.push(h.join(","));
       }
     }
     return i.join(`
@@ -1495,17 +1495,17 @@ class Q extends $ {
     this._renderScheduled = !1;
     const t = this.state.ready, e = !!this.state.swimlaneField;
     let n = this.state.cards;
-    this.state.quickFilter && (n = Vt(n, this.state.quickFilter)), typeof this.state.predicate == "function" && (n = Nt(n, this.state.predicate));
+    this.state.quickFilter && (n = Lt(n, this.state.quickFilter)), typeof this.state.predicate == "function" && (n = Nt(n, this.state.predicate));
     const s = this.filterModeValue || "hide";
     let i = this.element.querySelector(".sk-columns");
     i || (i = p("ol", { class: "sk-columns" }), this.element.replaceChildren(i)), i.style.gap = `${this.gapValue}px`;
     const l = this._orderedColumns().filter((d) => !d.hidden), c = e ? Ot(n, this.state.swimlaneField) : /* @__PURE__ */ new Map([["", n]]);
     if (i.replaceChildren(), e && c.size > 0)
-      for (const [d, m] of c) {
-        const g = p("li", {
+      for (const [d, h] of c) {
+        const m = p("li", {
           class: "sk-swimlane",
           "data-swimlane-value": d || ""
-        }), b = this.state.collapsedSwimlanes.has(d), k = p("div", {
+        }), k = this.state.collapsedSwimlanes.has(d), b = p("div", {
           class: "sk-swimlane-header",
           "data-controller": "swimlane-header",
           "data-swimlane-header-value-value": d || "",
@@ -1515,22 +1515,22 @@ class Q extends $ {
           "data-action": "click->swimlane-header#toggle keydown->swimlane-header#keydown",
           role: "button",
           tabindex: "0",
-          "aria-expanded": b ? "false" : "true"
+          "aria-expanded": k ? "false" : "true"
         }, [
-          p("span", { class: "sk-swimlane-toggle", "aria-hidden": "true", text: b ? "▶" : "▼" }),
+          p("span", { class: "sk-swimlane-toggle", "aria-hidden": "true", text: k ? "▶" : "▼" }),
           p("span", { class: "sk-swimlane-label", text: d || "Unassigned" }),
-          p("span", { class: "sk-swimlane-count", text: `${m.length}` })
-        ]), f = p("div", { class: "sk-swimlane-cols", style: `gap:${this.gapValue}px` });
-        for (const I of l) {
-          const w = R(m, I.id, this._modelOpts());
-          f.appendChild(this._renderColumn(I, w, s));
+          p("span", { class: "sk-swimlane-count", text: `${h.length}` })
+        ]), g = p("div", { class: "sk-swimlane-cols", style: `gap:${this.gapValue}px` });
+        for (const A of l) {
+          const w = R(h, A.id, this._modelOpts());
+          g.appendChild(this._renderColumn(A, w, s));
         }
-        g.append(k, f), this.state.collapsedSwimlanes.has(d) && g.classList.add("sk-swimlane-collapsed"), i.appendChild(g);
+        m.append(b, g), this.state.collapsedSwimlanes.has(d) && m.classList.add("sk-swimlane-collapsed"), i.appendChild(m);
       }
     else
       for (const d of l) {
-        const m = R(n, d.id, this._modelOpts());
-        i.appendChild(this._renderColumn(d, m, s));
+        const h = R(n, d.id, this._modelOpts());
+        i.appendChild(this._renderColumn(d, h, s));
       }
     this._refreshSelectionDecorations(), t && this._schedulePersist();
   }
@@ -1547,63 +1547,63 @@ class Q extends $ {
         width: `${t.width || this.columnWidthValue}px`,
         ...t.color ? { "--sk-column-accent": t.color } : {}
       }
-    }), m = p("header", { class: "sk-column-header" }, [
+    }), h = p("header", { class: "sk-column-header" }, [
       t.icon ? p("span", { class: "sk-column-icon", text: t.icon }) : null,
       p("span", { class: "sk-column-title", text: t.title }),
       p("span", {
         class: "sk-column-count" + (c ? " sk-column-count-over-wip" : ""),
         text: t.wip != null ? `${i} / ${t.wip}` : String(l)
       })
-    ].filter(Boolean)), g = p("ol", { class: "sk-cards", style: `gap:${this.gapValue}px` });
+    ].filter(Boolean)), m = p("ol", { class: "sk-cards", style: `gap:${this.gapValue}px` });
     if (t.collapsed)
-      return d.appendChild(m), d;
-    for (const k of s) {
-      const f = this._renderCard(k, t);
-      n === "dim" && this.state.quickFilter && !this._cardMatchesQuick(k) && f.classList.add("sk-card-dimmed"), g.appendChild(f);
+      return d.appendChild(h), d;
+    for (const b of s) {
+      const g = this._renderCard(b, t);
+      n === "dim" && this.state.quickFilter && !this._cardMatchesQuick(b) && g.classList.add("sk-card-dimmed"), m.appendChild(g);
     }
     if (this.serverSideValue) {
-      const k = this.state.columnCounts.get(String(t.id)) ?? i;
-      if (k > i) {
-        const f = p("li", { class: "sk-column-more-pill" }, [
+      const b = this.state.columnCounts.get(String(t.id)) ?? i;
+      if (b > i) {
+        const g = p("li", { class: "sk-column-more-pill" }, [
           p("button", {
             type: "button",
             class: "sk-button sk-button-ghost",
-            onclick: () => y(this.element, "board:columnFetchMore", { columnId: t.id, loadedCount: i, totalCount: k }),
-            text: `+${k - i} more…`
+            onclick: () => y(this.element, "board:columnFetchMore", { columnId: t.id, loadedCount: i, totalCount: b }),
+            text: `+${b - i} more…`
           })
         ]);
-        g.appendChild(f);
+        m.appendChild(g);
       }
     }
     if (this.addCardValue) {
-      const k = t.add_card_label || "+ Add card", f = p("li", { class: "sk-add-card-row" }, [
+      const b = t.add_card_label || "+ Add card", g = p("li", { class: "sk-add-card-row" }, [
         p("button", {
           type: "button",
           class: "sk-button sk-button-ghost",
           onclick: () => y(this.element, "board:addCardRequested", { columnId: t.id }),
-          text: k
+          text: b
         })
       ]);
-      g.appendChild(f);
+      m.appendChild(g);
     }
-    d.append(m, g);
-    const b = Number(this.cardHeightValue);
+    d.append(h, m);
+    const k = Number(this.cardHeightValue);
     if (Yt({
       cardCount: s.length,
       threshold: this.virtualThresholdValue,
-      cardHeight: b,
+      cardHeight: k,
       virtual: this.virtualValue
     })) {
-      this.state.virtualColumns.get(t.id)?.destroy?.(), g.replaceChildren();
-      const f = Ht({
+      this.state.virtualColumns.get(t.id)?.destroy?.(), m.replaceChildren();
+      const g = Ht({
         cards: s,
-        cardHeight: b,
+        cardHeight: k,
         gap: this.gapValue,
-        scrollEl: g,
-        cardsListEl: g,
-        renderCard: (I) => this._renderCard(I, t)
+        scrollEl: m,
+        cardsListEl: m,
+        renderCard: (A) => this._renderCard(A, t)
       });
-      this.state.virtualColumns.set(t.id, f);
+      this.state.virtualColumns.set(t.id, g);
     } else
       this.state.virtualColumns.get(t.id)?.destroy?.(), this.state.virtualColumns.delete(t.id);
     return d;
@@ -1674,7 +1674,7 @@ class Q extends $ {
   /* ---------------- Keyboard nav ---------------- */
   _installKeyboard() {
     this.element.addEventListener("keydown", (t) => {
-      if (L(t.target, ".sk-card-editor")) return;
+      if (V(t.target, ".sk-card-editor")) return;
       const e = t.key, n = t.metaKey || t.ctrlKey, s = this.state.activeCardId;
       if (!s) {
         if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e)) {
@@ -1746,10 +1746,10 @@ class Q extends $ {
   _installFileDrop() {
     this.acceptFilesValue && (this.element.addEventListener("dragover", (t) => {
       if (!t.dataTransfer?.types?.includes("Files")) return;
-      L(t.target, "[data-card-id]") && t.preventDefault();
+      V(t.target, "[data-card-id]") && t.preventDefault();
     }), this.element.addEventListener("drop", (t) => {
       if (!t.dataTransfer?.files?.length) return;
-      const e = L(t.target, "[data-card-id]");
+      const e = V(t.target, "[data-card-id]");
       if (!e) return;
       t.preventDefault();
       const n = e.getAttribute("data-card-id"), s = this._snapshotCard(n), i = Array.from(t.dataTransfer.files);
@@ -1759,8 +1759,8 @@ class Q extends $ {
         { cardId: n, files: i, card: s, dataTransfer: t.dataTransfer },
         { cancellable: !0 }
       ).defaultPrevented) return;
-      const c = this.attachmentsFieldValue || "attachments", d = Array.isArray(s?.[c]) ? s[c].slice() : [], m = i.map((g) => ({ name: g.name, size: g.size, type: g.type }));
-      this.applyTransaction({ update: [{ [this.getCardIdValue]: n, [c]: d.concat(m) }] });
+      const c = this.attachmentsFieldValue || "attachments", d = Array.isArray(s?.[c]) ? s[c].slice() : [], h = i.map((m) => ({ name: m.name, size: m.size, type: m.type }));
+      this.applyTransaction({ update: [{ [this.getCardIdValue]: n, [c]: d.concat(h) }] });
     }));
   }
   /* ---------------- Misc helpers ---------------- */
@@ -1778,7 +1778,7 @@ class Q extends $ {
     }
   }
 }
-x(Q, "values", {
+D(Q, "values", {
   cardData: { type: Array, default: [] },
   cardDataUrl: { type: String, default: "" },
   cardSelection: { type: String, default: "" },
@@ -1821,7 +1821,7 @@ class G extends $ {
     /* Header double-click toggles collapse — same UX as Trello's column menu
      * shortcut. Single click just emits a discoverable event so host apps can
      * wire a custom column menu. */
-    x(this, "_onHeaderClick", (e) => {
+    D(this, "_onHeaderClick", (e) => {
       const n = e.target?.closest?.(".sk-column-header");
       if (!(!n || !this.element.contains(n))) {
         if (e.detail === 2) {
@@ -1845,7 +1845,7 @@ class G extends $ {
     return U(this.element, "board", this.application);
   }
 }
-x(G, "values", {
+D(G, "values", {
   id: { type: String, default: "" },
   title: { type: String, default: "" },
   wip: { type: Number, default: 0 },
@@ -1862,10 +1862,10 @@ x(G, "values", {
   color: { type: String, default: "" },
   icon: { type: String, default: "" }
 });
-class kt extends $ {
+class bt extends $ {
   constructor() {
     super(...arguments);
-    x(this, "_onClick", (e) => {
+    D(this, "_onClick", (e) => {
       const n = this._board();
       if (!n) return;
       const s = this._cardId(), i = this._card(), l = i?.[n.getColumnIdValue] ?? null;
@@ -1873,7 +1873,7 @@ class kt extends $ {
       const c = e.metaKey || e.ctrlKey, d = e.shiftKey;
       n.cardSelectionValue === "multiple" && (c || d || n.cardMultiSelectWithClickValue) ? n.toggleSelection(s) : (n.clearSelection?.(), n.selectCard(s));
     });
-    x(this, "_onDblClick", (e) => {
+    D(this, "_onDblClick", (e) => {
       const n = this._board();
       if (!n) return;
       const s = this._cardId(), i = this._card(), l = i?.[n.getColumnIdValue] ?? null;
@@ -1915,7 +1915,7 @@ class kt extends $ {
 class Z extends $ {
   constructor() {
     super(...arguments);
-    x(this, "_onKeyDown", (e) => {
+    D(this, "_onKeyDown", (e) => {
       if (e.key === "Escape") {
         e.preventDefault(), this._board()?.cancelEditing();
         return;
@@ -1929,7 +1929,7 @@ class Z extends $ {
         n.length && e.target === n[n.length - 1] && !e.shiftKey && (e.preventDefault(), this._board()?.commitEditing());
       }
     });
-    x(this, "_onClick", (e) => {
+    D(this, "_onClick", (e) => {
       const n = e.target;
       if (n?.closest?.("[data-editor-commit]")) {
         e.preventDefault(), this._board()?.commitEditing();
@@ -1937,10 +1937,10 @@ class Z extends $ {
       }
       n?.closest?.("[data-editor-cancel]") && (e.preventDefault(), this._board()?.cancelEditing());
     });
-    x(this, "_onSubmit", (e) => {
+    D(this, "_onSubmit", (e) => {
       e.preventDefault(), this._board()?.commitEditing();
     });
-    x(this, "_onFocusOut", (e) => {
+    D(this, "_onFocusOut", (e) => {
       this.element.hasAttribute("data-editor-no-commit-on-blur") || this.element.contains(e.relatedTarget) || this._board()?.commitEditing();
     });
   }
@@ -1957,7 +1957,7 @@ class Z extends $ {
     return U(this.element, "board", this.application);
   }
 }
-x(Z, "values", {
+D(Z, "values", {
   cardId: { type: String, default: "" }
 });
 class tt extends $ {
@@ -1971,13 +1971,13 @@ class tt extends $ {
     (t.key === "Enter" || t.key === " " || t.key === "Spacebar") && (t.preventDefault(), this.toggle(t));
   }
 }
-x(tt, "values", {
+D(tt, "values", {
   value: { type: String, default: "" }
 });
 class et extends $ {
   constructor() {
     super(...arguments);
-    x(this, "_open", (e) => {
+    D(this, "_open", (e) => {
       e.preventDefault(), this._dismiss();
       const n = U(this.element, "board", this.application);
       if (!n) return;
@@ -2041,7 +2041,7 @@ class et extends $ {
       ].filter(Boolean));
       document.body.appendChild(l), this._menu = l, setTimeout(() => document.addEventListener("click", this._dismiss, { once: !0 }), 0);
     });
-    x(this, "_dismiss", () => {
+    D(this, "_dismiss", () => {
       this._menu?.remove(), this._menu = null;
     });
   }
@@ -2052,18 +2052,66 @@ class et extends $ {
     this.element.removeEventListener("contextmenu", this._open), this._dismiss();
   }
 }
-x(et, "values", {
+D(et, "values", {
   columnId: { type: String, default: "" }
 });
-function Gt(r) {
-  const t = r ?? Dt.start();
-  return t.register("board", Q), t.register("board-column", G), t.register("card", kt), t.register("card-editor", Z), t.register("swimlane-header", tt), t.register("column-menu", et), t;
+const Gt = { minSelection: 1, position: "bottom" };
+function Zt(r, t = {}) {
+  if (!r) throw new Error("attachBulkActionToolbar: boardEl is required");
+  const e = { ...Gt, ...t }, n = Array.isArray(e.actions) ? e.actions.slice() : [], s = p("div", { class: "sk-bulk-toolbar", role: "toolbar", "aria-label": "Bulk actions" });
+  s.style.display = "none";
+  const i = p("span", { class: "sk-bulk-label" });
+  s.appendChild(i);
+  function l(d) {
+    [...s.querySelectorAll("button.sk-bulk-btn,button.sk-bulk-clear")].forEach((m) => m.remove());
+    for (const m of n) {
+      const k = p("button", {
+        class: `sk-bulk-btn${m.danger ? " sk-bulk-btn-danger" : ""}${m.primary ? " sk-bulk-btn-primary" : ""}`,
+        type: "button",
+        "data-bulk-action": m.id || m.label,
+        text: m.label || m.id || ""
+      });
+      (typeof m.disabled == "function" ? m.disabled(d, r.boardApi) : !1) && k.setAttribute("disabled", ""), k.addEventListener("click", () => {
+        try {
+          m.onClick?.(r.boardApi.getSelectedCardIds(), r.boardApi, r);
+        } catch (g) {
+          console.error("[bulk-toolbar] action failed", g);
+        }
+      }), s.appendChild(k);
+    }
+    const h = p("button", {
+      class: "sk-bulk-clear",
+      type: "button",
+      "aria-label": "Clear selection",
+      text: "×"
+    });
+    h.addEventListener("click", () => r.boardApi?.clearSelection?.()), s.appendChild(h);
+  }
+  function c() {
+    const d = r.boardApi?.getSelectedCardIds?.() || [];
+    if (d.length < e.minSelection) {
+      s.style.display = "none";
+      return;
+    }
+    i.textContent = `${d.length} selected`, l(d), s.style.display = "";
+  }
+  return r.addEventListener("board:cardSelectionChanged", c), document.body.appendChild(s), s.classList.add(`sk-bulk-toolbar-${e.position}`), setTimeout(c, 0), {
+    destroy() {
+      r.removeEventListener("board:cardSelectionChanged", c), s.remove();
+    },
+    el: s,
+    update: c
+  };
 }
-const Zt = {
-  start: Gt,
+function te(r) {
+  const t = r ?? xt.start();
+  return t.register("board", Q), t.register("board-column", G), t.register("card", bt), t.register("card-editor", Z), t.register("swimlane-header", tt), t.register("column-menu", et), t;
+}
+const ee = {
+  start: te,
   BoardController: Q,
   BoardColumnController: G,
-  CardController: kt,
+  CardController: bt,
   CardEditorController: Z,
   SwimlaneHeaderController: tt,
   ColumnMenuController: et,
@@ -2071,22 +2119,24 @@ const Zt = {
   getRenderer: at,
   listRenderers: zt,
   renderers: Xt,
-  subRenderers: D
+  subRenderers: x,
+  attachBulkActionToolbar: Zt
 };
-typeof window < "u" && !window.__stimulusKanbanStarted && (window.__stimulusKanbanStarted = !0, window.StimulusKanban = Zt);
+typeof window < "u" && !window.__stimulusKanbanStarted && (window.__stimulusKanbanStarted = !0, window.StimulusKanban = ee);
 export {
   G as BoardColumnController,
   Q as BoardController,
-  kt as CardController,
+  bt as CardController,
   Z as CardEditorController,
   et as ColumnMenuController,
   tt as SwimlaneHeaderController,
-  Zt as default,
+  Zt as attachBulkActionToolbar,
+  ee as default,
   at as getRenderer,
   zt as listRenderers,
   F as registerRenderer,
   Xt as renderers,
-  Gt as start,
-  D as subRenderers
+  te as start,
+  x as subRenderers
 };
 //# sourceMappingURL=stimulus_kanban.esm.js.map

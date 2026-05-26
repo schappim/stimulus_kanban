@@ -7,6 +7,7 @@ import CardEditorController         from './controllers/card_editor_controller.j
 import SwimlaneHeaderController     from './controllers/swimlane_header_controller.js';
 import ColumnMenuController         from './controllers/column_menu_controller.js';
 import { registerRenderer, getRenderer, listRenderers, renderers, subRenderers } from './lib/renderers.js';
+import { attachBulkActionToolbar } from './lib/bulk_action_toolbar.js';
 
 export {
   BoardController,
@@ -20,6 +21,7 @@ export {
   listRenderers,
   renderers,
   subRenderers,
+  attachBulkActionToolbar,
 };
 
 /* Register every controller on a Stimulus Application and return it.
@@ -54,6 +56,7 @@ const StimulusKanban = {
   listRenderers,
   renderers,
   subRenderers,
+  attachBulkActionToolbar,
 };
 
 export default StimulusKanban;
