@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>31 — Snag list with photo attach | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>31 — Snag list (drag photos onto a card)</h1>
+  <p class="lede">Practical completion punch list. Drop a JPEG or PDF onto any card to attach it — fires <code>board:fileAttached</code> and appends to <code>card.attachments</code>. Swimlanes by trade so each subcontractor sees their own list.</p>
+
+  <div class="panel"
+       data-controller="board"
+       data-board-card-renderer-value="bug"
+       data-board-swimlane-field-value="trade"
+       data-board-accept-files-value="true"
+       data-board-attachments-field-value="attachments"
+       id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="identified" data-board-column-title-value="Identified"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="assigned"   data-board-column-title-value="Assigned"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="inprog"     data-board-column-title-value="In progress"
+          data-board-column-wip-value="3"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="qa"         data-board-column-title-value="Awaiting QA"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="closed"     data-board-column-title-value="Closed"
+          data-board-column-accept-cards-from-value='["qa"]'><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// drop a file on a card</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    board.addEventListener('board:ready', (ev) => {
+      ev.detail.api.setCardData([
+        { id: 1, column_id: 'identified', trade: 'Plumbing',   key: 'SNG-104', title: 'Mixer tap weeping under kitchen sink',           severity: 'major',    reporter_name: 'L. Park (PM)', attachments: [] },
+        { id: 2, column_id: 'identified', trade: 'Electrical', key: 'SNG-103', title: 'GPO loose in master bedroom — plate moves',       severity: 'major',    reporter_name: 'L. Park (PM)', attachments: [] },
+        { id: 3, column_id: 'identified', trade: 'Paint',      key: 'SNG-102', title: 'Cornice gap above stair landing',                 severity: 'cosmetic', reporter_name: 'Client',        attachments: [] },
+        { id: 4, column_id: 'assigned',   trade: 'Plumbing',   key: 'SNG-099', title: 'Slow drain — ensuite shower',                     severity: 'minor',    reporter_name: 'L. Park (PM)', attachments: [] },
+        { id: 5, column_id: 'inprog',     trade: 'Electrical', key: 'SNG-097', title: 'No power to outdoor sensor light (garage side)',  severity: 'major',    reporter_name: 'Client',        attachments: [] },
+        { id: 6, column_id: 'inprog',     trade: 'Paint',      key: 'SNG-095', title: 'Scuff marks down hallway feature wall',           severity: 'cosmetic', reporter_name: 'L. Park (PM)', attachments: [] },
+        { id: 7, column_id: 'qa',         trade: 'Plumbing',   key: 'SNG-088', title: 'Replaced flexi-hose — needs photo for warranty',  severity: 'major',    reporter_name: 'L. Park (PM)', attachments: [{ name: 'before.jpg', size: 245_000 }] },
+        { id: 8, column_id: 'closed',     trade: 'Electrical', key: 'SNG-080', title: 'RCD trip on washing machine circuit',             severity: 'critical', reporter_name: 'Client',        attachments: [{ name: 'rcd-test.pdf', size: 122_000 }] },
+      ]);
+    });
+    board.addEventListener('board:fileAttached', (ev) => {
+      const log = document.getElementById('log');
+      const names = ev.detail.files.map((f) => `${f.name} (${(f.size / 1024).toFixed(1)} KB)`);
+      log.textContent = `📎 attached to ${ev.detail.cardId}: ${names.join(', ')}\n` + log.textContent;
+    });
+  </script>
+</body>
+</html>
