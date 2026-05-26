@@ -5,27 +5,32 @@
 [![stimulus_kanban_rails gem](https://img.shields.io/gem/v/stimulus_kanban_rails?label=stimulus_kanban_rails)](https://rubygems.org/gems/stimulus_kanban_rails)
 
 An **HTML-first kanban board for [Stimulus.js](https://stimulus.hotwired.dev/) (Hotwire)**.
-Drop `data-controller="board"` on a `<div>`, describe columns + cards
-with `data-*` attributes, and you get drag-and-drop between/within
-columns, WIP limits, swimlanes, filtering, global search, multi-card
-selection, inline card editing, custom card renderers **and editors**,
-column collapse / hide / reorder, virtual scrolling for big columns, a
-public `boardApi` — no React, no build-time config object, no
-third-party kanban framework. With the optional
-[`stimulus_kanban_rails`](gem/stimulus_kanban_rails) companion, every
-move/edit **streams live to every connected client over Turbo Streams**
-(Action Cable) — optimistic updates, server-side validation, audit log
-ready for undo/redo.
 
-The HTML is the source of truth: a `stimulus_kanban` board is a real
-semantic `<ol>` / `<li>` list of columns and cards that renders without
-JS and progressively enhances.
+Your board is just a semantic `<ol>` / `<li>` list of columns and cards. It renders without JavaScript, then progressively enhances into a full drag-and-drop board. No React, no build-time config object, no third-party kanban framework — just `data-controller="board"` on a `<div>` and `data-*` attributes on the columns and cards.
 
-> Prefer the Rails/Hotwire server-driven version — live multi-user moves
-> over Turbo Streams, server-side workflow guards, optimistic updates,
-> and undo/redo? It ships as the **`stimulus_kanban_rails`** gem; see the
-> **Rails & Hotwire** section below, [`gem/stimulus_kanban_rails`](gem/stimulus_kanban_rails),
-> and the LLM usage docs in [`skills/`](skills).
+## What you get
+
+- **Drag-and-drop** — between and within columns, multi-card move that preserves order, programmatic drag for tests, and a cancellable `board:beforeMove` event so you can veto invalid transitions.
+
+- **Workflow controls** — WIP limits with a `board:wipExceeded` signal (fired once per crossing), per-column `accept-cards-from` allow-lists, sort modes (manual / asc / desc), and a `read-only` toggle.
+
+- **Board structure** — swimlanes (bucket every column by any card field), column collapse / hide / reorder / resize, inline "+ Add card" / "+ Add column" affordances, and a card detail panel (popover or side rail).
+
+- **Scale & search** — virtual scrolling per column (auto-on past a threshold), a global quick filter with hide-or-dim modes, a custom `setCardFilter(predicate)` hook, and a `server-side` mode for paged columns.
+
+- **Editing** — inline card editing, custom card renderers **and editors** via `<template>` elements, and drag-to-attach files (cancellable `board:fileAttached`).
+
+- **Persistence** — set `persist-key` and column order / widths / collapse state / hidden columns / swimlane / quick filter / sort round-trip through `localStorage`.
+
+- **13 built-in card renderers** — `story`, `task`, `bug`, `incident`, `note`, `pr`, `support-ticket`, `lead`, `order`, `email-thread`, `image-card`, `cover-progress`, `gantt-stub` — plus composable sub-renderers (status pill, avatar, tags, currency, progress bar, due date…). See [Built-in card renderers](#built-in-card-renderers).
+
+- **A public `boardApi`** with movement, selection, filter, sort, swimlane, persistence, and CSV/JSON export — plus a full keyboard map for non-mouse use.
+
+## With Rails
+
+Prefer a server-driven version with live multi-user moves? The optional [`stimulus_kanban_rails`](gem/stimulus_kanban_rails) companion streams every move/edit to every connected client over Turbo Streams (Action Cable), with optimistic updates, server-side workflow guards, and an audit log ready for undo/redo.
+
+See the **Rails & Hotwire** section below, or jump straight to [`gem/stimulus_kanban_rails/README.md`](gem/stimulus_kanban_rails/README.md). LLM-friendly usage docs live in [`skills/`](skills).
 
 ---
 
