@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>52 — Bulk-assign crew across multiple cards | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    body { max-width: 1500px; }
+
+    /* Card face — same visual language as demos 43 / 51 */
+    .bk-card { padding: 8px 10px; }
+    .bk-card h4 { margin: 0 0 4px 0; font-size: 13px; }
+    .bk-card .meta { color: #6b7280; font-size: 12px; }
+    .bk-card .crew { display: flex; align-items: center; gap: 4px; margin-top: 6px; min-height: 22px; }
+    .bk-card .crew .empty { font-size: 11px; color: #9ca3af; font-style: italic; }
+    .avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: inline-grid; place-items: center; font: 700 11px system-ui;
+      color: #fff; box-shadow: 0 0 0 2px #fff; margin-left: -6px;
+    }
+    .avatar:first-child { margin-left: 0; }
+    .avatar.lead { box-shadow: 0 0 0 2px #fff, 0 0 0 3px #fbbf24; }
+
+    /* Bulk crew panel — appears under the board when 2+ cards selected */
+    .bk-panel {
+      margin-top: 12px; padding: 12px;
+      border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;
+      display: none;
+    }
+    .bk-panel.open { display: block; }
+    .bk-panel header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+      padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;
+    }
+    .bk-panel header h3 { margin: 0; font-size: 14px; }
+    .bk-panel header .count {
+      background: #1f2937; color: #fff;
+      font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 999px;
+    }
+    .bk-panel header .clear {
+      margin-left: auto;
+      font: inherit; font-size: 12px; padding: 4px 10px;
+      border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer;
+    }
+    .bk-panel header .clear:hover { background: #f9fafb; }
+
+    .bk-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .bk-picker {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;
+    }
+    .bk-picker .row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 10px; border-radius: 6px; cursor: pointer;
+      border: 1px solid #e5e7eb;
+      transition: background 0.08s ease, border-color 0.08s ease;
+      user-select: none;
+    }
+    .bk-picker .row:hover { background: #f9fafb; }
+    .bk-picker .row[data-checked="true"] {
+      background: #eff6ff; border-color: #93c5fd;
+    }
+    .bk-picker .row .name { font-size: 13px; flex: 1; }
+    .bk-picker .row .who-on {
+      font: 600 10px ui-monospace, Menlo, monospace; color: #6b7280;
+      background: #f3f4f6; padding: 1px 6px; border-radius: 4px;
+    }
+    .bk-picker .row[data-on-all="true"] .who-on { background: #d1fae5; color: #047857; }
+    .bk-picker .row[data-on-none="true"] .who-on { background: #fef3c7; color: #92400e; }
+    .bk-picker .row input { margin: 0; cursor: pointer; }
+
+    .bk-actions {
+      display: flex; flex-direction: column; gap: 8px;
+      padding: 12px; background: #f9fafb; border-radius: 6px;
+    }
+    .bk-actions h4 { margin: 0; font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
+    .bk-actions button {
+      font: inherit; font-size: 13px;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db; background: #fff;
+      border-radius: 6px; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .bk-actions button:hover { background: #f3f4f6; }
+    .bk-actions button.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .bk-actions button.primary:hover { background: #1d4ed8; }
+    .bk-actions button.danger { color: #b91c1c; border-color: #fecaca; }
+    .bk-actions button.danger:hover { background: #fef2f2; color: #991b1b; }
+    .bk-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .bk-actions .hint {
+      font-size: 12px; color: #6b7280; padding-top: 4px; border-top: 1px dashed #e5e7eb;
+    }
+
+    /* Make selected cards more obvious */
+    .sk-card-wrapper.sk-card-selected {
+      background: #eff6ff !important;
+    }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>52 — Bulk-assign crew across multiple cards</h1>
+  <p class="lede">Click cards to select (or shift-click for ranges). When 2 or more are selected, the <strong>Bulk crew</strong> panel below opens with the on-N/M hint per person — pick the crew you want, then <em>Add to all selected</em> or <em>Remove from all selected</em> in one go. Lead status is preserved per card; if you remove the lead from a card, the next remaining member is promoted.</p>
+
+  <template id="bk-card">
+    <article class="sk-card bk-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta"><span data-bind="customer"></span> · <span data-bind="suburb"></span></div>
+      <div class="crew" data-bk-crew></div>
+    </article>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="bk-card"
+       data-board-card-selection-value="multiple"
+       data-board-card-multi-select-with-click-value="true">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="scheduled"   data-board-column-title-value="Scheduled"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="in_progress" data-board-column-title-value="In progress"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="completed"   data-board-column-title-value="Completed"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <div class="bk-panel" id="bk-panel">
+    <header>
+      <h3>Bulk crew assignment</h3>
+      <span class="count" id="bk-count">0 selected</span>
+      <button class="clear" id="bk-clear">Clear selection</button>
+    </header>
+    <div class="bk-grid">
+      <div>
+        <h4 style="margin:0 0 6px 0;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em">
+          Pick crew
+        </h4>
+        <div class="bk-picker" id="bk-picker"></div>
+      </div>
+      <div class="bk-actions">
+        <h4>Apply to all selected</h4>
+        <button class="primary" id="bk-add" disabled>＋ Add picked crew to all selected</button>
+        <button class="danger"  id="bk-remove" disabled>✕ Remove picked crew from all selected</button>
+        <div class="hint">First crew member added to an empty card becomes lead automatically.</div>
+      </div>
+    </div>
+  </div>
+
+  <pre class="log" id="log">// click cards (single or shift-click) → bulk panel opens at 2+ selected</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+    const panel = document.getElementById('bk-panel');
+    const picker = document.getElementById('bk-picker');
+    const countEl = document.getElementById('bk-count');
+    const addBtn = document.getElementById('bk-add');
+    const remBtn = document.getElementById('bk-remove');
+
+    const people = {
+      D: { name: 'Dave', role: 'gas plumber',         bg: '#2563eb' },
+      S: { name: 'Sam',  role: 'apprentice plumber',  bg: '#059669' },
+      M: { name: 'Mia',  role: 'commercial',          bg: '#b45309' },
+      N: { name: 'Noah', role: 'sparky (sub)',        bg: '#7c3aed' },
+      R: { name: 'Ravi', role: 'gasfitter (sub)',     bg: '#be123c' },
+      J: { name: 'Jade', role: 'commercial sparky',   bg: '#0e7490' },
+      T: { name: 'Tom',  role: 'apprentice sparky',   bg: '#65a30d' },
+    };
+    const POOL = Object.keys(people);
+
+    const cards = [
+      { id: 1, column_id: 'scheduled',   title: 'HWS install',                customer: 'Mr Chen',          suburb: 'Bondi',       crew: [] },
+      { id: 2, column_id: 'scheduled',   title: 'Café espresso plumbing',     customer: 'Bluestone Café',   suburb: 'CBD',         crew: [{ initial: 'M', lead: true }] },
+      { id: 3, column_id: 'scheduled',   title: 'Annual gas safety (12 unit)',customer: 'Cottesloe Strata', suburb: 'Vaucluse',    crew: [] },
+      { id: 4, column_id: 'scheduled',   title: 'Bathroom rough-in',          customer: 'Williams residence',suburb: 'Mosman',     crew: [{ initial: 'D', lead: true }] },
+      { id: 5, column_id: 'in_progress', title: 'Sewer line excavate',        customer: 'Bondi Pavilion',   suburb: 'Bondi',       crew: [{ initial: 'D', lead: true }, { initial: 'S' }] },
+      { id: 6, column_id: 'in_progress', title: 'Switchboard upgrade',        customer: 'Highgate Apts',    suburb: 'Surry Hills', crew: [] },
+      { id: 7, column_id: 'completed',   title: 'Mixer tap drips slow',       customer: 'Mrs Patel',        suburb: 'Surry Hills', crew: [{ initial: 'S', lead: true }] },
+    ];
+
+    // ---- Card face avatars --------------------------------------------------
+    function paintFaceCrew() {
+      for (const wrap of board.querySelectorAll('[data-card-id]')) {
+        const id = wrap.getAttribute('data-card-id');
+        const card = cards.find((c) => String(c.id) === String(id));
+        if (!card) continue;
+        const slot = wrap.querySelector('[data-bk-crew]');
+        if (!slot) continue;
+        slot.innerHTML = '';
+        if (!card.crew?.length) {
+          const s = document.createElement('span');
+          s.className = 'empty';
+          s.textContent = 'unassigned';
+          slot.appendChild(s);
+          continue;
+        }
+        for (const m of card.crew) {
+          const p = people[m.initial]; if (!p) continue;
+          const av = document.createElement('span');
+          av.className = 'avatar' + (m.lead ? ' lead' : '');
+          av.style.background = p.bg;
+          av.textContent = m.initial;
+          av.title = `${p.name} (${p.role})${m.lead ? ' — lead' : ''}`;
+          slot.appendChild(av);
+        }
+      }
+    }
+
+    // ---- Picker --------------------------------------------------------------
+    // Each row carries a checkbox + an "N/M selected cards" hint that
+    // updates in lockstep with the current selection. Click anywhere on
+    // the row to toggle the checkbox.
+    function buildPicker() {
+      picker.innerHTML = '';
+      for (const key of POOL) {
+        const p = people[key];
+        const row = document.createElement('label');
+        row.className = 'row';
+        row.setAttribute('data-key', key);
+        row.innerHTML = `
+          <input type="checkbox" data-picker-checkbox>
+          <span class="avatar" style="background:${p.bg};margin-left:0">${key}</span>
+          <span class="name">${p.name} <span style="color:#6b7280;font-size:11px">— ${p.role}</span></span>
+          <span class="who-on">on 0/0</span>
+        `;
+        picker.appendChild(row);
+      }
+      picker.addEventListener('change', updateActionButtons);
+    }
+
+    function pickedInitials() {
+      return Array.from(picker.querySelectorAll('[data-picker-checkbox]'))
+        .filter((cb) => cb.checked)
+        .map((cb) => cb.closest('[data-key]').getAttribute('data-key'));
+    }
+
+    function selectedCards() {
+      const ids = new Set(board.boardApi.getSelectedCardIds().map(String));
+      return cards.filter((c) => ids.has(String(c.id)));
+    }
+
+    function refreshHints() {
+      const sel = selectedCards();
+      const n = sel.length;
+      countEl.textContent = `${n} selected`;
+      for (const row of picker.querySelectorAll('[data-key]')) {
+        const k = row.getAttribute('data-key');
+        const onCount = sel.filter((c) => c.crew?.some((m) => m.initial === k)).length;
+        row.querySelector('.who-on').textContent = `on ${onCount}/${n}`;
+        row.setAttribute('data-on-all', n > 0 && onCount === n ? 'true' : 'false');
+        row.setAttribute('data-on-none', n > 0 && onCount === 0 ? 'true' : 'false');
+      }
+      updateActionButtons();
+    }
+
+    function updateActionButtons() {
+      const haveCards = board.boardApi.getSelectedCardIds().length >= 1;
+      const havePicks = pickedInitials().length >= 1;
+      addBtn.disabled = !(haveCards && havePicks);
+      remBtn.disabled = !(haveCards && havePicks);
+    }
+
+    // ---- Mutations -----------------------------------------------------------
+    function persist(card) {
+      // applyTransaction({ update }) so downstream listeners (audit, sync,
+      // etc) fire as they would in the Rails companion gem.
+      board.boardApi.applyTransaction({ update: [{ id: card.id, crew: card.crew }] });
+    }
+
+    function applyAdd() {
+      const sel = selectedCards();
+      const picks = pickedInitials();
+      if (sel.length === 0 || picks.length === 0) return;
+      let added = 0;
+      for (const card of sel) {
+        const have = new Set((card.crew || []).map((m) => m.initial));
+        const next = (card.crew || []).slice();
+        for (const k of picks) {
+          if (have.has(k)) continue;
+          next.push({ initial: k, lead: next.length === 0 });
+          added++;
+        }
+        card.crew = next;
+        persist(card);
+      }
+      log(`added ${picks.join(',')} → ${sel.length} card(s); ${added} new assignments`);
+      refreshHints();
+    }
+
+    function applyRemove() {
+      const sel = selectedCards();
+      const picks = pickedInitials();
+      if (sel.length === 0 || picks.length === 0) return;
+      const drop = new Set(picks);
+      let removed = 0;
+      for (const card of sel) {
+        const before = card.crew?.length || 0;
+        const wasLead = (card.crew || []).find((m) => m.lead);
+        const next = (card.crew || []).filter((m) => !drop.has(m.initial));
+        // If the lead was dropped, promote the first remaining.
+        if (wasLead && drop.has(wasLead.initial) && next.length) {
+          next[0] = { ...next[0], lead: true };
+        }
+        removed += before - next.length;
+        card.crew = next;
+        persist(card);
+      }
+      log(`removed ${picks.join(',')} from ${sel.length} card(s); ${removed} assignment(s) gone`);
+      refreshHints();
+    }
+
+    addBtn.addEventListener('click', applyAdd);
+    remBtn.addEventListener('click', applyRemove);
+    document.getElementById('bk-clear').addEventListener('click', () => board.boardApi.clearSelection());
+
+    function log(msg) {
+      const el = document.getElementById('log');
+      el.textContent = `${msg}\n${el.textContent}`.split('\n').slice(0, 10).join('\n');
+    }
+
+    // ---- Wiring --------------------------------------------------------------
+    board.addEventListener('board:cardSelectionChanged', (ev) => {
+      const n = ev.detail.selectedCardIds.length;
+      panel.classList.toggle('open', n >= 1);
+      refreshHints();
+    });
+    board.addEventListener('board:ready',    (ev) => { buildPicker(); ev.detail.api.setCardData(cards); });
+    board.addEventListener('board:rendered', paintFaceCrew);
+  </script>
+</body>
+</html>
