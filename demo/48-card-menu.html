@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>48 — Card menu (⋯) | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .cm-card { padding: 8px 10px; position: relative; }
+    .cm-card h4 { margin: 0 0 2px 0; font-size: 13px; }
+    .cm-card .meta { color: #6b7280; font-size: 12px; }
+
+    /* Three-dot trigger — hidden until hover/focus. */
+    .cm-trigger {
+      position: absolute; top: 6px; right: 6px;
+      width: 22px; height: 22px;
+      display: inline-grid; place-items: center;
+      background: transparent; border: 0; border-radius: 4px;
+      color: #9ca3af; font-size: 16px; line-height: 1; cursor: pointer;
+      opacity: 0; transition: opacity 0.12s ease;
+    }
+    .sk-card-wrapper:hover .cm-trigger,
+    .sk-card-wrapper:focus-within .cm-trigger,
+    .sk-card-wrapper.sk-card-active .cm-trigger {
+      opacity: 1;
+    }
+    @media (hover: none) {
+      .cm-trigger { opacity: 1; }
+    }
+    .cm-trigger:hover { background: #f3f4f6; color: #111827; }
+    .cm-trigger[aria-expanded="true"] { background: #e5e7eb; opacity: 1; }
+
+    /* Pop-down menu */
+    .cm-menu {
+      position: fixed; z-index: 200; min-width: 180px;
+      background: #fff;
+      border: 1px solid #e5e7eb; border-radius: 6px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+      padding: 4px 0;
+      font: 13px system-ui;
+    }
+    .cm-menu button {
+      width: 100%; text-align: left;
+      padding: 6px 12px;
+      background: transparent; border: 0; color: #111827;
+      cursor: pointer; font: inherit; display: flex; gap: 8px; align-items: center;
+    }
+    .cm-menu button:hover { background: #f3f4f6; }
+    .cm-menu button.danger { color: #b91c1c; }
+    .cm-menu button.danger:hover { background: #fef2f2; }
+    .cm-menu hr { border: 0; border-top: 1px solid #e5e7eb; margin: 4px 0; }
+    .cm-menu .kbd {
+      margin-left: auto; font: 11px ui-monospace, Menlo, monospace;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>48 — Card menu (⋯) — archive / duplicate / move-to-top</h1>
+  <p class="lede">Hover any card → the three-dot button reveals in the top-right. Click it for a contextual menu (archive, duplicate, move-to-top of column, copy id). The trigger is keyboard-focusable; Esc closes the open menu.</p>
+
+  <template id="cm-card">
+    <article class="sk-card cm-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta"><span data-bind="customer"></span> · <span data-bind="suburb"></span></div>
+      <button class="cm-trigger" aria-haspopup="true" aria-expanded="false" aria-label="Card actions" type="button" data-cm-trigger>⋯</button>
+    </article>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="cm-card"
+       data-board-suppress-card-click-selection-value="true">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="todo"     data-board-column-title-value="To-do"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="doing"    data-board-column-title-value="Doing"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="done"     data-board-column-title-value="Done"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="archived" data-board-column-title-value="Archived"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// menu actions log here</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+
+    let nextId = 100;
+    const cards = [
+      { id: 1, column_id: 'todo',  title: 'Leaking kitchen tap',         customer: 'Mrs Patel',         suburb: 'Surry Hills' },
+      { id: 2, column_id: 'todo',  title: 'Quote — bathroom rough-in',   customer: 'Smith family',      suburb: 'Newtown' },
+      { id: 3, column_id: 'todo',  title: 'Annual safety check (gas)',   customer: 'Cottesloe Strata',  suburb: 'Vaucluse' },
+      { id: 4, column_id: 'doing', title: 'HWS replace 250L',            customer: 'Mr Chen',           suburb: 'Bondi' },
+      { id: 5, column_id: 'doing', title: 'Café espresso plumbing',      customer: 'Bluestone Café',    suburb: 'CBD' },
+      { id: 6, column_id: 'done',  title: 'Toilet running constantly',   customer: 'Lee household',     suburb: 'Manly' },
+    ];
+    board.addEventListener('board:ready', (ev) => ev.detail.api.setCardData(cards));
+
+    // ---- Menu plumbing ----------------------------------------------------
+    let openMenu = null;
+    function closeMenu() {
+      if (!openMenu) return;
+      openMenu.btn?.setAttribute('aria-expanded', 'false');
+      openMenu.menuEl?.remove();
+      openMenu = null;
+    }
+    document.addEventListener('click', (ev) => {
+      // Click on a trigger ⋯
+      const trigger = ev.target.closest?.('[data-cm-trigger]');
+      if (trigger) {
+        ev.stopPropagation();
+        const cardEl = trigger.closest('[data-card-id]');
+        const cardId = cardEl?.getAttribute('data-card-id');
+        if (openMenu?.cardId === cardId) { closeMenu(); return; }
+        closeMenu();
+        openMenuFor(cardId, trigger);
+        return;
+      }
+      // Click outside any menu → close
+      if (openMenu && !openMenu.menuEl.contains(ev.target)) closeMenu();
+    });
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') closeMenu(); });
+
+    function openMenuFor(cardId, trigger) {
+      const card = board.boardApi.getCardData().find((c) => String(c.id) === String(cardId));
+      if (!card) return;
+      const menuEl = document.createElement('div');
+      menuEl.className = 'cm-menu';
+      menuEl.innerHTML = `
+        <button data-act="open">↗ Open detail</button>
+        <button data-act="duplicate">⎘ Duplicate <span class="kbd">⌘D</span></button>
+        <button data-act="top">↑ Move to top</button>
+        <button data-act="copy-id">🔗 Copy id</button>
+        <hr>
+        <button class="danger" data-act="archive">🗄 Archive</button>
+        <button class="danger" data-act="remove">🗑 Delete…</button>
+      `;
+      const r = trigger.getBoundingClientRect();
+      menuEl.style.top  = `${r.bottom + 4}px`;
+      menuEl.style.left = `${Math.max(8, Math.min(window.innerWidth - 200, r.right - 180))}px`;
+      document.body.appendChild(menuEl);
+      trigger.setAttribute('aria-expanded', 'true');
+      openMenu = { cardId, btn: trigger, menuEl };
+
+      menuEl.addEventListener('click', (ev) => {
+        const act = ev.target.closest?.('[data-act]')?.getAttribute('data-act');
+        if (!act) return;
+        switch (act) {
+          case 'open':
+            log(`open detail: ${card.id}`);
+            break;
+          case 'duplicate': {
+            const id = ++nextId;
+            board.boardApi.applyTransaction({ add: [{ ...card, id, title: `${card.title} (copy)` }] });
+            log(`duplicated ${card.id} → ${id}`);
+            break;
+          }
+          case 'top':
+            board.boardApi.moveCard(card.id, { toColumnId: card.column_id, toIndex: 0 });
+            log(`moved ${card.id} to top of ${card.column_id}`);
+            break;
+          case 'copy-id':
+            navigator.clipboard?.writeText(String(card.id)).catch(() => {});
+            log(`copied id ${card.id}`);
+            break;
+          case 'archive':
+            board.boardApi.moveCard(card.id, { toColumnId: 'archived', toIndex: 0 });
+            log(`archived ${card.id}`);
+            break;
+          case 'remove':
+            board.boardApi.applyTransaction({ remove: [card.id] });
+            log(`deleted ${card.id}`);
+            break;
+        }
+        closeMenu();
+      });
+    }
+
+    function log(msg) {
+      const el = document.getElementById('log');
+      el.textContent = `${msg}\n${el.textContent}`.split('\n').slice(0, 10).join('\n');
+    }
+  </script>
+</body>
+</html>
