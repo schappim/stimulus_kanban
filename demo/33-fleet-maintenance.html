@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>33 — Fleet maintenance | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .vehicle-card { padding: 10px 12px; }
+    .vehicle-card .top { display: flex; justify-content: space-between; align-items: center; }
+    .vehicle-card .rego { font-family: ui-monospace, monospace; background: #fef3c7; padding: 1px 6px; border-radius: 4px; font-weight: 700; font-size: 11px; }
+    .vehicle-card h4 { margin: 6px 0 4px 0; font-size: 13px; }
+    .vehicle-card .meta { color: #6b7280; font-size: 12px; display: flex; justify-content: space-between; }
+    .vehicle-card .km { font-variant-numeric: tabular-nums; font-weight: 600; color: #374151; }
+    .vehicle-card .model { color: #6b7280; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>33 — Fleet &amp; vehicle maintenance</h1>
+  <p class="lede">Every ute and van in the fleet, by service stage. WIP on <strong>At workshop</strong> caps how many vehicles can be off the road at once — drop a third and the column goes red.</p>
+
+  <template id="vehicle-card">
+    <article class="sk-card vehicle-card">
+      <div class="top">
+        <span class="rego" data-bind="rego"></span>
+        <span class="model" data-bind="model"></span>
+      </div>
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta">
+        <span data-bind="last_service"></span>
+        <span class="km" data-bind="km_display"></span>
+      </div>
+    </article>
+  </template>
+
+  <div class="panel" data-controller="board" data-board-card-renderer-value="vehicle-card" id="board">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="ok"        data-board-column-title-value="In service"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="due"       data-board-column-title-value="Service due"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="booked"    data-board-column-title-value="Booked"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="workshop"  data-board-column-title-value="At workshop"
+          data-board-column-wip-value="2"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="grounded"  data-board-column-title-value="Off road / defect"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// board:wipExceeded</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const km = (n) => `${n.toLocaleString('en-AU')} km`;
+    const board = document.getElementById('board');
+    board.addEventListener('board:ready', (ev) => {
+      const cards = [
+        { id: 1, column_id: 'ok',       rego: 'EHF-411', model: '2022 Toyota HiLux SR',     title: 'Lead carpenter truck',          last_service: 'Serviced 12/02/2026',          km: 48200 },
+        { id: 2, column_id: 'ok',       rego: 'CBA-203', model: '2023 Ford Transit 350',   title: 'Plumber van — Sarah',           last_service: 'Serviced 28/03/2026',          km: 31550 },
+        { id: 3, column_id: 'ok',       rego: 'BHT-880', model: '2020 Hyundai iLoad',      title: 'Sparky van — Dave',             last_service: 'Serviced 14/01/2026',          km: 102400 },
+        { id: 4, column_id: 'due',      rego: 'EFP-712', model: '2019 Mitsubishi Triton',  title: 'Painters ute — Jamie',          last_service: 'Last serviced 02/10/2025',     km: 145800 },
+        { id: 5, column_id: 'due',      rego: 'AKR-099', model: '2021 Isuzu D-Max',        title: 'Apprentice ute',                last_service: 'Last serviced 18/11/2025',     km: 67400 },
+        { id: 6, column_id: 'booked',   rego: 'EKL-501', model: '2024 Ford Ranger XLT',    title: 'Lead carpenter — Mike',         last_service: 'Booked Mon 04/06/2026',         km: 18900 },
+        { id: 7, column_id: 'workshop', rego: 'CHV-220', model: '2018 Toyota HiAce',       title: 'Spare materials van',           last_service: 'In for clutch &amp; brakes',    km: 188500 },
+        { id: 8, column_id: 'grounded', rego: 'BYY-734', model: '2017 Holden Colorado',    title: 'Old apprentice ute (for sale)', last_service: 'Off road — head gasket',        km: 240100 },
+      ];
+      cards.forEach((c) => c.km_display = km(c.km));
+      ev.detail.api.setCardData(cards);
+    });
+    board.addEventListener('board:wipExceeded', (ev) => {
+      document.getElementById('log').textContent =
+        `⚠️  ${ev.detail.columnId} over limit: ${ev.detail.count} / ${ev.detail.limit}\n` +
+        document.getElementById('log').textContent;
+    });
+  </script>
+</body>
+</html>
