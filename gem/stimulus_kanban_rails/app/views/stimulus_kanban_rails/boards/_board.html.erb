@@ -1,0 +1,26 @@
+<%# Locals: board (Board instance), cards (relation), streamables (array),
+       card_selection (""|"single"|"multiple"), html_opts (Hash) %>
+<%= turbo_stream_from(*streamables) %>
+
+<%
+  resource = board.class.resource_name
+  cards_by_column = cards.group_by { |c| board.column_id_for(c).to_s }
+%>
+<div data-controller="board board-sync"
+     data-board-card-selection-value="<%= card_selection %>"
+     data-board-sync-resource-value="<%= resource %>"
+     data-board-sync-mount-path-value="<%= StimulusKanbanRails.mount_path %>"
+     <% html_opts.each do |k, v| %><%= k %>="<%= v %>"<% end %>>
+  <ol class="sk-columns">
+    <% board.columns.each do |col| %>
+      <li <% col.data_attrs.each do |k, v| %><%= k %>="<%= v %>" <% end %>>
+        <ol class="sk-cards">
+          <% (cards_by_column[col.name.to_s] || []).each do |card| %>
+            <%= render partial: "stimulus_kanban_rails/boards/card",
+                      locals: { card: card, column: col, board: board } %>
+          <% end %>
+        </ol>
+      </li>
+    <% end %>
+  </ol>
+</div>

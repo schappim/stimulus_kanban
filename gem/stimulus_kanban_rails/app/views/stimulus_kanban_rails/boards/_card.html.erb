@@ -1,0 +1,7 @@
+<%# Locals: card, column, board %>
+<li data-card-id="<%= card.id %>"
+    data-column-id="<%= board.column_id_for(card) %>"
+    <%= "data-card-order=\"#{card.position}\"".html_safe if card.respond_to?(:position) %>
+    data-card-json="<%= JSON.generate(board.card_to_h(card)).gsub('"', '&quot;') %>">
+  <%= card.respond_to?(:to_kanban_html) ? card.to_kanban_html.html_safe : (card.try(:title) || card.id) %>
+</li>

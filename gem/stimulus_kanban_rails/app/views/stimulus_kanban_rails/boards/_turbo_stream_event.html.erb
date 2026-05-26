@@ -1,0 +1,8 @@
+<%# Sent over Turbo Streams on every model commit. The board-sync controller
+    picks it up via the document-level "stimulus-kanban-rails:event"
+    CustomEvent and routes it through applyTransaction. %>
+<script>
+  (function(){
+    document.dispatchEvent(new CustomEvent("stimulus-kanban-rails:event", { detail: <%= raw JSON.generate({ resource: resource, event: event }) %> }));
+  })();
+</script>
