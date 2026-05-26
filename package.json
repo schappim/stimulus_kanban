@@ -48,10 +48,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:lib": "FORMAT=iife vite build --config vite.lib.config.js && FORMAT=es vite build --config vite.lib.config.js",
+    "build:lib": "FORMAT=iife vite build --config vite.lib.config.js && FORMAT=es vite build --config vite.lib.config.js && npm run vendor:gem",
     "build:lib:iife": "FORMAT=iife vite build --config vite.lib.config.js",
     "build:lib:esm": "FORMAT=es vite build --config vite.lib.config.js",
     "build:lib:watch": "FORMAT=iife vite build --config vite.lib.config.js --watch",
+    "vendor:gem": "cp dist/stimulus_kanban.esm.js gem/stimulus_kanban_rails/app/assets/javascripts/stimulus_kanban.js && cp dist/stimulus_kanban.css gem/stimulus_kanban_rails/app/assets/stylesheets/stimulus_kanban.css",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
