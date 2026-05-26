@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>47 — Cross-board automation | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    body { max-width: 1500px; }
+    .cb-stage {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+      margin-top: 16px;
+    }
+    .cb-stage > section { display: flex; flex-direction: column; min-height: 0; }
+    .cb-stage h2 {
+      margin: 0 0 8px 0; font-size: 13px; color: #6b7280;
+      text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;
+    }
+    .cb-board { flex: 1; height: 560px; }
+    .cb-card { padding: 8px 10px; }
+    .cb-card h4 { margin: 0 0 2px 0; font-size: 13px; }
+    .cb-card .meta { color: #6b7280; font-size: 12px; }
+    .cb-card .val {
+      font: 600 11px ui-monospace, Menlo, monospace; color: #047857; margin-top: 4px;
+      display: inline-block;
+    }
+    /* Subtle highlight on the just-converted card */
+    @keyframes cb-flash {
+      0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.55), 0 0 0 0 rgba(16,185,129,0); }
+      40%  { box-shadow: 0 0 0 3px rgba(16,185,129,0.55), 0 0 12px 6px rgba(16,185,129,0.25); }
+      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0), 0 0 0 0 rgba(16,185,129,0); }
+    }
+    .cb-board [data-card-id].cb-just-converted {
+      animation: cb-flash 1.6s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>47 — Cross-board automation (Won quote → new job)</h1>
+  <p class="lede">Two independent boards. When you drag a quote into the <strong>Won</strong> column on the left, the left board fires <code>board:cardMoved</code>; a single host listener calls <code>applyTransaction({ add: [...] })</code> on the right board to materialise a fresh job in <em>Scheduled</em>. The new job flashes green for a second so the dispatcher can see what just happened.</p>
+
+  <div class="cb-stage">
+    <section>
+      <h2>Quote pipeline</h2>
+      <div class="panel cb-board" id="quotes"
+           data-controller="board"
+           data-board-card-renderer-value="cb-card">
+        <ol class="sk-columns">
+          <li data-controller="board-column" data-board-column-id-value="enquiry" data-board-column-title-value="Enquiry"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="quoting" data-board-column-title-value="Quoting"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="sent"    data-board-column-title-value="Sent"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="won"     data-board-column-title-value="Won"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="lost"    data-board-column-title-value="Lost"><ol class="sk-cards"></ol></li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>Jobs board</h2>
+      <div class="panel cb-board" id="jobs"
+           data-controller="board"
+           data-board-card-renderer-value="cb-card">
+        <ol class="sk-columns">
+          <li data-controller="board-column" data-board-column-id-value="scheduled"   data-board-column-title-value="Scheduled"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="in_progress" data-board-column-title-value="In progress"><ol class="sk-cards"></ol></li>
+          <li data-controller="board-column" data-board-column-id-value="completed"   data-board-column-title-value="Completed"><ol class="sk-cards"></ol></li>
+        </ol>
+      </div>
+    </section>
+  </div>
+
+  <template id="cb-card">
+    <article class="sk-card cb-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta"><span data-bind="customer"></span> · <span data-bind="suburb"></span></div>
+      <div class="val" data-bind="value_label"></div>
+    </article>
+  </template>
+
+  <pre class="log" id="log">// drag a quote → "Won" to trigger a fresh job in Scheduled</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+
+    const fmt = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+    const enrich = (c) => ({ ...c, value_label: c.value ? fmt.format(c.value) : '' });
+
+    const quotes = document.getElementById('quotes');
+    const jobs   = document.getElementById('jobs');
+
+    quotes.addEventListener('board:ready', (ev) => ev.detail.api.setCardData([
+      enrich({ id: 'Q-2401', column_id: 'enquiry', title: 'Mr Liu — site visit',         customer: 'Mr Liu',          suburb: 'Surry Hills', value: 200 }),
+      enrich({ id: 'Q-2402', column_id: 'enquiry', title: 'Bondi Strata common-area',    customer: 'Bondi Strata',    suburb: 'Bondi',       value: 22000 }),
+      enrich({ id: 'Q-2403', column_id: 'quoting', title: 'Whole-house rewire (3-bed)',  customer: 'Mrs Hollingworth',suburb: 'Marrickville',value: 14500 }),
+      enrich({ id: 'Q-2404', column_id: 'quoting', title: 'Warehouse — power + data',    customer: 'Foley & Sons',    suburb: 'Mascot',      value: 68000 }),
+      enrich({ id: 'Q-2405', column_id: 'sent',    title: 'Pool pump + spa wiring',      customer: 'Mr Daniels',      suburb: 'Cronulla',    value: 3200 }),
+      enrich({ id: 'Q-2406', column_id: 'sent',    title: 'Switchboard upgrade ×4',      customer: 'Highgate Apts',   suburb: 'Surry Hills', value: 18400 }),
+    ]));
+
+    jobs.addEventListener('board:ready', (ev) => ev.detail.api.setCardData([
+      enrich({ id: 'J-1099', column_id: 'in_progress', title: 'Bathroom rough-in',        customer: 'Williams residence', suburb: 'Mosman',     value: 5400 }),
+      enrich({ id: 'J-1100', column_id: 'completed',  title: 'Annual gas safety (12mo)', customer: 'Cottesloe Strata',   suburb: 'Vaucluse',   value: 1450 }),
+    ]));
+
+    let nextJobId = 1101;
+
+    // The single line of automation: when a quote crosses into "won", spawn
+    // the corresponding job on the other board. We hand the spawned card a
+    // forward-pointer back to the source quote (source_quote_id) so the
+    // jobs board can render a "Q-2403 ↗" badge in a real app.
+    quotes.addEventListener('board:cardMoved', (ev) => {
+      if (ev.detail.toColumnId !== 'won') return;
+      const card = quotes.boardApi.getCardData().find((c) => String(c.id) === String(ev.detail.cardId));
+      if (!card) return;
+      const newId = `J-${nextJobId++}`;
+      jobs.boardApi.applyTransaction({ add: [enrich({
+        id: newId,
+        column_id: 'scheduled',
+        title: card.title,
+        customer: card.customer,
+        suburb: card.suburb,
+        value: card.value,
+        source_quote_id: card.id,
+      })] });
+      log(`✓ ${card.id} won → spawned ${newId} on jobs board`);
+      // Flash the freshly added card on the jobs board.
+      requestAnimationFrame(() => {
+        const wrap = jobs.querySelector(`[data-card-id="${newId}"]`);
+        if (wrap) {
+          wrap.classList.add('cb-just-converted');
+          setTimeout(() => wrap.classList.remove('cb-just-converted'), 1700);
+        }
+      });
+    });
+
+    function log(msg) {
+      const el = document.getElementById('log');
+      el.textContent = `${msg}\n${el.textContent}`.split('\n').slice(0, 10).join('\n');
+    }
+  </script>
+</body>
+</html>
