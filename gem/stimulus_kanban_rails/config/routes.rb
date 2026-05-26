@@ -8,6 +8,14 @@ StimulusKanbanRails::Engine.routes.draw do
       member do
         patch :move
       end
+      collection do
+        # Atomic bulk-move endpoint backing the bulk-action toolbar:
+        # PATCH /boards/:resource/cards/move_bulk
+        #   body: { card_ids: [...], to_column_id:, to_index: }
+        # Runs the board's before_move chain for every card in a single
+        # transaction so a Veto on any one card rolls back the lot.
+        patch :move_bulk
+      end
     end
   end
 end

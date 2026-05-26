@@ -30,15 +30,18 @@ class BoardSyncController extends Controller {
     // dropped after a short TTL so a stuck request can't leak memory.
     this._myOptimisticIds = new Set();
 
-    this._onMoved   = (ev) => this._postMove(ev.detail);
-    this._onUpdated = (ev) => this._postUpdate(ev.detail);
-    this._onIncoming = (ev) => this._applyIncoming(ev.detail);
+    this._onMoved      = (ev) => this._postMove(ev.detail);
+    this._onMovedBulk  = (ev) => this._postMoveBulk(ev.detail);
+    this._onUpdated    = (ev) => this._postUpdate(ev.detail);
+    this._onIncoming   = (ev) => this._applyIncoming(ev.detail);
     this.element.addEventListener("board:cardMoved",        this._onMoved);
+    this.element.addEventListener("board:cardsMoved",       this._onMovedBulk);
     this.element.addEventListener("board:cardValueChanged", this._onUpdated);
     document.addEventListener("stimulus-kanban-rails:event", this._onIncoming);
   }
   disconnect() {
     this.element.removeEventListener("board:cardMoved",        this._onMoved);
+    this.element.removeEventListener("board:cardsMoved",       this._onMovedBulk);
     this.element.removeEventListener("board:cardValueChanged", this._onUpdated);
     document.removeEventListener("stimulus-kanban-rails:event", this._onIncoming);
   }
@@ -58,6 +61,15 @@ class BoardSyncController extends Controller {
       headers: this._headers(),
       body: JSON.stringify({ to_column_id: toColumnId, to_index: toIndex }),
     }).then((r) => { if (!r.ok) this._revert(cardId); });
+  }
+  _postMoveBulk({ cardIds, toColumnId, toIndex }) {
+    if (!Array.isArray(cardIds) || cardIds.length === 0) return;
+    const url = `${this.mountPathValue}/${this.resourceValue}/cards/move_bulk`;
+    fetch(url, {
+      method: "PATCH",
+      headers: this._headers(),
+      body: JSON.stringify({ card_ids: cardIds, to_column_id: toColumnId, to_index: toIndex }),
+    }).then((r) => { if (!r.ok) cardIds.forEach((id) => this._revert(id)); });
   }
   _postUpdate({ cardId, newCard }) {
     if (!newCard) return;

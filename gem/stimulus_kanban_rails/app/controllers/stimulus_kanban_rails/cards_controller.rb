@@ -1,9 +1,10 @@
 module StimulusKanbanRails
-  # GET    /boards/:resource/cards/:id      → show (used by sync revert)
-  # POST   /boards/:resource/cards          → create
-  # PATCH  /boards/:resource/cards/:id      → field update
-  # PATCH  /boards/:resource/cards/:id/move → move (column / index)
-  # DELETE /boards/:resource/cards/:id      → destroy
+  # GET    /boards/:resource/cards/:id          → show (used by sync revert)
+  # POST   /boards/:resource/cards              → create
+  # PATCH  /boards/:resource/cards/:id          → field update
+  # PATCH  /boards/:resource/cards/:id/move     → move (column / index)
+  # PATCH  /boards/:resource/cards/move_bulk    → atomic multi-card move
+  # DELETE /boards/:resource/cards/:id          → destroy
   class CardsController < BaseController
     rescue_from StimulusKanbanRails::Veto, with: :render_veto
 
@@ -47,6 +48,31 @@ module StimulusKanbanRails
       card = scoped_card(params[:id])
       card.destroy
       head :no_content
+    end
+
+    # Atomic multi-card move. Same shape as the JS-side
+    # `boardApi.bulkMove({ fromIds, toColumnId, toIndex })`. Runs every
+    # card's before_move guard; raises Veto inside the transaction so all
+    # writes roll back on the first refusal. Per-card broadcasts still
+    # fire on the after_commit (each carries the optimistic_id so the
+    # originator only suppresses these collectively).
+    def move_bulk
+      ids          = Array(params.require(:card_ids))
+      to_column_id = params.require(:to_column_id)
+      to_index     = params.fetch(:to_index, 0).to_i
+      board        = board_instance
+      moved        = []
+
+      board_class.model_class.transaction do
+        ids.each_with_index do |id, i|
+          card = scoped_card(id)
+          card._skr_optimistic_id = optimistic_id if card.respond_to?(:_skr_optimistic_id=)
+          _, mutations = board.apply_move!(card, to_column_id: to_column_id, to_index: to_index + i, user: current_user_if_defined)
+          moved << { card: board.card_to_h(card), mutations: mutations }
+        end
+      end
+
+      render json: { moved: moved, optimistic_id: optimistic_id }
     end
 
     private
