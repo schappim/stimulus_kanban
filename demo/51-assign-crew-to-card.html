@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>51 — Assign crew to a card | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    body { max-width: 1400px; }
+
+    /* Re-uses the avatar styling from demo 43 */
+    .ac-card { padding: 8px 10px; }
+    .ac-card h4 { margin: 0 0 4px 0; font-size: 13px; }
+    .ac-card .meta { color: #6b7280; font-size: 12px; }
+    .ac-card .crew {
+      display: flex; align-items: center; gap: 4px; margin-top: 6px;
+    }
+    .avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: inline-grid; place-items: center; font: 700 11px system-ui;
+      color: #fff;
+      box-shadow: 0 0 0 2px #fff;
+      margin-left: -6px;
+    }
+    .avatar:first-child { margin-left: 0; }
+    .avatar.lead {
+      box-shadow: 0 0 0 2px #fff, 0 0 0 3px #fbbf24;
+    }
+    .ac-card .crew .empty { font-size: 11px; color: #9ca3af; font-style: italic; }
+
+    /* Detail rail — the assignment surface */
+    .ac-detail {
+      display: flex; flex-direction: column;
+      background: #fff;
+      border-left: 1px solid #e5e7eb;
+      height: 100%; overflow: hidden;
+    }
+    .ac-detail > header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px; border-bottom: 1px solid #e5e7eb; background: #f9fafb;
+    }
+    .ac-detail .head-text { flex: 1; min-width: 0; }
+    .ac-detail h2 { margin: 0; font-size: 14px; line-height: 1.3; }
+    .ac-detail .close {
+      background: transparent; border: 0; cursor: pointer; font-size: 22px;
+      color: #6b7280; padding: 0 4px;
+    }
+    .ac-detail .close:hover { color: #111827; }
+
+    .ac-body { overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+    .ac-section h3 {
+      margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase;
+      color: #6b7280; letter-spacing: 0.05em; font-weight: 700;
+    }
+
+    /* Assigned crew list inside the rail */
+    .ac-assigned { display: flex; flex-direction: column; gap: 4px; }
+    .ac-assigned .row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 8px; border-radius: 4px;
+    }
+    .ac-assigned .row:hover { background: #f9fafb; }
+    .ac-assigned .name { flex: 1; font-size: 13px; }
+    .ac-assigned .role { color: #6b7280; font-size: 11px; }
+    .ac-assigned .actions { display: flex; gap: 4px; }
+    .ac-assigned .actions button {
+      font: inherit; font-size: 11px; padding: 2px 8px;
+      border: 1px solid #e5e7eb; background: #fff; border-radius: 4px; cursor: pointer;
+    }
+    .ac-assigned .actions button.lead-on { border-color: #fbbf24; background: #fef3c7; color: #92400e; }
+    .ac-assigned .actions button.remove { color: #b91c1c; border-color: #fecaca; }
+    .ac-assigned .actions button:hover { background: #f3f4f6; }
+    .ac-assigned .actions button.lead-on:hover { background: #fde68a; }
+    .ac-assigned .actions button.remove:hover { background: #fee2e2; color: #991b1b; }
+
+    /* Add-crew picker */
+    .ac-pool {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .ac-pool .row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 8px; border-radius: 4px; cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .ac-pool .row:hover { background: #f3f4f6; border-color: #e5e7eb; }
+    .ac-pool .row[aria-disabled="true"] { opacity: 0.4; cursor: not-allowed; }
+    .ac-pool .add { margin-left: auto; color: #2563eb; font-size: 11px; font-weight: 600; }
+    .ac-pool .role { color: #6b7280; font-size: 11px; }
+    .ac-pool .name { font-size: 13px; }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>51 — Assign crew to a card</h1>
+  <p class="lede">Click any card to open the rail. Add tradies from the bottom pool, drop them with the <strong>✕</strong> button, or promote/demote the lead with the gold star. Built on the standard detail-rail + <code>boardApi.applyTransaction({ update })</code>; the card face's avatar strip re-paints on every <code>board:rendered</code>.</p>
+
+  <template id="ac-card">
+    <article class="sk-card ac-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta"><span data-bind="customer"></span> · <span data-bind="suburb"></span></div>
+      <div class="crew" data-ac-crew></div>
+    </article>
+  </template>
+
+  <template id="ac-detail">
+    <aside class="ac-detail">
+      <header>
+        <div class="head-text">
+          <h2 data-bind="title"></h2>
+        </div>
+        <button data-detail-close class="close" aria-label="Close">×</button>
+      </header>
+      <div class="ac-body">
+        <section class="ac-section">
+          <h3>Assigned crew (<span data-ac-count>0</span>)</h3>
+          <div class="ac-assigned" data-ac-assigned-list>
+            <div class="row"><span class="name" style="color:#9ca3af;font-style:italic">No-one assigned yet.</span></div>
+          </div>
+        </section>
+        <section class="ac-section">
+          <h3>Add crew</h3>
+          <div class="ac-pool" data-ac-pool></div>
+        </section>
+      </div>
+    </aside>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="ac-card"
+       data-board-card-detail-template-value="ac-detail"
+       data-board-detail-layout-value="rail"
+       data-board-detail-width-value="320">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="scheduled" data-board-column-title-value="Scheduled"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="in_progress" data-board-column-title-value="In progress"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="completed" data-board-column-title-value="Completed"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// click a card → rail opens. Tap a pool name to add. ✕ to remove. ★ to set lead.</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+    const board = document.getElementById('board');
+
+    const people = {
+      D: { name: 'Dave', role: 'gas plumber',         bg: '#2563eb' },
+      S: { name: 'Sam',  role: 'apprentice plumber',  bg: '#059669' },
+      M: { name: 'Mia',  role: 'commercial',          bg: '#b45309' },
+      N: { name: 'Noah', role: 'sparky (sub)',        bg: '#7c3aed' },
+      R: { name: 'Ravi', role: 'gasfitter (sub)',     bg: '#be123c' },
+      J: { name: 'Jade', role: 'commercial sparky',   bg: '#0e7490' },
+      T: { name: 'Tom',  role: 'apprentice sparky',   bg: '#65a30d' },
+    };
+    const POOL = Object.keys(people);
+
+    const cards = [
+      { id: 1, column_id: 'scheduled',   title: 'New HWS + tempering valve install', customer: 'Mr Chen',          suburb: 'Bondi',
+        crew: [{ initial: 'D', lead: true }, { initial: 'S' }] },
+      { id: 2, column_id: 'scheduled',   title: 'Café espresso + drainage tie-in',   customer: 'Bluestone Café',   suburb: 'CBD',
+        crew: [{ initial: 'M', lead: true }] },
+      { id: 3, column_id: 'in_progress', title: 'Sewer line excavate + cap',         customer: 'Bondi Pavilion',   suburb: 'Bondi',
+        crew: [{ initial: 'D', lead: true }, { initial: 'S' }, { initial: 'R' }] },
+      { id: 4, column_id: 'in_progress', title: 'Switchboard + power for fit-out',   customer: 'Highgate Apts',    suburb: 'Surry Hills',
+        crew: [] /* nobody yet */ },
+      { id: 5, column_id: 'completed',   title: 'Mixer tap drips slow',              customer: 'Mrs Patel',        suburb: 'Surry Hills',
+        crew: [{ initial: 'S', lead: true }] },
+      { id: 6, column_id: 'scheduled',   title: 'Annual gas safety (12 units)',      customer: 'Cottesloe Strata', suburb: 'Vaucluse',
+        crew: [] },
+    ];
+
+    function paintFaceCrew() {
+      for (const wrap of board.querySelectorAll('[data-card-id]')) {
+        const id = wrap.getAttribute('data-card-id');
+        const card = cards.find((c) => String(c.id) === String(id));
+        if (!card) continue;
+        const slot = wrap.querySelector('[data-ac-crew]');
+        if (!slot) continue;
+        slot.innerHTML = '';
+        if (!card.crew?.length) {
+          const s = document.createElement('span');
+          s.className = 'empty';
+          s.textContent = 'unassigned';
+          slot.appendChild(s);
+          continue;
+        }
+        for (const m of card.crew) {
+          const p = people[m.initial]; if (!p) continue;
+          const av = document.createElement('span');
+          av.className = 'avatar' + (m.lead ? ' lead' : '');
+          av.style.background = p.bg;
+          av.textContent = m.initial;
+          av.title = `${p.name} (${p.role})${m.lead ? ' — lead' : ''}`;
+          slot.appendChild(av);
+        }
+      }
+    }
+
+    function log(msg) {
+      const el = document.getElementById('log');
+      el.textContent = `${msg}\n${el.textContent}`.split('\n').slice(0, 10).join('\n');
+    }
+
+    // Persist a card's crew back to the underlying dataset + redraw the
+    // board (so the face avatars update). The detail panel is re-painted
+    // inline below.
+    function setCrew(cardId, nextCrew) {
+      const card = cards.find((c) => String(c.id) === String(cardId));
+      if (!card) return;
+      card.crew = nextCrew;
+      // Use applyTransaction with an update so the board state stays in
+      // sync (and downstream listeners — Rails Turbo Stream sync, audit
+      // log, etc — fire as expected).
+      board.boardApi.applyTransaction({ update: [{ id: card.id, crew: nextCrew }] });
+    }
+
+    function rebuildDetail(cardId, panelEl) {
+      const card = cards.find((c) => String(c.id) === String(cardId));
+      if (!card) return;
+
+      // ---- Assigned list -------------------------------------------------
+      const list = panelEl.querySelector('[data-ac-assigned-list]');
+      const countEl = panelEl.querySelector('[data-ac-count]');
+      countEl.textContent = card.crew?.length || 0;
+      list.innerHTML = '';
+      if (!card.crew?.length) {
+        const r = document.createElement('div');
+        r.className = 'row';
+        r.innerHTML = `<span class="name" style="color:#9ca3af;font-style:italic">No-one assigned yet.</span>`;
+        list.appendChild(r);
+      } else {
+        card.crew.forEach((m, idx) => {
+          const p = people[m.initial]; if (!p) return;
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.innerHTML = `
+            <span class="avatar${m.lead ? ' lead' : ''}" style="background:${p.bg};margin-left:0">${m.initial}</span>
+            <span class="name">${p.name} <span class="role">— ${p.role}</span></span>
+            <span class="actions">
+              <button data-set-lead="${idx}" class="${m.lead ? 'lead-on' : ''}" title="${m.lead ? 'Lead' : 'Set lead'}">★</button>
+              <button data-remove="${idx}" class="remove" title="Remove">✕</button>
+            </span>`;
+          list.appendChild(row);
+        });
+      }
+
+      // ---- Pool (people not yet assigned) -------------------------------
+      const pool = panelEl.querySelector('[data-ac-pool]');
+      pool.innerHTML = '';
+      const assignedInitials = new Set((card.crew || []).map((m) => m.initial));
+      for (const key of POOL) {
+        const p = people[key];
+        const taken = assignedInitials.has(key);
+        const row = document.createElement('div');
+        row.className = 'row';
+        if (taken) row.setAttribute('aria-disabled', 'true');
+        else row.setAttribute('data-add', key);
+        row.innerHTML = `
+          <span class="avatar" style="background:${p.bg};margin-left:0">${key}</span>
+          <span class="name">${p.name} <span class="role">— ${p.role}</span></span>
+          <span class="add">${taken ? 'on this job' : '+ add'}</span>`;
+        pool.appendChild(row);
+      }
+    }
+
+    // Hook the detail open event so we know which panel to bind handlers on.
+    board.addEventListener('board:cardDetailOpened', (ev) => {
+      const { cardId, panelEl } = ev.detail;
+      rebuildDetail(cardId, panelEl);
+
+      // Single delegated click handler covering the assigned list + pool.
+      // stopPropagation because rebuildDetail (called below) replaces the
+      // clicked node's parent — by the time the controller's document
+      // click handler runs, panel.contains(target) returns false and the
+      // rail would auto-close. Stopping the click here keeps the rail open.
+      panelEl.addEventListener('click', (cev) => {
+        const removeIdx = cev.target.closest?.('[data-remove]')?.getAttribute('data-remove');
+        const leadIdx   = cev.target.closest?.('[data-set-lead]')?.getAttribute('data-set-lead');
+        const addInit   = cev.target.closest?.('[data-add]')?.getAttribute('data-add');
+        if (removeIdx != null || leadIdx != null || addInit) cev.stopPropagation();
+        const card = cards.find((c) => String(c.id) === String(cardId));
+        if (!card) return;
+
+        if (removeIdx != null) {
+          const next = card.crew.slice();
+          const removed = next.splice(Number(removeIdx), 1)[0];
+          // If we just removed the lead, promote the first remaining to lead.
+          if (removed?.lead && next.length) next[0] = { ...next[0], lead: true };
+          setCrew(card.id, next);
+          log(`removed ${people[removed.initial]?.name} from ${card.title}`);
+          rebuildDetail(card.id, panelEl);
+        } else if (leadIdx != null) {
+          const idx = Number(leadIdx);
+          // Toggle: if the clicked one is already lead, demote (no lead).
+          // Otherwise demote everyone else and set this one as lead.
+          const next = card.crew.map((m, i) => ({ ...m, lead: i === idx ? !m.lead : false }));
+          setCrew(card.id, next);
+          log(`lead → ${people[card.crew[idx].initial]?.name} (${card.title})`);
+          rebuildDetail(card.id, panelEl);
+        } else if (addInit) {
+          const next = card.crew.slice();
+          // First assignee becomes lead automatically.
+          next.push({ initial: addInit, lead: next.length === 0 });
+          setCrew(card.id, next);
+          log(`added ${people[addInit]?.name} to ${card.title}`);
+          rebuildDetail(card.id, panelEl);
+        }
+      });
+    });
+
+    // Single-click opens the detail rail (same UX as demo 37).
+    board.addEventListener('board:cardClicked', (ev) => {
+      if (ev.detail.originalEvent?.target?.closest('.ac-detail')) return;
+      board.boardApi.openCardDetail(ev.detail.cardId);
+    });
+
+    board.addEventListener('board:ready',    (ev) => ev.detail.api.setCardData(cards));
+    board.addEventListener('board:rendered', paintFaceCrew);
+  </script>
+</body>
+</html>
