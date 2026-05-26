@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>46 — Card hover quick actions | stimulus_kanban</title>
+  <link rel="stylesheet" href="../dist/stimulus_kanban.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .qa-card { padding: 8px 10px; position: relative; }
+    .qa-card h4 { margin: 0 0 2px 0; font-size: 13px; }
+    .qa-card .meta { color: #6b7280; font-size: 12px; }
+    .qa-card .addr { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+    /* Hover toolbar — hidden by default, revealed on wrapper hover/focus.
+     * Lives in the top-right of the card and floats on a translucent panel. */
+    .qa-actions {
+      position: absolute; top: 6px; right: 6px;
+      display: flex; gap: 2px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.12s ease;
+      background: rgba(255,255,255,0.92);
+      border-radius: 6px;
+      padding: 2px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .qa-actions a {
+      display: inline-grid; place-items: center;
+      width: 24px; height: 24px;
+      border-radius: 4px;
+      text-decoration: none;
+      color: #6b7280;
+      font-size: 13px;
+    }
+    .qa-actions a:hover {
+      background: #f3f4f6;
+      color: #111827;
+    }
+    /* Touch-friendly: reveal on hover OR on focus-within (keyboard) OR
+     * keep them visible when the card is selected/active. */
+    .sk-card-wrapper:hover  .qa-actions,
+    .sk-card-wrapper:focus-within .qa-actions,
+    .sk-card-wrapper.sk-card-active .qa-actions {
+      opacity: 1; pointer-events: auto;
+    }
+    /* Always visible at touch widths (no hover state) */
+    @media (hover: none) {
+      .qa-actions { opacity: 1; pointer-events: auto; }
+    }
+  </style>
+</head>
+<body>
+  <p class="crumbs"><a href="./">← demos</a></p>
+  <h1>46 — Card hover quick actions (call / SMS / map)</h1>
+  <p class="lede">Hover any card to reveal a compact action strip in the top-right: <strong>📞</strong> tap-to-call, <strong>💬</strong> SMS, <strong>📍</strong> navigate. Each is a plain <code>&lt;a href="tel:…"&gt;</code> / <code>sms:</code> / Google Maps link — no JS required for the actual action. Visibility flips on <code>:hover</code> + <code>:focus-within</code> so keyboard users can tab into the actions and screen-reader users see them as proper links. On touch devices the strip is always visible (no hover state).</p>
+
+  <template id="qa-card">
+    <article class="sk-card qa-card">
+      <h4 class="sk-card-title" data-bind="title"></h4>
+      <div class="meta"><span data-bind="customer"></span> · <span data-bind="phone"></span></div>
+      <div class="addr" data-bind="address"></div>
+      <div class="qa-actions">
+        <a data-bind-attr="href:phone_tel" title="Call" aria-label="Call">📞</a>
+        <a data-bind-attr="href:phone_sms" title="SMS"  aria-label="SMS">💬</a>
+        <a data-bind-attr="href:map_url"   title="Navigate" target="_blank" rel="noopener" aria-label="Navigate">📍</a>
+      </div>
+    </article>
+  </template>
+
+  <div class="panel" id="board"
+       data-controller="board"
+       data-board-card-renderer-value="qa-card"
+       data-board-suppress-card-click-selection-value="true">
+    <ol class="sk-columns">
+      <li data-controller="board-column" data-board-column-id-value="today"     data-board-column-title-value="Today"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="this_week" data-board-column-title-value="This week"><ol class="sk-cards"></ol></li>
+      <li data-controller="board-column" data-board-column-id-value="later"     data-board-column-title-value="Later"><ol class="sk-cards"></ol></li>
+    </ol>
+  </div>
+
+  <pre class="log" id="log">// hover any card → quick actions appear. Clicking one fires the native tel:/sms:/maps URL.</pre>
+
+  <script src="../dist/stimulus_kanban.js"></script>
+  <script>
+    StimulusKanban.start();
+
+    function enrich(c) {
+      const digits = (c.phone || '').replace(/[^\d+]/g, '');
+      return { ...c,
+        phone_tel: digits ? `tel:${digits}` : null,
+        phone_sms: digits ? `sms:${digits}` : null,
+        map_url:   c.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address)}` : null,
+      };
+    }
+    const cards = [
+      enrich({ id: 1, column_id: 'today', title: 'Leaking kitchen tap',         customer: 'Mrs Patel',         phone: '0412 555 901', address: '12 Smith St, Surry Hills NSW 2010' }),
+      enrich({ id: 2, column_id: 'today', title: 'No hot water at unit 4',      customer: 'Highview Strata',   phone: '0421 444 102', address: '88 Park Rd, Parramatta NSW 2150' }),
+      enrich({ id: 3, column_id: 'today', title: 'Quote — site visit',          customer: 'Mr Liu',            phone: '0490 121 555', address: '14 Bayview St, Coogee NSW 2034' }),
+      enrich({ id: 4, column_id: 'this_week', title: 'Bathroom rough-in',       customer: 'Williams residence',phone: '0455 010 020', address: '3 Beauty Point Rd, Mosman NSW 2088' }),
+      enrich({ id: 5, column_id: 'this_week', title: 'HWS replace 250L gas',    customer: 'Mr Chen',           phone: '0421 444 102', address: '6 Wairoa Ave, Bondi NSW 2026' }),
+      enrich({ id: 6, column_id: 'later', title: 'Annual gas safety (12 units)',customer: 'Cottesloe Strata',  phone: '02 9389 5500', address: '102 King St, Cottesloe NSW 2030' }),
+    ];
+
+    const board = document.getElementById('board');
+    board.addEventListener('board:ready', (ev) => ev.detail.api.setCardData(cards));
+
+    // Intercept the quick-action clicks so we can log + keep selection clean.
+    board.addEventListener('click', (ev) => {
+      const a = ev.target.closest?.('.qa-actions a');
+      if (!a) return;
+      ev.stopPropagation(); // don't trigger the card's click → selection
+      const el = document.getElementById('log');
+      el.textContent = `${a.getAttribute('title')}: ${a.getAttribute('href')}\n${el.textContent}`
+        .split('\n').slice(0, 8).join('\n');
+    });
+  </script>
+</body>
+</html>
