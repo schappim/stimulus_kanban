@@ -8,6 +8,49 @@ An **HTML-first kanban board for [Stimulus.js](https://stimulus.hotwired.dev/) (
 
 Your board is just a semantic `<ol>` / `<li>` list of columns and cards. It renders without JavaScript, then progressively enhances into a full drag-and-drop board. No React, no build-time config object, no third-party kanban framework — just `data-controller="board"` on a `<div>` and `data-*` attributes on the columns and cards.
 
+![Basic three-column board](docs/screenshots/basic.png)
+
+<table>
+  <tr>
+    <td width="50%">
+      <a href="docs/screenshots/wip-limits.png"><img src="docs/screenshots/wip-limits.png" alt="WIP limits — Doing column shows 2 / 2"></a>
+      <p align="center"><sub><b>WIP limits</b> — per-column caps with <code>board:wipExceeded</code></sub></p>
+    </td>
+    <td width="50%">
+      <a href="docs/screenshots/swimlanes.png"><img src="docs/screenshots/swimlanes.png" alt="Swimlanes grouped by assignee"></a>
+      <p align="center"><sub><b>Swimlanes</b> — bucket every column by any card field</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="docs/screenshots/incident.png"><img src="docs/screenshots/incident.png" alt="Incident board with P1 / P3 priority pills"></a>
+      <p align="center"><sub><b><code>incident</code> renderer</b> — priority pills, affected services, age</sub></p>
+    </td>
+    <td>
+      <a href="docs/screenshots/pr-review.png"><img src="docs/screenshots/pr-review.png" alt="PR review board with CI status, diffstat and reviewer avatars"></a>
+      <p align="center"><sub><b><code>pr</code> renderer</b> — CI status, +/− diffstat, reviewers</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="docs/screenshots/support-inbox.png"><img src="docs/screenshots/support-inbox.png" alt="Support inbox with channel tags and due dates"></a>
+      <p align="center"><sub><b><code>support-ticket</code> renderer</b> — channel, requester, due date</sub></p>
+    </td>
+    <td>
+      <a href="docs/screenshots/leads-pipeline.png"><img src="docs/screenshots/leads-pipeline.png" alt="Leads pipeline with currency-formatted deal values"></a>
+      <p align="center"><sub><b><code>lead</code> renderer</b> — company, deal value, stage pill</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <a href="docs/screenshots/image-cards.png"><img src="docs/screenshots/image-cards.png" alt="Image cards with cover thumbnails"></a>
+      <p align="center"><sub><b><code>image-card</code> renderer</b> — cover thumbnail with click-to-zoom</sub></p>
+    </td>
+  </tr>
+</table>
+
+Every screenshot above is a [live demo page](demo/) — `npm run dev` and open `/demo/`.
+
 ## What you get
 
 - **Drag-and-drop** — between and within columns, multi-card move that preserves order, programmatic drag for tests, and a cancellable `board:beforeMove` event so you can veto invalid transitions.
