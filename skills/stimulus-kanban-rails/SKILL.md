@@ -1,6 +1,6 @@
 ---
 name: stimulus-kanban-rails
-description: Use stimulus_kanban_rails — the Rails / Hotwire companion gem for the stimulus_kanban JS package. Apply when wiring up a server-driven kanban board in a Rails app (Turbo Streams live multi-user sync, server-side workflow guards / WIP limits / accept_from rules, optimistic-id reconciliation, tenant-scoped broadcasts, atomic bulk-move endpoint, audit log + undo/redo). For client-only / non-Rails usage of the JS controller use the stimulus-kanban-js skill instead.
+description: Use stimulus_kanban_rails — the Rails / Hotwire companion gem for the stimulus_kanban JS package. Apply when wiring up a server-driven kanban board in a Rails app (Turbo Streams live multi-user sync, server-side workflow guards / WIP limits / accept_from rules, optimistic-id reconciliation, tenant-scoped broadcasts, atomic bulk-move endpoint, audit log + undo/redo). For client-only / non-Rails usage of the JS controller use the stimulus-kanban-js skill instead. For exact HTTP request/response shapes, broadcast envelopes, schema requirements, or debugging a fresh integration, see COOKBOOK.md alongside this file.
 ---
 
 # Using stimulus_kanban_rails (the Rails gem)
@@ -11,6 +11,17 @@ JS package handles the user-facing drag/drop/keyboard/editor. The gem
 owns the server-side schema, the workflow guards, and the broadcasts
 that keep every connected tab in sync.
 
+## When to use which file
+
+| You're doing… | Read this |
+|---|---|
+| First-time integration in a fresh Rails app | This file, top-to-bottom — then the [End-to-end first-time recipe](./COOKBOOK.md#end-to-end-first-time-recipe) |
+| Need exact HTTP request/response shapes | [`COOKBOOK.md`](./COOKBOOK.md#http-surface) |
+| Debugging "it doesn't sync" / "my move flickers" / "404 on /cards/:id" | [`COOKBOOK.md` common failures](./COOKBOOK.md#common-first-time-failures) |
+| JS-only / client-side board (no Rails) | [`../stimulus-kanban-js/SKILL.md`](../stimulus-kanban-js/SKILL.md) |
+| Looking for boardApi methods / JS event names | [`../stimulus-kanban-js/SKILL.md`](../stimulus-kanban-js/SKILL.md) |
+| Pasting a working example | The runnable demo at `gem/demo/` (`bin/rails server`, open in two tabs) |
+
 > **Live, runnable demo:** `gem/demo/` is a complete Rails 7.2 app. Boot
 > it with `cd gem/demo && bundle install && bin/rails db:setup && bin/rails server`
 > and open `http://localhost:3000` in two browser windows side-by-side to
@@ -18,6 +29,17 @@ that keep every connected tab in sync.
 > what a host app's wiring looks like.
 
 ## Setup
+
+### Schema requirements (do this first)
+
+Your card model needs `column_id` (string) and `position` (integer)
+columns by default — the `board-sync` controller writes them on every
+move. If your existing schema uses different names, override
+`Board#column_id_for` and `Board#assign_column!` rather than renaming
+your tables. Full details + a minimal migration:
+[COOKBOOK.md → Schema requirements](./COOKBOOK.md#schema-requirements).
+
+### Gemfile + install
 
 ```ruby
 # Gemfile
@@ -33,11 +55,15 @@ bin/rails stimulus_kanban_rails:install:migrations   # optional: audit log
 bin/rails db:migrate
 ```
 
+### Routes
+
 ```ruby
 # config/routes.rb
 mount ActionCable.server          => "/cable"
 mount StimulusKanbanRails::Engine => StimulusKanbanRails.mount_path  # default "/boards"
 ```
+
+### JS bootstrap
 
 ```js
 // app/javascript/application.js
@@ -51,11 +77,16 @@ StimulusKanban.start(application)        // board, board-column, card, card-edit
 StimulusKanbanRails.start(application)   // adds the `board-sync` controller
 ```
 
+### Layout
+
 ```erb
 <%# app/views/layouts/application.html.erb <head> %>
+<%= csrf_meta_tags %>                         <%# REQUIRED — JS reads it for X-CSRF-Token %>
 <%= stylesheet_link_tag "stimulus_kanban", "stimulus_kanban_rails" %>
 <%= javascript_importmap_tags %>
 ```
+
+### Initializer
 
 ```ruby
 # config/initializers/stimulus_kanban_rails.rb
@@ -112,6 +143,8 @@ The DSL is intentionally small:
   `model_class.all`. Override for ActsAsTenant / Devise scoping
 
 **Card-field types:** `string text integer bigint decimal money boolean enum date datetime reference`.
+Exact JSON serialization rules per type:
+[COOKBOOK.md → Card payload shape](./COOKBOOK.md#card-payload-shape).
 
 ## 2. Make the model broadcastable
 
@@ -129,6 +162,11 @@ tenant-scoped stream — including changes made from the console, jobs, or
 other controllers. No manual broadcast calls anywhere. The `board-sync`
 JS controller picks them up and applies them via
 `boardApi.applyTransaction`.
+
+The broadcast payload shape (what the originator sees, what other tabs
+see, how `optimistic_id` round-trips) is documented in
+[COOKBOOK.md → Broadcast envelope](./COOKBOOK.md#broadcast-envelope) and
+[COOKBOOK.md → Optimistic-id reconciliation lifecycle](./COOKBOOK.md#optimistic-id-reconciliation-lifecycle).
 
 ## 3. Render the board in a view
 
@@ -148,7 +186,9 @@ which:
 3. Renders the column `<li>`s with the right `data-board-column-*`
    attributes from the Board's `column` declarations.
 4. Renders each card `<li>` with `data-card-id` + the JSON payload on
-   `data-card-json` so the JS renderers find their fields.
+   `data-card-json` so the JS renderers find their fields. To use a
+   custom HTML card, define `to_kanban_html` on the model — see
+   [COOKBOOK.md → Card HTML rendering](./COOKBOOK.md#card-html-rendering).
 
 Wrap or style `.sk-board` to give the board a height. Defaults to
 `height: 620px` in the demo.
@@ -169,10 +209,12 @@ All actions go through `BaseController#scoped_card`, which delegates to
 authorization filters apply automatically. A card outside the user's
 scope raises `RecordNotFound` rather than silently leaking.
 
-`move_bulk` runs every card's `before_move` guard inside one transaction:
-a single `Veto` rolls back the entire batch (no half-moved state). The
-`board-sync` controller fires it automatically when the JS library emits
-`board:cardsMoved` (multi-select drag/drop).
+**Full request/response JSON for every endpoint** — including the
+`X-Optimistic-Id` header contract, the veto response shape, and the
+`move_bulk` per-card auto-incremented `to_index` rule — lives in
+[COOKBOOK.md → HTTP surface](./COOKBOOK.md#http-surface). If you're
+implementing a non-default client (custom mobile app, scripted writer)
+or debugging an integration, read that section.
 
 ## Optimistic-id reconciliation
 
@@ -186,6 +228,10 @@ applied locally). Other tabs apply normally.
 In short: the originator's UI doesn't double-render / flicker, and you
 don't have to write any reconcile code yourself.
 
+Lifecycle diagram + 30-second TTL guard + the "I wrote a custom client
+and it flickers" symptom:
+[COOKBOOK.md → Optimistic-id reconciliation lifecycle](./COOKBOOK.md#optimistic-id-reconciliation-lifecycle).
+
 ## Tenant isolation
 
 If `ActsAsTenant` is in use, both the broadcaster (the `Broadcastable`
@@ -194,6 +240,11 @@ include the same `skr-tenant:<Class>:<id>` token. A broadcast for
 tenant A can never reach tenant B's subscribers — even when boards
 share a logical stream name. Without ActsAsTenant the tenant scoping is
 a no-op and `Board#scope` defaults to `model_class.all`.
+
+Caveat for background jobs that mutate cards: wrap them in
+`ActsAsTenant.with_tenant(tenant) { … }` so the broadcaster picks up the
+right tenant at after_commit time.
+[COOKBOOK.md → Tenant scoping mechanics](./COOKBOOK.md#tenant-scoping-mechanics).
 
 ## Workflow patterns
 
@@ -207,10 +258,13 @@ a no-op and `Board#scope` defaults to `model_class.all`.
   advisory; this is the real gate.
 - **Atomic bulk moves** — the JS `boardApi.bulkMove({ fromIds, toColumnId, toIndex })`
   PATCHes `move_bulk`; one transaction wraps every card so an early Veto
-  rolls back the entire batch.
+  rolls back the entire batch. The server auto-increments `to_index`
+  per card so the pile lands in order — never send the same `to_index`
+  per card from a custom client.
 - **Audit log / undo** — run the bundled migration to enable the
   `stimulus_kanban_audits` table. (V0.1 ships the table + model; the
-  undo controller lands in v0.2.)
+  undo controller lands in v0.2.) Table shape:
+  [COOKBOOK.md → Audit-log table shape](./COOKBOOK.md#audit-log-table-shape).
 
 ## Two-tab smoke test
 
@@ -228,6 +282,9 @@ bin/rails server
 3. Cmd/Ctrl-click 3 stories then drag the pile — one `move_bulk` PATCH
    moves all three atomically.
 
+If any of these fails on your host app:
+[COOKBOOK.md → Common first-time failures](./COOKBOOK.md#common-first-time-failures).
+
 ## Configuration knobs
 
 ```ruby
@@ -244,6 +301,8 @@ they always agree.
 
 | Where to look                                                   | What's in it                                          |
 |-----------------------------------------------------------------|-------------------------------------------------------|
+| [`./COOKBOOK.md`](./COOKBOOK.md)                                | **wire-format spec** — HTTP, broadcasts, lifecycle, first-time recipe, failure modes |
+| [`../stimulus-kanban-js/SKILL.md`](../stimulus-kanban-js/SKILL.md) | JS-side `boardApi`, events, renderers, drag-and-drop  |
 | `gem/stimulus_kanban_rails/lib/stimulus_kanban_rails/board.rb`  | the DSL (`Board` base class)                          |
 | `gem/stimulus_kanban_rails/lib/stimulus_kanban_rails/column.rb` | column option list + DOM data-attr emission           |
 | `gem/stimulus_kanban_rails/lib/stimulus_kanban_rails/card_field.rb` | card-field type registry + coerce/validate           |

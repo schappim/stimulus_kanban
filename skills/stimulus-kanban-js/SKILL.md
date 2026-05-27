@@ -1,6 +1,6 @@
 ---
 name: stimulus-kanban-js
-description: Use stimulus_kanban, an HTML-first kanban board for Stimulus.js (Hotwire). Apply when adding or editing a column-of-cards board UI in a Stimulus/Hotwire front end — drag-and-drop between columns, WIP limits, swimlanes, multi-card selection, inline card editing, custom card renderers / editors, virtual scrolling, server-side card windows, or driving a board through its boardApi. For the Rails server-driven version (Turbo Stream live sync, server-side workflow guards, audit log + undo/redo) use the stimulus-kanban-rails skill instead.
+description: Use stimulus_kanban, an HTML-first kanban board for Stimulus.js (Hotwire). Apply when adding or editing a column-of-cards board UI in a Stimulus/Hotwire front end — drag-and-drop between columns, WIP limits, swimlanes, multi-card selection, inline card editing, custom card renderers / editors, virtual scrolling, server-side card windows, or driving a board through its boardApi. For the Rails server-driven version (Turbo Stream live sync, server-side workflow guards, audit log + undo/redo) use the stimulus-kanban-rails skill instead — and see its COOKBOOK.md for the exact HTTP + broadcast wire format if you're writing a non-Rails server.
 ---
 
 # Using stimulus_kanban (the JS library)
@@ -285,7 +285,11 @@ composition.
   (`moveCard`), POST to the server, then reconcile via
   `applyTransaction({ update: [...] })` with the server's authoritative
   `column_id` / `order`. The Rails companion automates this — see the
-  `stimulus-kanban-rails` skill.
+  [`stimulus-kanban-rails` skill](../stimulus-kanban-rails/SKILL.md).
+  Writing a custom (non-Rails) server? The full wire format the
+  `board-sync` controller expects — HTTP shapes, `X-Optimistic-Id`
+  header, broadcast envelope — is documented in
+  [`../stimulus-kanban-rails/COOKBOOK.md`](../stimulus-kanban-rails/COOKBOOK.md).
 - **Server-side columns:** set `data-board-server-side-value="true"`,
   send one page per column via `setCardData`, send totals via
   `setColumnCounts({ colId: n })`. Watch `board:columnFetchMore` for
